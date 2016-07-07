@@ -269,5 +269,5 @@ plot.gdpc <- function(x, which = 'Loadings', which_load = 0, ...){
   # Default is 'Loadings'
   # which_load: Lag number indicating which loadings should be plotted. 
   # Only used if which = 'Loadings'. Default is 0.
-  switch(which, Component = plot(x$f, type='l', main='Principal Component', ylab='', ...), Loadings = plot(x$beta[,which_load+1], type='l', main=c(paste(which_load),'lag loadings'), ylab='',...))
+  switch(which, Component = plot(x$f, type='l', main='Principal Component', ...), Loadings = plot(x$beta[,which_load+1], type='l', main=c(paste(which_load,'lag loadings')), ...))
 }

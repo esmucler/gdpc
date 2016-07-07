@@ -45,7 +45,7 @@ for (i in 1:m) {
 #Data is not normalized.
 #k_max=3 to keep computation time low
 autofit <- auto.gdpc(x, normalize = FALSE, k_max = 3) 
-plot(autofit[[1]], which = 'Loadings', which_load = 0)
+plot(autofit[[1]], which = 'Loadings', which_load = 0, xlab = '', ylab = '')
 }
 
 \keyword{ts}

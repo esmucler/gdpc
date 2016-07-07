@@ -60,8 +60,8 @@ for (i in 1:m) {
 }
 fit <- gdpc(x, k = 1) #find first DPC with one lag
 par(mfrow = c(1, 2)) #plot loadings
-plot(fit, which = 'Loadings', which_load = 0) 
-plot(fit, which = 'Loadings', which_load = 1) 
+plot(fit, which = 'Loadings', which_load = 0, xlab = '', ylab = '') 
+plot(fit, which = 'Loadings', which_load = 1, xlab = '', ylab = '') 
 }
 
 \keyword{ts}
