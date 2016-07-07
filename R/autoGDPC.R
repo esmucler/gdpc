@@ -25,7 +25,7 @@ auto.gdpc <- function(Z, crit = 'AIC', normalize = TRUE, auto_comp = TRUE, expl_
   # beta: beta matrix corresponding to f
   # alpha: alpha matrix corresponding to f
   # mse: mean (in T and m) squared error of the residuals of the fit with the first i components 
-  # k_opt: number of lags used, chosen using the criterion specified in crit, used to predict with the i-th component
+  # k_opt: number of lags used chosen using the criterion specified in crit
   # crit: the AIC or BIC of the fitted model, according to what was specified in crit
   # res: matrix of residuals of the fit with the first i components 
   # fitted: matrix of fitted values of the fit with the first i components 
@@ -97,7 +97,7 @@ my_autodyc <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel =
   # V : matrix of original data or residuals where each ROW is a different time series
   # k_max : maximum of numbers of leads to be considered
   # mean_var_V : mean variance of original data
-  # tol : relative accuracy to stop the search of the DPC ( 0<ep<1)
+  # tol : relative precision
   # niter_max: maximum number of iterations
   # sel: criterion to be used, AIC = 1, BIC = 2
   #OUTPUT
@@ -123,7 +123,7 @@ my_autodyc <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel =
     gdpc.priv(V, k = k_lag - 1, tol = tol, niter_max = niter_max, sel = sel)
   }
   
-  crits <- sapply(fits, function(x){ x$crit })
+  crits <- sapply(fits, function(x){ x$crit }) #Get criterion corresponding to each lead
   k_opt <- which.min(crits) - 1
   out <- fits[[k_opt + 1]]
   expart <- 1 - out$mse / mean_var_V
