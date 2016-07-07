@@ -1,7 +1,7 @@
 \name{plot.gdpc}
 \alias{plot.gdpc}
 \alias{plot}
-\title{Plot Dynamic Principal Components}
+\title{Plot Generalized Dynamic Principal Components}
 \description{
 Plots a \code{gdpc} object.
 }
@@ -11,7 +11,7 @@ Plots a \code{gdpc} object.
 \method{plot}{gdpc}(x, which = 'Loadings', which_load = 0, \dots)
 }
 \arguments{
-  \item{x}{An object of class \code{gdpc}, the result of \link{gdpc} or one of the entries of the result of \link{auto.gdpc}.}
+  \item{x}{An object of class \code{gdpc}, usually the result of \link{gdpc} or one of the entries of the result of \link{auto.gdpc}.}
   \item{which}{String. Indicates what to plot, either 'Component' or 'Loadings'. Default is 'Loadings'.}
   \item{which_load}{Lag number indicating which loadings should be plotted. Only used if which = 'Loadings'. Default is 0.}
   \item{\dots}{Additional arguments to be passed to the plotting functions.}
