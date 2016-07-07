@@ -246,6 +246,8 @@ construct_gdpc <- function(out,data){
   out$f <- out$f[(k+1):length(out$f)]
   out$res <- t(out$res)
   out$fitted <- data - out$res
+  colnames(out$res) <- colnames(data)
+  colnames(out$fitted) <- colnames(data)
   class(out) <- append(class(out),"gdpc")
   return(out)
 }
