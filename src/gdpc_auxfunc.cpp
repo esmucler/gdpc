@@ -6,7 +6,7 @@ using namespace arma;
 
 // [[Rcpp::export]]
 List betaf(arma::mat & Z, arma::rowvec & f, int & k, int & sel) {
-  // This function finds the beta, alpha and mse corresponding to Z, f and k. 
+  // This function finds the optimal beta and alpha and the mse (only in N) corresponding to Z, f and k. 
   int m = Z.n_rows;
   int N = Z.n_cols;
   arma::mat beta = mat(m,k+1);
@@ -70,7 +70,7 @@ arma::mat matrix_C(arma::rowvec & betav, double & alfa, int & k) {
 
 // [[Rcpp::export]]
 arma::mat matrix_D(arma::rowvec & betav, int & N, int & k) {
-  //This function constructs the matrix C correspoding to betav, N and k 
+  //This function constructs the matrix D correspoding to betav, N and k 
   arma::mat beta_mat = zeros(N + k, N + k);
   for ( int t = 1; t <= N+k ; t++){
     arma::vec liml = vec(2);
@@ -90,6 +90,7 @@ arma::mat matrix_D(arma::rowvec & betav, int & N, int & k) {
 
 // [[Rcpp::export]]
 arma::vec matrix_ff(arma::mat & Z, arma::mat & beta, arma::vec & alpha, int & k) {
+  //This functions finds the optimal f corresponding to Z, beta, alpha and k.
   int m = Z.n_rows;
   int N = Z.n_cols;
   arma::vec f = zeros(N+k);
