@@ -1,0 +1,6 @@
+Changes in gdpc version 0.99.1
+
+    + The output of gdpc is now and object of class 'gdpc'. residuals, fitted and plot methods available.
+
+
+

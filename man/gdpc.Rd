@@ -2,7 +2,7 @@
 \alias{gdpc}
 \title{Generalized Dynamic Principal Components}
 \description{
-Function to compute a single Dynamic Principal Component with a given number of lags.
+Computes a single Generalized Dynamic Principal Component with a given number of lags.
 }
 
 
@@ -23,14 +23,17 @@ See \code{\link{auto.gdpc}} for the definition of the AIC or BIC type criterion 
 }
 
 \value{
-  A list with entries:
+  An object of class \code{gdpc}, that is, a list with entries:
  \item{f}{Coordinates of the first Principal Component corresponding to the periods \eqn{1,\dots,T}.}
   \item{initial_f}{Coordinates of the first Principal Component corresponding to the periods \eqn{-k+1,\dots,0}. Only for the case \eqn{k>0}.}
- \item{beta}{Matrix beta corresponding to f.}
- \item{alpha}{Vector alpha corresponding to f.}
+   \item{beta}{Matrix of loadings corresponding to f. Column number \eqn{k} is the vector of \eqn{k-1} lag loadings.}
+ \item{alpha}{Vector of intercepts corresponding to f.}
  \item{mse}{Mean squared error.}
  \item{crit}{The criterion specified by the user.}
+ \item{k_opt}{Number of lags used.}
+  \item{expart}{Proportion of the variance explained.}
  \item{res}{Matrix of residuals.}
+     \item{fitted}{Matrix of fitted values.}
  }
 \author{
 Daniel Peña, Ezequiel Smucler, Victor Yohai
@@ -42,7 +45,7 @@ Statistical Association.
 
 
 \seealso{
-\code{\link{auto.gdpc}}
+\code{\link{auto.gdpc}}, \code{\link{plot.gdpc}}
 }
 
 \examples{
@@ -57,10 +60,8 @@ for (i in 1:m) {
 }
 fit <- gdpc(x, k = 1) #find first DPC with one lag
 par(mfrow = c(1, 2)) #plot loadings
-plot(fit$beta[, 1], xlab = "variable", ylab = "loadings", type = "l")
-title("Zero lag loadings") 
-plot(fit$beta[, 2], xlab = "variable", ylab = "loadings", type = "l")
-title("One lag loadings")
+plot(fit, which = 'Loadings', which_load = 0) 
+plot(fit, which = 'Loadings', which_load = 1) 
 }
 
 \keyword{ts}

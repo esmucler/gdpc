@@ -1,7 +1,7 @@
 auto.gdpc <- function(Z, crit = 'AIC', normalize = TRUE, auto_comp = TRUE, expl_var = 0.9, num_comp = 5, tol = 1e-4, k_max = 10, niter_max = 500, ncores = 1) {
   # This is the main function to compute the Generalized Dynamic Principal Components, Pena and Yohai (2016) JASA
   # All computations are done internally using leads rather than lags. However, the final result is outputted
-  # using lags using the auxiliary leads2lags function.
+  # using lags.
   #Input
   #Z: data matrix, series by columns 
   #crit: a string, either 'AIC' or 'BIC', indicating the criterion used to chose the number of lags. Default is 'AIC'
@@ -76,7 +76,11 @@ auto.gdpc <- function(Z, crit = 'AIC', normalize = TRUE, auto_comp = TRUE, expl_
   
   on.exit(stopCluster(cl))
   
-  output <- lapply(output, leads2lags)
+  if (normalize) {
+    Z <- scale(Z)
+  }
+  
+  output <- lapply(output, construct_gdpc, Z)
   
   return(output)
   
@@ -202,18 +206,35 @@ gdpc <- function(Z, k, f_ini = NULL, tol = 1e-4, niter_max = 500, crit = 'AIC') 
     sel = 2
   }
   out <- gdpc.priv(t(Z), k, f_ini, tol, niter_max, sel)
-  out <- leads2lags(out)
+  out$k_opt <- k
+  out$expart <- 1 - out$mse / mean(apply(Z, 2, var))
+  out <- construct_gdpc(out, Z)
   return(out)
 }
 
-leads2lags <- function(out){
-  # Auxiliary function used to pass from leads to lags form.
+construct_gdpc <- function(out,data){
   k <- ncol(out$beta) - 1 #number of leads
   out$beta <- out$beta[,(k+1):1]
   if (k !=0 ){
     out$initial_f <- out$f[1:k]
+  } else {
+    out$initial_f <- 0
   }
   out$f <- out$f[(k+1):length(out$f)]
   out$res <- t(out$res)
+  out$fitted <- data - out$res
+  class(out) <- append(class(out),"gdpc")
   return(out)
+}
+
+fitted.gdpc <- function(object, ...){
+  return(object$fitted)
+}
+
+residuals.gdpc <- function(object, ...){
+  return(object$res)
+}
+
+plot.gdpc <- function(x, which = 'Loadings', which_load = 0, ...){
+  switch(which, Component = plot(x$f, type='l', main='Principal Component', ylab='', ...), Loadings = plot(x$beta[,which_load+1], type='l', main=c(paste(which_load),'lag loadings'), ylab='',...))
 }

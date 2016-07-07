@@ -2,7 +2,7 @@
 \alias{auto.gdpc}
 \title{Automatic Fitting of Generalized Dynamic Principal Components}
 \description{
-Function to compute Dynamic Principal Components. The number of components can be supplied by the user or chosen automatically so that a given proportion of variance is explained. The number of lags is chosen automatically using an AIC or a BIC type criterion.
+Computes Generalized Dynamic Principal Components. The number of components can be supplied by the user or chosen automatically so that a given proportion of variance is explained. The number of lags is chosen automatically using an AIC or a BIC type criterion.
 }
 
 
@@ -35,16 +35,17 @@ where \eqn{\Sigma = (res^{T} res) / T} and \eqn{res} is the matrix of residuals 
 }
 
 \value{
-  A list of length equal to the number of computed components. The i-th entry of this list is a list with entries
+  A list of length equal to the number of computed components. The i-th entry of this list is an object of class \code{gdpc}, that is, a list with entries
   \item{f}{Coordinates of the i-th Principal Component corresponding to the periods \eqn{1,\dots,T}.}
-  \item{initial_f}{Coordinates of the i-th Principal Component to the periods \eqn{-k+1,\dots,0}. Only for the case k>0.}
-  \item{beta}{Matrix beta corresponding to f.}
-  \item{alpha}{Vector alpha corresponding to f.}
-  \item{mse}{Mean squared error of the residuals of the fit with the first i components.}
+  \item{initial_f}{Coordinates of the i-th Principal Component corresponding to the periods \eqn{-k+1,\dots,0}. Only for the case \eqn{k>0}.}
+  \item{beta}{Matrix of loadings corresponding to f. Column number \eqn{k} is the vector of \eqn{k-1} lag loadings.}
+  \item{alpha}{Vector of intercepts corresponding to f.}
+  \item{mse}{Mean squared error of the residuals of the fit using the first i components.}
   \item{crit}{The AIC or BIC of the fitted model, according to what the user specified.}
   \item{k_opt}{Number of lags chosen.}
   \item{expart}{Proportion of the variance explained by the first i components.}
-  \item{res}{Matrix of residuals of the fit with the first i components.}
+  \item{res}{Matrix of residuals of the fit using the first i components.}
+    \item{fitted}{Matrix of fitted values of the fit using the first i components.}
 }
 \author{
   Daniel Peña, Ezequiel Smucler, Victor Yohai
@@ -54,7 +55,7 @@ where \eqn{\Sigma = (res^{T} res) / T} and \eqn{res} is the matrix of residuals 
 }
 
 \seealso{
-\code{\link{gdpc}}
+\code{\link{gdpc}}, \code{\link{plot.gdpc}}
 }
 \examples{
 N <- 200 #length of series
@@ -69,7 +70,9 @@ for (i in 1:m) {
 #Choose number of lags using the AIC type criterion.
 #Data is not normalized.
 #k_max=3 to keep computation time low
-autofit <- auto.gdpc(x, normalize = FALSE, k_max = 3) 
+autofit <- auto.gdpc(x, normalize = FALSE, k_max = 3)
+resid <- residuals(autofit[[1]]) #Get residuals of the fit
+fit_val <- fitted(autofit[[1]]) #Get fitted values
 }
 
 \keyword{ts}

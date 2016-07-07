@@ -30,7 +30,8 @@ data(ipi91)
 
 \dontrun{
 #Compute first GDPC with twelve lags; this may take a bit.
-gdpc_ipi <- gdpc(ipi91,12,niter_max = 1000)
+gdpc_ipi <- gdpc(ipi91, 12, niter_max = 1000)
+plot(gdpc_ipi, which='Component') #plot the component
 }
 }
 \keyword{datasets}
