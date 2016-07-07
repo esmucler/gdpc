@@ -1,7 +1,6 @@
 useDynLib(gdpc, .registration=TRUE)
 ##exportPattern("^[[:alpha:]]+")
 importFrom("Rcpp", "evalCpp")
-importFrom("MASS","mvrnorm","ginv")
 importFrom("stats", "sd", "var")
 importFrom("parallel", "stopCluster", "makeCluster", "detectCores")
 importFrom("doParallel","registerDoParallel")

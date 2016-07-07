@@ -12,7 +12,6 @@ Description: Functions to compute the Generalized Dynamic Principal Components
 License: GPL (>= 2)
 Imports:
     Rcpp,
-    MASS,
     parallel,
     doParallel,
     foreach
