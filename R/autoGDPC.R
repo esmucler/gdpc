@@ -1,30 +1,35 @@
 auto.gdpc <- function(Z, crit = 'AIC', normalize = TRUE, auto_comp = TRUE, expl_var = 0.9, num_comp = 5, tol = 1e-4, k_max = 10, niter_max = 500, ncores = 1) {
-  # This is the main function to compute the Generalized Dynamic Principal Components, Pena and Yohai (2016) JASA
+  # This is the main function to compute Generalized Dynamic Principal Components, Pena and Yohai (2016) JASA
   # All computations are done internally using leads rather than lags. However, the final result is outputted
   # using lags.
-  #Input
-  #Z: data matrix, series by columns 
-  #crit: a string, either 'AIC' or 'BIC', indicating the criterion used to chose the number of lags. Default is 'AIC'
-  #normalize: logical, if TRUE the data is standardized to zero mean and unit variance
-  #auto_comp:  logical, if TRUE compute components until the proportion of explained variance is equal to expl_var, other
-  #wise use num_comp components
-  #expl_var: a number between 0 and 1. Desired proportion of explained variance (only if auto_comp==TRUE)
-  #num_comp: integer, number of components to be computed (only if auto_comp==FALSE)
-  #tol: desired accuracy when computing the components
-  #k_max: maximum number of lags
-  #niter_max : maximum number of iterations
-  #ncores: number of cores to be used for parallel computations
+  #INPUT
+  # Z: data matrix, series by columns 
+  # crit: a string, either 'AIC' or 'BIC', indicating the criterion used to chose the number of lags. Default is 'AIC'
+  # normalize: logical, if TRUE the data is standardized to zero mean and unit variance. Default is TRUE
+  # auto_comp:  logical, if TRUE compute components until the proportion of explained variance is equal to expl_var, other
+  # wise use num_comp components. Default is TRUE
+  # expl_var: a number between 0 and 1. Desired proportion of explained variance (only if auto_comp==TRUE).
+  # default is 0.9
+  # num_comp: integer, number of components to be computed (only if auto_comp==FALSE). Default is 5
+  # tol: desired accuracy when computing the components. Default is 1-e4
+  # k_max: maximum number of lags. Default is 10
+  # niter_max : maximum number of iterations. Default is 500
+  # ncores: number of cores to be used for parallel computations. Default is 1
     
-  #Output
-  #A list of length equal to the number of computed components. The i-th entry of this list is a list with entries
-  # $f: the i-th dynamic component 
-  # $beta: beta matrix corresponding to f_fin
-  # $alpha: alpha matrix corresponding to f_fin
-  # $mse: mean (in N and m) squared error of the residuals of the fit with the first i components 
-  # $k_opt: number of lags, chosen using the criterion specified in crit, used to predict with the i-th component
-  # $crit: the AIC or BIC of the fitted model, according to what was specified in crit
-  # $res: matrix of residuals of the fit with the first i components 
-  # $expart: proportion of the variance explained by the first i components
+  #OUTPUT
+  # A list of length equal to the number of computed components. The i-th entry of this list is an object of class
+  # gdpc, that is, a list with entries:
+  # f: Coordinates of the i-th Principal Component corresponding to the periods 1,…,T
+  # initial_f: Coordinates of the i-th Principal Component corresponding to the periods -k+1,…,0.
+  # Only for the case k>0
+  # beta: beta matrix corresponding to f
+  # alpha: alpha matrix corresponding to f
+  # mse: mean (in T and m) squared error of the residuals of the fit with the first i components 
+  # k_opt: number of lags used, chosen using the criterion specified in crit, used to predict with the i-th component
+  # crit: the AIC or BIC of the fitted model, according to what was specified in crit
+  # res: matrix of residuals of the fit with the first i components 
+  # fitted: matrix of fitted values of the fit with the first i components 
+  # expart: proportion of the variance explained by the first i components
   
   
   if (normalize) {
@@ -88,26 +93,23 @@ auto.gdpc <- function(Z, crit = 'AIC', normalize = TRUE, auto_comp = TRUE, expl_
 
 my_autodyc <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel = 1) {
   #Auxiliary function to choose the optimal number of leads
-  
-  
   #INPUT
-  #V : matrix of original data or residuals where each row is a different time series
-  #k_max : maximum of numbers of leads to be considered
-  #mean_var_V : mean variance of original data
-  #tol : relative accuracy to stop the search of the DPC ( 0<ep<1)
-  #niter_max: maximum number of iterations
-  #sel: criterion to be used, AIC = 1, BIC = 2
-  
+  # V : matrix of original data or residuals where each ROW is a different time series
+  # k_max : maximum of numbers of leads to be considered
+  # mean_var_V : mean variance of original data
+  # tol : relative accuracy to stop the search of the DPC ( 0<ep<1)
+  # niter_max: maximum number of iterations
+  # sel: criterion to be used, AIC = 1, BIC = 2
   #OUTPUT
-  #A list with entries
-  #k_opt: optimal number of leads
-  #f: dynamic component with k_opt leads
-  #beta: matrix beta corresponding to f
-  #alfa: matrix beta alfa corresponding to f
-  #mse: mean squared error
-  #crit: criterion
-  #res: matrix of residuals
-  
+  # A list with entries:
+  # k_opt: optimal number of leads
+  # f: dynamic component with k_opt leads
+  # beta: matrix beta corresponding to f
+  # alfa: matrix beta alfa corresponding to f
+  # mse: mean squared error
+  # crit: criterion
+  # res: matrix of residuals
+  # expart: proportion of the variance explained
   
   
   m <- nrow(V)
@@ -132,21 +134,22 @@ my_autodyc <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel =
 
 
 gdpc.priv <- function(V, k, f_ini = NULL, tol = 1e-4, niter_max = 500, sel = 1) {
+  # This function computes a single GDPC with a given number of leads.
   #INPUT
-  #V: data matrix each row is a different time series
-  #k: number of leads used to predict
-  #tol: relative precision, stopping criterion
-  #niter_max: maximum number of iterations
-  #f_fin: (optional) initial principal component. If no argument is passed, the standard
-  #first principal component with k leads is used
-  #sel: AIC (1) or BIC (2)
+  # V: data matrix each ROW is a different time series
+  # k: number of leads used
+  # tol: relative precision, stopping criterion
+  # niter_max: maximum number of iterations
+  # f_ini: (optional) initial principal component. If no argument is passed, the standard
+  # first principal component with k leads is used
+  # sel: AIC (1) or BIC (2)
   #OUTPUT
-  #f: final principal component
-  #beta: matrix beta corresponding to f_fin
-  #alpha: matrix alpha corresponding to f_fin
-  #mse:  mean squared error (in N and m)
-  #crit: criterion
-  #res: matrix of residuals
+  # f: final principal component
+  # beta: matrix beta corresponding to f_fin
+  # alpha: matrix alpha corresponding to f_fin
+  # mse:  mean squared error (in N and m)
+  # crit: criterion used to evaluate the fit, that is, sel
+  # res: matrix of residuals
   
   m <- nrow(V)  #Number of time series
   N <- ncol(V)  #Length of the time series
@@ -183,23 +186,27 @@ gdpc.priv <- function(V, k, f_ini = NULL, tol = 1e-4, niter_max = 500, sel = 1) 
 
 
 gdpc <- function(Z, k, f_ini = NULL, tol = 1e-4, niter_max = 500, crit = 'AIC') {
-  # All computations are done using leads rather than lags. However, the final result is outputted
-  # using lags using the auxiliary leads2lags function.
+  # A wrapper function for gdpc.priv.
   #INPUT
-  #Z: data matrix each column is a different time series
-  #k: number of lags used to predict
-  #tol: relative precision, stopping criterion
-  #niter_max: maximum number of iterations
-  #f_ini: (optional) initial principal component. If no argument is passed, the standard
-  #first principal component with k lags is used
-  #crit: AIC or BIC
+  # Z: data matrix each COLUMN is a different time series
+  # k: number of lags used to predict
+  # tol: relative precision, stopping criterion
+  # niter_max: maximum number of iterations
+  # f_ini: (optional) initial principal component. If no argument is passed, the standard
+  # first principal component with k lags is used
+  # crit: AIC or BIC
   #OUTPUT
-  #f: final principal component
-  #beta: matrix beta corresponding to f
-  #alpha: matrix alpha corresponding to f
-  #mse:  mean squared error (in N and m)
-  #crit: criterion
-  #res: matrix of residuals
+  # An object of class gdpc, that is, a list with entries:
+  # f: the dynamic component 
+  # beta: beta matrix corresponding to f
+  # alpha: alpha matrix corresponding to f
+  # mse: mean (in N and m) squared error of the residuals of the fit with the first i components 
+  # k_opt: number of lags, chosen using the criterion specified in crit, used to predict with the i-th component
+  # crit: the AIC or BIC of the fitted model, according to what was specified in crit
+  # res: matrix of residuals of the fit
+  # fitted: matrix of fitted values of the fit
+  # expart: proportion of the variance explained
+  
   
   sel = 1
   if (crit=='BIC'){
@@ -213,6 +220,22 @@ gdpc <- function(Z, k, f_ini = NULL, tol = 1e-4, niter_max = 500, crit = 'AIC') 
 }
 
 construct_gdpc <- function(out,data){
+  #This function constructs an object of class gdpc.
+  #INPUT
+  # out: the output of gdpc.priv
+  # data: the data matrix passed to gdpc.priv
+  #OUTPUT
+  # An object of class gdpc, that is, a list with entries:
+  # f: the dynamic component 
+  # beta: beta matrix corresponding to f
+  # alpha: alpha matrix corresponding to f
+  # mse: mean (in N and m) squared error of the residuals of the fit with the first i components 
+  # k_opt: number of lags used
+  # crit: the AIC or BIC of the fitted model, according to what was specified in crit
+  # res: matrix of residuals of the fit
+  # fitted: matrix of fitted values of the fit
+  # expart: proportion of the variance explained
+  
   k <- ncol(out$beta) - 1 #number of leads
   out$beta <- out$beta[,(k+1):1]
   if (k !=0 ){
@@ -228,13 +251,23 @@ construct_gdpc <- function(out,data){
 }
 
 fitted.gdpc <- function(object, ...){
+  #Returns the fitted values of a gdpc object
   return(object$fitted)
 }
 
 residuals.gdpc <- function(object, ...){
+  #Returns the residuals of a gdpc object
   return(object$res)
 }
 
 plot.gdpc <- function(x, which = 'Loadings', which_load = 0, ...){
+  #Plots a gdpc object
+  #INPUT
+  # x: An object of class gdpc, the result of gdpc or one of the entries 
+  # of the result of auto.gdpc
+  # which: String. Indicates what to plot, either 'Component' or 'Loadings'
+  # Default is 'Loadings'
+  # which_load: Lag number indicating which loadings should be plotted. 
+  # Only used if which = 'Loadings'. Default is 0.
   switch(which, Component = plot(x$f, type='l', main='Principal Component', ylab='', ...), Loadings = plot(x$beta[,which_load+1], type='l', main=c(paste(which_load),'lag loadings'), ylab='',...))
 }
