@@ -27,7 +27,7 @@ Statistical Association.
 
 \examples{
 data(ipi91)
-
+plot(ipi91, plot.type = 'multiple', main = 'Industrial Production Index')
 \dontrun{
 #Compute first GDPC with twelve lags; this may take a bit.
 gdpc_ipi <- gdpc(ipi91, 12, niter_max = 1000)
