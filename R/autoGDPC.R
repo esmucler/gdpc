@@ -219,7 +219,7 @@ gdpc <- function(Z, k, f_ini = NULL, tol = 1e-4, niter_max = 500, crit = 'AIC') 
   return(out)
 }
 
-construct_gdpc <- function(out,data){
+construct_gdpc <- function(out, data){
   #This function constructs an object of class gdpc.
   #INPUT
   # out: the output of gdpc.priv
@@ -248,7 +248,11 @@ construct_gdpc <- function(out,data){
   out$fitted <- data - out$res
   colnames(out$res) <- colnames(data)
   colnames(out$fitted) <- colnames(data)
-  if ( inherits(data, 'ts') ){
+  if ( inherits(data, 'xts') ){
+    out$f <- xts(out$f, order.by = index(data), frequency = frequency(data))
+    out$res <- xts(out$res, order.by = index(data), frequency = frequency(data))
+    out$fitted <- xts(out$fitted, order.by = index(data), frequency = frequency(data))
+  } else if ( inherits(data, 'ts') ){
     out$f <- ts(out$f, start = start(data), end = end(data), frequency = frequency(data))
     out$res <- ts(out$res, start = start(data), end = end(data), frequency = frequency(data))
     out$fitted <- ts(out$fitted, start = start(data), end = end(data), frequency = frequency(data))

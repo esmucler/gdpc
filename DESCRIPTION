@@ -11,6 +11,8 @@ Description: Functions to compute the Generalized Dynamic Principal Components
     introduced in Peña and Yohai (2016).
 License: GPL (>= 2)
 Imports:
+    xts,
+    zoo,
     Rcpp,
     parallel,
     doParallel,
