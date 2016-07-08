@@ -11,7 +11,7 @@ auto.gdpc <- function(Z, crit = 'AIC', normalize = TRUE, auto_comp = TRUE, expl_
   # expl_var: a number between 0 and 1. Desired proportion of explained variance (only if auto_comp==TRUE).
   # default is 0.9
   # num_comp: integer, number of components to be computed (only if auto_comp==FALSE). Default is 5
-  # tol: desired accuracy when computing the components. Default is 1-e4
+  # tol: desired accuracy when computing the components. Default is 1e-4
   # k_max: maximum number of lags. Default is 10
   # niter_max : maximum number of iterations. Default is 500
   # ncores: number of cores to be used for parallel computations. Default is 1
@@ -31,12 +31,12 @@ auto.gdpc <- function(Z, crit = 'AIC', normalize = TRUE, auto_comp = TRUE, expl_
   # fitted: matrix of fitted values of the fit with the first i components 
   # expart: proportion of the variance explained by the first i components
   
-  
+  #Pass to matrix form. Scale and transpose data.
   if (normalize) {
-    V <- as.matrix(t(scale(Z)))
+    V <- t(scale(as.matrix(Z)))
     mean_var_V <- 1
   } else {
-    V <- as.matrix(t(Z))
+    V <- t(as.matrix(Z))
     mean_var_V <- mean(apply(V, 1, var)) # Mean variance of the data
   }
   vard <- (1 - expl_var) * mean_var_V
@@ -91,7 +91,7 @@ auto.gdpc <- function(Z, crit = 'AIC', normalize = TRUE, auto_comp = TRUE, expl_
   
 }
 
-my_autodyc <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel = 1) {
+my_autodyc <- function(V, k_max, mean_var_V, tol = 1e-4, niter_max = 500, sel = 1) {
   #Auxiliary function to choose the optimal number of leads
   #INPUT
   # V : matrix of original data or residuals where each ROW is a different time series
@@ -248,6 +248,11 @@ construct_gdpc <- function(out,data){
   out$fitted <- data - out$res
   colnames(out$res) <- colnames(data)
   colnames(out$fitted) <- colnames(data)
+  if ( inherits(data, 'ts') ){
+    out$f <- ts(out$f, start = start(data), end = end(data), frequency = frequency(data))
+    out$res <- ts(out$res, start = start(data), end = end(data), frequency = frequency(data))
+    out$fitted <- ts(out$fitted, start = start(data), end = end(data), frequency = frequency(data))
+  }
   class(out) <- append(class(out),"gdpc")
   return(out)
 }

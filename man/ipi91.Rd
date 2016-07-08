@@ -9,7 +9,7 @@ Six series corresponding to the Industrial Production Index (IPI) of France, Ger
 }
 \usage{data(ipi91)}
 \format{
-  A data frame with 264 observations on the following 6 variables.
+  A matrix time series with 264 observations on the following 6 variables.
  \describe{
     \item{\code{France}}{IPI of France.}
     \item{\code{Germany}}{IPI of Germany.}
@@ -32,7 +32,7 @@ data(ipi91)
 #Compute first GDPC with twelve lags; this may take a bit.
 gdpc_ipi <- gdpc(ipi91, 12, niter_max = 1000)
 #plot the component
-plot(gdpc_ipi, which='Component', xlab = '', ylab = 'Industrial Production Index') 
+plot(gdpc_ipi, which='Component', ylab = 'Industrial Production Index') 
 }
 }
 \keyword{datasets}
