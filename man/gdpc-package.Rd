@@ -32,7 +32,7 @@ auto.gdpc   Computes Generalized Dynamic Principal Components, number of
 plot.gdpc   Plots a gdpc object.
 }
 \preformatted{
-ipi91   Data frame. Six series corresponding to the Industrial Production
+ipi91   Six series corresponding to the Industrial Production
         Index (IPI) of France, Germany, Italy, United Kingdom, USA and 
         Japan. Monthly data from January 1991 to December 2012.
 }
