@@ -100,7 +100,7 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = TRUE, auto_comp = TRUE, expl_
   
   comp_ready <- 1
   print(paste("Computing component number", comp_ready))
-  out <- my_autodyc(V, k_max, mean_var_V, tol, niter_max, sel)
+  out <- my.autodyc(V, k_max, mean_var_V, tol, niter_max, sel)
   mse <- out$mse  #Mean squared error (in N and m)
   output[[comp_ready]] <- out
   V <- out$res
@@ -109,7 +109,7 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = TRUE, auto_comp = TRUE, expl_
     while (mse > vard) {
       comp_ready <- comp_ready + 1
       print(paste("Computing component number", comp_ready))
-      out <- my_autodyc(V, k_max, mean_var_V, tol, niter_max, sel)
+      out <- my.autodyc(V, k_max, mean_var_V, tol, niter_max, sel)
       mse <- out$mse
       output[[comp_ready]] <- out
       V <- out$res
@@ -118,7 +118,7 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = TRUE, auto_comp = TRUE, expl_
     while (comp_ready < num_comp) {
       comp_ready <- comp_ready + 1
       print(paste("Computing component number", comp_ready))
-      out <- my_autodyc(V, k_max, mean_var_V, tol, niter_max, sel)
+      out <- my.autodyc(V, k_max, mean_var_V, tol, niter_max, sel)
       output[[comp_ready]] <- out
       V <- out$res
     }
@@ -130,13 +130,13 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = TRUE, auto_comp = TRUE, expl_
     Z <- scale(Z)
   }
   
-  output <- lapply(output, construct_gdpc, Z)
+  output <- lapply(output, construct.gdpc, Z)
   
   return(output)
   
 }
 
-my_autodyc <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel = 1) {
+my.autodyc <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel = 1) {
   #Auxiliary function to choose the optimal number of leads
   #INPUT
   # V : matrix of original data or residuals where each ROW is a different time series
@@ -289,11 +289,11 @@ gdpc <- function(Z, k, f_ini = NULL, tol = 1e-04, niter_max = 500, crit = "AIC")
   out <- gdpc.priv(t(Z), k, f_ini, tol, niter_max, sel)
   out$k_opt <- k
   out$expart <- 1 - out$mse/mean(apply(Z, 2, var))
-  out <- construct_gdpc(out, Z)
+  out <- construct.gdpc(out, Z)
   return(out)
 }
 
-construct_gdpc <- function(out, data) {
+construct.gdpc <- function(out, data) {
   #This function constructs an object of class gdpc.
   #INPUT
   # out: the output of gdpc.priv
