@@ -1,5 +1,8 @@
-auto.gdpc <- function(Z, crit = 'AIC', normalize = TRUE, auto_comp = TRUE, expl_var = 0.9, num_comp = 5, tol = 1e-4, k_max = 10, niter_max = 500, ncores = 1) {
-  # This is the main function to compute Generalized Dynamic Principal Components, Pena and Yohai (2016) JASA
+auto.gdpc <- function(Z, crit = "AIC", normalize = TRUE, auto_comp = TRUE, expl_var = 0.9, num_comp = 5, tol = 1e-04, 
+                      k_max = 10, niter_max = 500, ncores = 1) {
+  # Computes Generalized Dynamic Principal Components. The number of components can be supplied by the user 
+  # or chosen automatically so that a given proportion of variance is explained. The number of lags is chosen
+  # automatically using an AIC or a BIC type criterion.
   # All computations are done internally using leads rather than lags. However, the final result is outputted
   # using lags.
   #INPUT
@@ -15,7 +18,7 @@ auto.gdpc <- function(Z, crit = 'AIC', normalize = TRUE, auto_comp = TRUE, expl_
   # k_max: maximum number of lags. Default is 10
   # niter_max : maximum number of iterations. Default is 500
   # ncores: number of cores to be used for parallel computations. Default is 1
-    
+  
   #OUTPUT
   # A list of length equal to the number of computed components. The i-th entry of this list is an object of class
   # gdpc, that is, a list with entries:
@@ -31,48 +34,90 @@ auto.gdpc <- function(Z, crit = 'AIC', normalize = TRUE, auto_comp = TRUE, expl_
   # fitted: matrix of fitted values of the fit with the first i components 
   # expart: proportion of the variance explained by the first i components
   
-  #Pass to matrix form. Scale and transpose data.
+  if (all(!inherits(Z, "matrix"), !inherits(Z, "mts"), !inherits(Z, "xts"), !inherits(Z, "data.frame"))) {
+    stop("Z should belong to one of the following classes: matrix, data.frame, mts, xts")
+  }
+  if (!crit %in% c("BIC", "AIC")) {
+    stop("crit should be AIC or BIC ")
+  }
+  if (!inherits(auto_comp, "logical")) {
+    stop("auto_comp should be logical")
+  }
+  if (!inherits(normalize, "logical")) {
+    stop("normalize should be logical")
+  }
+  if (!inherits(expl_var, "numeric")) {
+    stop("expl_var should be numeric")
+  } else if (!all(expl_var < 1, expl_var > 0)) {
+    stop("expl_var be between 0 and 1")
+  }
+  if (!inherits(tol, "numeric")) {
+    stop("tol should be numeric")
+  } else if (!all(tol < 1, tol > 0)) {
+    stop("tol be between 0 and 1")
+  }
+  if (!inherits(num_comp, "numeric")) {
+    stop("num_comp should be numeric")
+  } else if (any(!num_comp == floor(num_comp), num_comp <= 0)) {
+    stop("num_comp should be a positive integer")
+  }
+  if (!inherits(k_max, "numeric")) {
+    stop("k_max should be numeric")
+  } else if (any(!k_max == floor(k_max), k_max <= 0)) {
+    stop("k_max should be a positive integer")
+  }
+  if (!inherits(niter_max, "numeric")) {
+    stop("niter_max should be numeric")
+  } else if (any(!niter_max == floor(niter_max), niter_max <= 0)) {
+    stop("niter_max should be a positive integer")
+  }
+  if (!inherits(ncores, "numeric")) {
+    stop("ncores should be numeric")
+  } else if (any(!ncores == floor(ncores), ncores <= 0)) {
+    stop("ncores should be a positive integer")
+  }
+  # Pass to matrix form. Scale and transpose data.
   if (normalize) {
     V <- t(scale(as.matrix(Z)))
     mean_var_V <- 1
   } else {
     V <- t(as.matrix(Z))
-    mean_var_V <- mean(apply(V, 1, var)) # Mean variance of the data
+    mean_var_V <- mean(apply(V, 1, var))  # Mean variance of the data
   }
   vard <- (1 - expl_var) * mean_var_V
   output <- vector("list")
   
   sel <- 1
-  if (crit == 'BIC'){
+  if (crit == "BIC") {
     sel <- 2
   }
   
-  ###Set-up cluster for parallel computations
-  cores<-min(detectCores(),ncores)
-  cl<-makeCluster(cores)
+  ### Set-up cluster for parallel computations
+  cores <- min(detectCores(), ncores)
+  cl <- makeCluster(cores)
   registerDoParallel(cl)
-  ###
+  ### 
   
   comp_ready <- 1
-  print(paste('Computing component number',comp_ready))
+  print(paste("Computing component number", comp_ready))
   out <- my_autodyc(V, k_max, mean_var_V, tol, niter_max, sel)
-  mse <- out$mse #Mean squared error (in N and m)
+  mse <- out$mse  #Mean squared error (in N and m)
   output[[comp_ready]] <- out
   V <- out$res
   
-  if(auto_comp){
-     while (mse > vard){
+  if (auto_comp) {
+    while (mse > vard) {
       comp_ready <- comp_ready + 1
-      print(paste('Computing component number',comp_ready))
+      print(paste("Computing component number", comp_ready))
       out <- my_autodyc(V, k_max, mean_var_V, tol, niter_max, sel)
       mse <- out$mse
       output[[comp_ready]] <- out
       V <- out$res
-      }
-  } else{
-    while (comp_ready < num_comp){
+    }
+  } else {
+    while (comp_ready < num_comp) {
       comp_ready <- comp_ready + 1
-      print(paste('Computing component number',comp_ready))
+      print(paste("Computing component number", comp_ready))
       out <- my_autodyc(V, k_max, mean_var_V, tol, niter_max, sel)
       output[[comp_ready]] <- out
       V <- out$res
@@ -91,7 +136,7 @@ auto.gdpc <- function(Z, crit = 'AIC', normalize = TRUE, auto_comp = TRUE, expl_
   
 }
 
-my_autodyc <- function(V, k_max, mean_var_V, tol = 1e-4, niter_max = 500, sel = 1) {
+my_autodyc <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel = 1) {
   #Auxiliary function to choose the optimal number of leads
   #INPUT
   # V : matrix of original data or residuals where each ROW is a different time series
@@ -112,28 +157,31 @@ my_autodyc <- function(V, k_max, mean_var_V, tol = 1e-4, niter_max = 500, sel = 
   # expart: proportion of the variance explained
   
   
+  
   m <- nrow(V)
   N <- ncol(V)
   
   exports <- c("gdpc.priv")
   k_lag <- NULL
   crits <- rep(0, k_max + 1)
-  fits <- vector('list', k_max + 1)
-  fits <- foreach(k_lag = 1:(k_max + 1), .export = exports, .packages='gdpc') %dopar% {
+  fits <- vector("list", k_max + 1)
+  fits <- foreach(k_lag = 1:(k_max + 1), .export = exports, .packages = "gdpc") %dopar% {
     gdpc.priv(V, k = k_lag - 1, tol = tol, niter_max = niter_max, sel = sel)
   }
   
-  crits <- sapply(fits, function(x){ x$crit }) #Get criterion corresponding to each lead
+  crits <- sapply(fits, function(x) {
+    x$crit
+  })  #Get criterion corresponding to each lead
   k_opt <- which.min(crits) - 1
   out <- fits[[k_opt + 1]]
-  expart <- 1 - out$mse / mean_var_V
+  expart <- 1 - out$mse/mean_var_V
   out$k_opt <- k_opt
   out$expart <- expart
   return(out)
-} 
+}
 
 
-gdpc.priv <- function(V, k, f_ini = NULL, tol = 1e-4, niter_max = 500, sel = 1) {
+gdpc.priv <- function(V, k, f_ini = NULL, tol = 1e-04, niter_max = 500, sel = 1) {
   # This function computes a single GDPC with a given number of leads.
   #INPUT
   # V: data matrix each ROW is a different time series
@@ -156,36 +204,36 @@ gdpc.priv <- function(V, k, f_ini = NULL, tol = 1e-4, niter_max = 500, sel = 1) 
   niter <- 0  #Number of iterations
   
   if (is.null(f_ini)) {
-    f_ini <- t(V) %*% svd(scale(t(V),scale=FALSE), nu = 0, nv = 1)$v[,1]
+    f_ini <- t(V) %*% svd(scale(t(V), scale = FALSE), nu = 0, nv = 1)$v[, 1]
     f_ini <- c(f_ini, rep(f_ini[N], k))
   }
   
-  if(length(f_ini)!=N+k){
-    warning('Length of initial factor does not equal N+k')
+  if (length(f_ini) != N + k) {
+    warning("Length of initial factor does not equal N+k")
   }
   f_ini <- scale(f_ini)
   out <- betaf(V, f_ini, k, sel)
-  mse_ini <- out$mse / m
+  mse_ini <- out$mse/m
   criter <- 10  #Stopping criterion for the iterations
   while (criter > tol & niter < niter_max) {
     niter <- niter + 1
     f_fin <- scale(matrix_ff(V, out$beta, out$alpha, k))
     out <- betaf(V, f_fin, k, sel)
-    mse_fin <- out$mse / m
+    mse_fin <- out$mse/m
     criter <- 1 - mse_fin/mse_ini
     mse_ini <- mse_fin
   }
-  if (niter >= niter_max){
-    warning('Iterations did not converge. Consider increasing niter_max.')
+  if (niter >= niter_max) {
+    warning("Iterations did not converge. Consider increasing niter_max.")
   }
-  out$mse <- out$mse / m
+  out$mse <- out$mse/m
   out$f <- f_fin
   return(out)
   
 }
 
 
-gdpc <- function(Z, k, f_ini = NULL, tol = 1e-4, niter_max = 500, crit = 'AIC') {
+gdpc <- function(Z, k, f_ini = NULL, tol = 1e-04, niter_max = 500, crit = "AIC") {
   # A wrapper function for gdpc.priv.
   #INPUT
   # Z: data matrix each COLUMN is a different time series
@@ -208,18 +256,44 @@ gdpc <- function(Z, k, f_ini = NULL, tol = 1e-4, niter_max = 500, crit = 'AIC') 
   # expart: proportion of the variance explained
   
   
-  sel = 1
-  if (crit=='BIC'){
-    sel = 2
+  if (all(!inherits(Z, "matrix"), !inherits(Z, "mts"), !inherits(Z, "xts"), !inherits(Z, "data.frame"))) {
+    stop("Z should belong to one of the following classes: matrix, data.frame, mts, xts")
+  }
+  if (all(!is.null(f_ini), !inherits(f_ini, "numeric"), !inherits(f_ini, "matrix"), !inherits(f_ini, "ts"), !inherits(f_ini, "xts"))) {
+    stop("f_ini should belong to one of the following classes: numeric, matrix, ts, xts")
+  }
+  if (!crit %in% c("BIC", "AIC")) {
+    stop("crit should be AIC or BIC ")
+  }
+  if (!inherits(tol, "numeric")) {
+    stop("tol should be numeric")
+  } else if (!all(tol < 1, tol > 0)) {
+    stop("tol be between 0 and 1")
+  }
+  if (!inherits(k, "numeric")) {
+    stop("k_max should be numeric")
+  } else if (any(!k == floor(k), k <= 0)) {
+    stop("k_max should be a positive integer")
+  }
+  if (!inherits(niter_max, "numeric")) {
+    stop("niter_max should be numeric")
+  } else if (any(!niter_max == floor(niter_max), niter_max <= 0)) {
+    stop("niter_max should be a positive integer")
+  }
+  
+  
+  sel <- 1
+  if (crit == "BIC") {
+    sel <- 2
   }
   out <- gdpc.priv(t(Z), k, f_ini, tol, niter_max, sel)
   out$k_opt <- k
-  out$expart <- 1 - out$mse / mean(apply(Z, 2, var))
+  out$expart <- 1 - out$mse/mean(apply(Z, 2, var))
   out <- construct_gdpc(out, Z)
   return(out)
 }
 
-construct_gdpc <- function(out, data){
+construct_gdpc <- function(out, data) {
   #This function constructs an object of class gdpc.
   #INPUT
   # out: the output of gdpc.priv
@@ -236,42 +310,42 @@ construct_gdpc <- function(out, data){
   # fitted: matrix of fitted values of the fit
   # expart: proportion of the variance explained
   
-  k <- ncol(out$beta) - 1 #number of leads
-  out$beta <- out$beta[,(k+1):1]
-  if (k !=0 ){
+  k <- ncol(out$beta) - 1  #number of leads
+  out$beta <- out$beta[, (k + 1):1]
+  if (k != 0) {
     out$initial_f <- out$f[1:k]
   } else {
     out$initial_f <- 0
   }
-  out$f <- out$f[(k+1):length(out$f)]
+  out$f <- out$f[(k + 1):length(out$f)]
   out$res <- t(out$res)
   out$fitted <- data - out$res
   colnames(out$res) <- colnames(data)
   colnames(out$fitted) <- colnames(data)
-  if ( inherits(data, 'xts') ){
+  if (inherits(data, "xts")) {
     out$f <- xts(out$f, order.by = index(data), frequency = frequency(data))
     out$res <- xts(out$res, order.by = index(data), frequency = frequency(data))
     out$fitted <- xts(out$fitted, order.by = index(data), frequency = frequency(data))
-  } else if ( inherits(data, 'ts') ){
+  } else if (inherits(data, "ts")) {
     out$f <- ts(out$f, start = start(data), end = end(data), frequency = frequency(data))
     out$res <- ts(out$res, start = start(data), end = end(data), frequency = frequency(data))
     out$fitted <- ts(out$fitted, start = start(data), end = end(data), frequency = frequency(data))
   }
-  class(out) <- append(class(out),"gdpc")
+  class(out) <- append(class(out), "gdpc")
   return(out)
 }
 
-fitted.gdpc <- function(object, ...){
-  #Returns the fitted values of a gdpc object
+fitted.gdpc <- function(object, ...) {
+  # Returns the fitted values of a gdpc object
   return(object$fitted)
 }
 
-residuals.gdpc <- function(object, ...){
-  #Returns the residuals of a gdpc object
+residuals.gdpc <- function(object, ...) {
+  # Returns the residuals of a gdpc object
   return(object$res)
 }
 
-plot.gdpc <- function(x, which = 'Loadings', which_load = 0, ...){
+plot.gdpc <- function(x, which = "Loadings", which_load = 0, ...) {
   #Plots a gdpc object
   #INPUT
   # x: An object of class gdpc, the result of gdpc or one of the entries 
@@ -280,5 +354,6 @@ plot.gdpc <- function(x, which = 'Loadings', which_load = 0, ...){
   # Default is 'Loadings'
   # which_load: Lag number indicating which loadings should be plotted. 
   # Only used if which = 'Loadings'. Default is 0.
-  switch(which, Component = plot(x$f, type='l', main='Principal Component', ...), Loadings = plot(x$beta[,which_load+1], type='l', main=c(paste(which_load,'lag loadings')), ...))
+  switch(which, Component = plot(x$f, type = "l", main = "Principal Component", ...), Loadings = plot(x$beta[, 
+                                                                                                             which_load + 1], type = "l", main = c(paste(which_load, "lag loadings")), ...))
 }
