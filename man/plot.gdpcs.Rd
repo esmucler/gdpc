@@ -30,7 +30,7 @@ Statistical Association.
 }
 
 \examples{
-N <- 100 #length of series
+N <- 200 #length of series
 m <- 200 #number of series
 set.seed(1234)
 f <- rnorm(N + 1)
@@ -41,8 +41,8 @@ for (i in 1:m) {
 }
 #Choose number of lags using the AIC type criterion.
 #Data is not normalized.
-#k_max=3 to keep computation time low
-autofit <- auto.gdpc(x, normalize = FALSE, k_max = 3, auto_comp = FALSE, num_comp = 2) 
+#k_max=2 to keep computation time low
+autofit <- auto.gdpc(x, normalize = FALSE, k_max = 2, auto_comp = FALSE, num_comp = 2) 
 plot(autofit, which_comp = c(1,2), xlab = '', ylab = '')
 }
 

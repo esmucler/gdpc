@@ -317,6 +317,8 @@ construct.gdpc <- function(out, data) {
   } else {
     out$initial_f <- 0
   }
+  out$beta <- as.matrix(out$beta)
+  out$alpha <- as.numeric(out$alpha)
   out$f <- out$f[(k + 1):length(out$f)]
   out$res <- t(out$res)
   out$fitted <- data - out$res
@@ -423,12 +425,12 @@ plot.gdpcs <- function(x, which_comp = 1, ...) {
   }
   comps <- components(x, which_comp)
   if (inherits(comps, "xts") & length(which_comp)==1) {
-    plot(comps, main = 'Principal Components',...)
+    plot(comps, main = "Principal Components",...)
   } else if (inherits(comps, "ts")) {
-    plot(comps, main = 'Principal Components', plot.type = 'multiple', ...)
+    plot(comps, main = "Principal Components", plot.type = 'multiple', ...)
   } else {
     comps <- ts(comps)
-    plot(comps, main = 'Principal Components', plot.type = 'multiple', ...)
+    plot(comps, main = "Principal Components", plot.type = 'multiple', ...)
   }
   
 }
