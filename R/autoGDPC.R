@@ -130,7 +130,7 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = TRUE, auto_comp = TRUE, expl_
     Z <- scale(Z)
   }
   
-  output <- lapply(output, construct.gdpc, Z)
+  output <- construct.gdpcs(output, Z)
   
   return(output)
   
@@ -303,7 +303,7 @@ construct.gdpc <- function(out, data) {
   # f: the dynamic component 
   # beta: beta matrix corresponding to f
   # alpha: alpha matrix corresponding to f
-  # mse: mean (in N and m) squared error of the residuals of the fit with the first i components 
+  # mse: mean (in N and m) squared error of the residuals of the fit
   # k_opt: number of lags used
   # crit: the AIC or BIC of the fitted model, according to what was specified in crit
   # res: matrix of residuals of the fit
@@ -345,15 +345,90 @@ residuals.gdpc <- function(object, ...) {
   return(object$res)
 }
 
-plot.gdpc <- function(x, which = "Loadings", which_load = 0, ...) {
+plot.gdpc <- function(x, which = "Component", which_load = 0, ...) {
   #Plots a gdpc object
   #INPUT
   # x: An object of class gdpc, the result of gdpc or one of the entries 
   # of the result of auto.gdpc
   # which: String. Indicates what to plot, either 'Component' or 'Loadings'
-  # Default is 'Loadings'
+  # Default is 'Component'
   # which_load: Lag number indicating which loadings should be plotted. 
   # Only used if which = 'Loadings'. Default is 0.
-  switch(which, Component = plot(x$f, type = "l", main = "Principal Component", ...), Loadings = plot(x$beta[, 
-                                                                                                             which_load + 1], type = "l", main = c(paste(which_load, "lag loadings")), ...))
+  if (!which %in% c("Component", "Loadings")) {
+    stop("which should be either Component or Loadings ")
+  }
+  if (!inherits(which_load, "numeric")) {
+    stop("which_load should be numeric")
+  } else if (any(!which_load == floor(which_load), which_load < 0, which_load > ncol(x$beta) - 1)) {
+    stop("which_load should be a non-negative integer, at most equal to the number of lags")
+  }
+  if (which == "Component"){
+    plot(x$f, type = "l", main = "Principal Component", ...) 
+  } else if (which == "Loadings"){
+    plot(x$beta[, which_load + 1], type = "l", main = c(paste(which_load, "lag loadings")), ...)
+  }
+}
+
+construct.gdpcs <- function(out, data) {
+  #This function constructs an object of class gdpcs that is, a list of length equal to 
+  #the number of computed components. The i-th entry of this list is an object of class gdpc.
+  #INPUT
+  # out: the output of auto.gdpc
+  # data: the data matrix passed to auto.gdpc
+  #OUTPUT
+  # An object of class gdpcs, that is, a list where each entry is an object of class gdpc.
+  out <- lapply(out, construct.gdpc, data)
+  class(out) <- append(class(out), "gdpcs")
+  return(out)
+}
+
+
+components <- function(object, ...){
+  # Generic function for getting components out of an object
+  UseMethod("components", object)
+}
+
+components.gdpcs <- function(object, which_comp = 1) {
+  # This function extracts the desired components from a gdpcs object
+  #INPUT
+  # object: the output of auto.gdpc
+  # which_comp: Integer vector. Indicates which components to get
+  #OUTPUT
+  # A matrix with the desired components as columns
+  if (all(!inherits(which_comp, "numeric"), !inherits(which_comp, "integer"))) {
+    stop("which_comp should be numeric")
+  } else if (any(!which_comp == floor(which_comp), which_comp <= 0, which_comp > length(object))) {
+    stop("The entries of which_comp should be positive integers, at most equal to the number of components")
+  }
+  object <- object[which_comp]
+  comps <- sapply(object, function(object){ object$f })
+  colnames(comps) <- paste("Component number", which_comp)
+  if (inherits(object[[1]]$f, "xts")) {
+    comps <- xts(comps, order.by = index(object[[1]]$f), frequency = frequency(object[[1]]$f))
+  } else if (inherits(object[[1]]$f, "ts")) {
+    comps <- ts(comps, start = start(object[[1]]$f), end = end(object[[1]]$f), frequency = frequency(object[[1]]$f))
+  } 
+  return(comps)
+}
+
+plot.gdpcs <- function(x, which_comp = 1, ...) {
+  #Plots a gdpcs object
+  #INPUT
+  # x: An object of class gdpcs, the result of auto.gdpc
+  # which_comp: Integer vector. Indicates which components to plot
+  if (all(!inherits(which_comp, "numeric"), !inherits(which_comp, "integer"))) {
+    stop("which_comp should be numeric")
+  } else if (any(!which_comp == floor(which_comp), which_comp <= 0, which_comp > length(x))) {
+    stop("The entries of which_comp should be positive integers, at most equal to the number of components")
+  }
+  comps <- components(x, which_comp)
+  if (inherits(comps, "xts") & length(which_comp)==1) {
+    plot(comps, main = 'Principal Components',...)
+  } else if (inherits(comps, "ts")) {
+    plot(comps, main = 'Principal Components', plot.type = 'multiple', ...)
+  } else {
+    comps <- ts(comps)
+    plot(comps, main = 'Principal Components', plot.type = 'multiple', ...)
+  }
+  
 }

@@ -11,10 +11,10 @@ Computes the Generalized Dynamic Principal Components proposed in Peña and Yoha
 \tabular{ll}{
 Package: \tab gdpc\cr
 Type: \tab Package\cr
-Version: \tab 0.99.1\cr
-Date: \tab 2016-7-1\cr
+Version: \tab 0.99.2\cr
+Date: \tab 2016-7-10\cr
 License: \tab GPL (>= 2)\cr
-Imports: \tab Rcpp, parallel, doParallel, foreach\cr
+Imports: \tab xts, zoo, Rcpp, parallel, doParallel, foreach\cr
 LinkingTo: \tab Rcpp, RcppArmadillo\cr
 NeedsCompilation: \tab yes\cr
 }
@@ -30,6 +30,9 @@ auto.gdpc   Computes Generalized Dynamic Principal Components, number of
 }
 \preformatted{
 plot.gdpc   Plots a gdpc object.
+}
+\preformatted{
+plot.gdpcs   Plots a gdpcs object.
 }
 \preformatted{
 ipi91   Six series corresponding to the Industrial Production

@@ -35,7 +35,7 @@ where \eqn{\Sigma = (res^{T} res) / T} and \eqn{res} is the matrix of residuals 
 }
 
 \value{
-  A list of length equal to the number of computed components. The i-th entry of this list is an object of class \code{gdpc}, that is, a list with entries
+  An object of class \code{gdpcs}, that is, a list of length equal to the number of computed components. The i-th entry of this list is an object of class \code{gdpc}, that is, a list with entries
   \item{f}{Coordinates of the i-th Principal Component corresponding to the periods \eqn{1,\dots,T}.}
   \item{initial_f}{Coordinates of the i-th Principal Component corresponding to the periods \eqn{-k+1,\dots,0}. Only for the case \eqn{k>0}.}
   \item{beta}{Matrix of loadings corresponding to f. Column number \eqn{k} is the vector of \eqn{k-1} lag loadings.}
@@ -55,7 +55,7 @@ where \eqn{\Sigma = (res^{T} res) / T} and \eqn{res} is the matrix of residuals 
 }
 
 \seealso{
-\code{\link{gdpc}}, \code{\link{plot.gdpc}}
+\code{\link{gdpc}}, \code{\link{plot.gdpc}}, \code{\link{plot.gdpcs}}
 }
 \examples{
 N <- 200 #length of series
@@ -73,6 +73,7 @@ for (i in 1:m) {
 autofit <- auto.gdpc(x, normalize = FALSE, k_max = 3)
 resid <- residuals(autofit[[1]]) #Get residuals of the fit
 fit_val <- fitted(autofit[[1]]) #Get fitted values
+plot.gdpcs(autofit, which_comp = 1)
 }
 
 \keyword{ts}

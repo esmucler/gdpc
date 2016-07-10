@@ -1,0 +1,49 @@
+\name{components.gdpcs}
+\alias{components.gdpcs}
+\title{Get Generalized Dynamic Principal Components From a gdpcs Object}
+\description{
+Get Generalized Dynamic Principal Components From a gdpcs Object.
+}
+
+
+\usage{
+\method{components}{gdpcs}(object, which_comp = 1)
+}
+\arguments{
+  \item{object}{An object of class \code{gdpcs}, usually the result of \link{auto.gdpc}.}
+  \item{which_comp}{Numeric vector indicating which components to get. Default is 1.}
+}
+
+
+\value{ A matrix whose columns are the desired Principal Components.}
+\author{
+Daniel Peña, Ezequiel Smucler, Victor Yohai
+}
+\references{
+Peña and Yohai (2016) "Generalized Dynamic Principal Components". Upcoming on Journal of the American
+Statistical Association.
+}
+
+
+\seealso{
+\code{\link{gdpc}}, \code{\link{auto.gdpc}}, \code{\link{plot.gdpc}}
+}
+
+\examples{
+N <- 100 #length of series
+m <- 200 #number of series
+set.seed(1234)
+f <- rnorm(N + 1)
+x <- matrix(0, N, m)
+u <- matrix(rnorm(N * m), N, m)
+for (i in 1:m) {
+    x[, i] <- 10 * sin(2 * pi * (i/m)) * f[1:N] + 10 * cos(2 * pi * (i/m)) * f[2:(N + 1)] + u[, i]
+}
+#Choose number of lags using the AIC type criterion.
+#Data is not normalized.
+#k_max=3 to keep computation time low
+autofit <- auto.gdpc(x, normalize = FALSE, k_max = 3, auto_comp = FALSE, num_comp = 2) 
+comps <- components.gdpcs(autofit, which_comp = c(1,2))
+}
+
+\keyword{ts}

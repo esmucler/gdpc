@@ -1,18 +1,17 @@
-\name{plot.gdpc}
-\alias{plot.gdpc}
+\name{plot.gdpcs}
+\alias{plot.gdpcs}
 \title{Plot Generalized Dynamic Principal Components}
 \description{
-Plots a \code{gdpc} object.
+Plots a \code{gdpcs} object.
 }
 
 
 \usage{
-\method{plot}{gdpc}(x, which = 'Component', which_load = 0, \dots)
+\method{plot}{gdpcs}(x, which_comp = 1, \dots)
 }
 \arguments{
-  \item{x}{An object of class \code{gdpc}, usually the result of \link{gdpc} or one of the entries of the result of \link{auto.gdpc}.}
-  \item{which}{String. Indicates what to plot, either 'Component' or 'Loadings'. Default is 'Component'.}
-  \item{which_load}{Lag number indicating which loadings should be plotted. Only used if which = 'Loadings'. Default is 0.}
+  \item{x}{An object of class \code{gdpcs}, usually the result of \link{auto.gdpc}.}
+  \item{which_comp}{Numeric vector indicating which components to plot. Default is 1.}
   \item{\dots}{Additional arguments to be passed to the plotting functions.}
 }
 
@@ -27,11 +26,11 @@ Statistical Association.
 
 
 \seealso{
-\code{\link{gdpc}}, \code{\link{auto.gdpc}}, \code{\link{plot.gdpcs}}
+\code{\link{gdpc}}, \code{\link{auto.gdpc}}, \code{\link{plot.gdpc}}
 }
 
 \examples{
-N <- 200 #length of series
+N <- 100 #length of series
 m <- 200 #number of series
 set.seed(1234)
 f <- rnorm(N + 1)
@@ -43,8 +42,8 @@ for (i in 1:m) {
 #Choose number of lags using the AIC type criterion.
 #Data is not normalized.
 #k_max=3 to keep computation time low
-autofit <- auto.gdpc(x, normalize = FALSE, k_max = 3) 
-plot(autofit[[1]], xlab = '', ylab = '')
+autofit <- auto.gdpc(x, normalize = FALSE, k_max = 3, auto_comp = FALSE, num_comp = 2) 
+plot(autofit, which_comp = c(1,2), xlab = '', ylab = '')
 }
 
 \keyword{ts}
