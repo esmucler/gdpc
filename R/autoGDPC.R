@@ -36,7 +36,7 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = TRUE, auto_comp = TRUE, expl_
   
   if (all(!inherits(Z, "matrix"), !inherits(Z, "mts"), !inherits(Z, "xts"), !inherits(Z, "data.frame"))) {
     stop("Z should belong to one of the following classes: matrix, data.frame, mts, xts")
-  } else if (any(dim(Z) <= 2)) {
+  } else if (any(dim(Z) < 2)) {
     stop("Z should have at least two rows and two columns")
   }
   if (!crit %in% c("BIC", "AIC")) {
@@ -260,7 +260,7 @@ gdpc <- function(Z, k, f_ini = NULL, tol = 1e-04, niter_max = 500, crit = "AIC")
   
   if (all(!inherits(Z, "matrix"), !inherits(Z, "mts"), !inherits(Z, "xts"), !inherits(Z, "data.frame"))) {
     stop("Z should belong to one of the following classes: matrix, data.frame, mts, xts")
-  } else if (any(dim(Z) <= 2)) {
+  } else if (any(dim(Z) < 2)) {
     stop("Z should have at least two rows and two columns")
   }
   if (all(!is.null(f_ini), !inherits(f_ini, "numeric"), !inherits(f_ini, "matrix"), !inherits(f_ini, "ts"), !inherits(f_ini, "xts"))) {
