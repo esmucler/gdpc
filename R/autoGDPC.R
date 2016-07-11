@@ -38,6 +38,8 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = TRUE, auto_comp = TRUE, expl_
     stop("Z should belong to one of the following classes: matrix, data.frame, mts, xts")
   } else if (any(dim(Z)[2] < 2, dim(Z)[1] < 10)) {
     stop("Z should have at least ten rows and two columns")
+  } else if (any(anyNA(Z), any(is.nan(Z)), any(is.infinite(Z)))) {
+    stop("Z should not have missing, infinite or nan values")
   }
   if (!crit %in% c("BIC", "AIC")) {
     stop("crit should be AIC or BIC ")
@@ -262,6 +264,8 @@ gdpc <- function(Z, k, f_ini = NULL, tol = 1e-04, niter_max = 500, crit = "AIC")
     stop("Z should belong to one of the following classes: matrix, data.frame, mts, xts")
   } else if (any(dim(Z)[2] < 2, dim(Z)[1] < 10)) {
     stop("Z should have at least ten rows and two columns")
+  } else if (any(anyNA(Z), any(is.nan(Z)), any(is.infinite(Z)))) {
+    stop("Z should not have missing, infinite or nan values")
   }
   if (all(!is.null(f_ini), !inherits(f_ini, "numeric"), !inherits(f_ini, "matrix"), !inherits(f_ini, "ts"), !inherits(f_ini, "xts"))) {
     stop("f_ini should belong to one of the following classes: numeric, matrix, ts, xts")
