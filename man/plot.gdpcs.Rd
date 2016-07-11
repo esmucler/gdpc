@@ -43,6 +43,7 @@ for (i in 1:m) {
 #Data is not normalized.
 #k_max=2 to keep computation time low
 autofit <- auto.gdpc(x, normalize = FALSE, k_max = 2, auto_comp = FALSE, num_comp = 2) 
+autofit
 plot(autofit, which_comp = c(1,2), xlab = '', ylab = '')
 }
 

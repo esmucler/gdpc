@@ -59,6 +59,7 @@ for (i in 1:m) {
     x[, i] <- 10 * sin(2 * pi * (i/m)) * f[1:N] + 10 * cos(2 * pi * (i/m)) * f[2:(N + 1)] + u[, i]
 }
 fit <- gdpc(x, k = 1) #find first DPC with one lag
+fit
 par(mfrow = c(1, 2)) #plot loadings
 plot(fit, which = 'Loadings', which_load = 0, xlab = '', ylab = '') 
 plot(fit, which = 'Loadings', which_load = 1, xlab = '', ylab = '') 

@@ -71,6 +71,7 @@ for (i in 1:m) {
 #Data is not normalized.
 #k_max=3 to keep computation time low
 autofit <- auto.gdpc(x, normalize = FALSE, k_max = 3)
+autofit
 resid <- residuals(autofit[[1]]) #Get residuals of the fit
 fit_val <- fitted(autofit[[1]]) #Get fitted values
 plot.gdpcs(autofit, which_comp = 1)
