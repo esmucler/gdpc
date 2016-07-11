@@ -13,6 +13,7 @@ License: GPL (>= 2)
 Imports:
     xts,
     zoo,
+    methods,
     Rcpp,
     parallel,
     doParallel,

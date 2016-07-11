@@ -360,6 +360,9 @@ plot.gdpc <- function(x, which = "Component", which_load = 0, ...) {
   # Default is 'Component'
   # which_load: Lag number indicating which loadings should be plotted. 
   # Only used if which = 'Loadings'. Default is 0.
+  if (!is.gdpc(x)) {
+    stop("x should be of class gdpc")
+  }
   if (!which %in% c("Component", "Loadings")) {
     stop("which should be either Component or Loadings ")
   }
@@ -387,6 +390,50 @@ construct.gdpcs <- function(out, data) {
   class(out) <- append(class(out), "gdpcs")
   return(out)
 }
+ 
+is.gdpc <- function(object, ...) {
+  #This function checks whether an object is of class gdpc
+  #First check if object is a list.
+  #Second check if the list has the correct entries
+  #Third check if the entries have the correct classes
+  #Fourth check if the entries have the correct dims
+  if (any(!inherits(object, "list"), !inherits(object, "gdpc"))) {
+    return(FALSE)
+  } else if (any(is.null(object$f), is.null(object$initial_f), is.null(object$beta),
+          is.null(object$alpha), is.null(object$mse), is.null(object$crit),
+          is.null(object$k_opt), is.null(object$expart), is.null(object$res),
+          is.null(object$fitted))) {
+    return(FALSE)
+  } else if (any(!inherits(object$mse, "numeric"), !inherits(object$crit, 'numeric'), !inherits(object$alpha, "numeric"),
+                 !inherits(object$beta, "matrix"),
+                 all(!inherits(object$f,"numeric"), !inherits(object$f,"ts"), !inherits(object$f,"xts")), 
+                 all(!inherits(object$res,'matrix'),!inherits(object$res,'mts'),!inherits(object$res,'xts'),
+                     !inherits(object$res,'data.frame')),
+                 all(!inherits(object$fitted,'matrix'),!inherits(object$fitted,'mts'),!inherits(object$fitted,'xts'),
+                         !inherits(object$fitted, 'data.frame')),
+                 !inherits(object$k_opt, "numeric"), !inherits(object$expart, "numeric"),
+                 all(!inherits(object$initial_f,"numeric"), !inherits(object$initial_f,"ts"), !inherits(object$initial_f,"xts"))
+                 )) {
+    return(FALSE)
+  } else if(any(dim(object$res) != dim(object$fitted), dim(object$alpha)[1] != dim(object$beta)[1], 
+                dim(object$res)[2] != dim(object$alpha)[1], dim(object$f)[1] != dim(object$res)[1], 
+                dim(object$initial_f)[1] != object$k_opt, dim(object$beta)[2] != object$k_opt + 1
+                )) {
+    return(FALSE)
+  } else {
+    return(TRUE)
+  }
+}
+
+is.gdpcs <- function(object, ...){
+  #This function checks whether an object is of class gdpcs,
+  #that is, if each of its entries is a list of class gdpc
+  if (!inherits(object, "gdpcs")){
+    return(FALSE)
+  } else {
+  return(all(sapply(object,is.gdpc)))
+  }
+}
 
 
 components <- function(object, ...){
@@ -401,6 +448,9 @@ components.gdpcs <- function(object, which_comp = 1) {
   # which_comp: Integer vector. Indicates which components to get
   #OUTPUT
   # A matrix with the desired components as columns
+  if (!is.gdpcs(object)) {
+    stop("object should be of class gdpcs")
+  }
   if (all(!inherits(which_comp, "numeric"), !inherits(which_comp, "integer"))) {
     stop("which_comp should be numeric")
   } else if (any(!which_comp == floor(which_comp), which_comp <= 0, which_comp > length(object))) {
@@ -422,6 +472,9 @@ plot.gdpcs <- function(x, which_comp = 1, ...) {
   #INPUT
   # x: An object of class gdpcs, the result of auto.gdpc
   # which_comp: Integer vector. Indicates which components to plot
+  if (!is.gdpcs(x)) {
+    stop("x should be of class gdpcs")
+  }
   if (all(!inherits(which_comp, "numeric"), !inherits(which_comp, "integer"))) {
     stop("which_comp should be numeric")
   } else if (any(!which_comp == floor(which_comp), which_comp <= 0, which_comp > length(x))) {
