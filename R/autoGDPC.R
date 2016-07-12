@@ -67,8 +67,8 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = TRUE, auto_comp = TRUE, expl_
   }
   if (!inherits(k_max, "numeric")) {
     stop("k_max should be numeric")
-  } else if (any(!k_max == floor(k_max), k_max <= 0)) {
-    stop("k_max should be a positive integer")
+  } else if (any(!k_max == floor(k_max), k_max < 0)) {
+    stop("k_max should be a non-negative integer")
   }
   if (!inherits(niter_max, "numeric")) {
     stop("niter_max should be numeric")
@@ -280,9 +280,9 @@ gdpc <- function(Z, k, f_ini = NULL, tol = 1e-04, niter_max = 500, crit = "AIC")
     stop("tol be between 0 and 1")
   }
   if (!inherits(k, "numeric")) {
-    stop("k_max should be numeric")
-  } else if (any(!k == floor(k), k <= 0)) {
-    stop("k_max should be a positive integer")
+    stop("k should be numeric")
+  } else if (any(!k == floor(k), k < 0)) {
+    stop("k should be a non-negative integer")
   }
   if (!inherits(niter_max, "numeric")) {
     stop("niter_max should be numeric")
