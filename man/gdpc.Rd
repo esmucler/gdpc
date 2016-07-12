@@ -34,6 +34,7 @@ See \code{\link{auto.gdpc}} for the definition of the AIC or BIC type criterion 
   \item{expart}{Proportion of the variance explained.}
  \item{res}{Matrix of residuals.}
      \item{fitted}{Matrix of fitted values.}
+       \item{call}{The matched call.}
  }
 \author{
 Daniel Peña, Ezequiel Smucler, Victor Yohai

@@ -9,10 +9,10 @@ is.gdpc <- function(object, ...) {
   } else if (any(is.null(object$f), is.null(object$initial_f), is.null(object$beta),
                  is.null(object$alpha), is.null(object$mse), is.null(object$crit),
                  is.null(object$k_opt), is.null(object$expart), is.null(object$res),
-                 is.null(object$fitted))) {
+                 is.null(object$fitted), is.null(object$call))) {
     return(FALSE)
   } else if (any(!inherits(object$mse, "numeric"), !inherits(object$crit, 'numeric'), !inherits(object$alpha, "numeric"),
-                 !inherits(object$beta, "matrix"),
+                 !inherits(object$beta, "matrix"), !inherits(object$call, "call"),
                  all(!inherits(object$f,"numeric"), !inherits(object$f,"ts"), !inherits(object$f,"xts")), 
                  all(!inherits(object$res,'matrix'),!inherits(object$res,'mts'),!inherits(object$res,'xts'),
                      !inherits(object$res,'data.frame')),
@@ -123,7 +123,7 @@ print.gdpc <- function(x, ...) {
   print(y)
 }
 
-construct.gdpcs <- function(out, data) {
+construct.gdpcs <- function(out, data, fn_call) {
   #This function constructs an object of class gdpcs that is, a list of length equal to 
   #the number of computed components. The i-th entry of this list is an object of class gdpc.
   #INPUT
@@ -131,6 +131,7 @@ construct.gdpcs <- function(out, data) {
   # data: the data matrix passed to auto.gdpc
   #OUTPUT
   # An object of class gdpcs, that is, a list where each entry is an object of class gdpc.
+  out <- lapply(out, function(x, fn_call){ x$call <- fn_call; return(x)}, fn_call)
   out <- lapply(out, construct.gdpc, data)
   class(out) <- append(class(out), "gdpcs")
   return(out)
@@ -141,7 +142,7 @@ construct.gdpcs <- function(out, data) {
 is.gdpcs <- function(object, ...) {
   #This function checks whether an object is of class gdpcs,
   #that is, if each of its entries is a list of class gdpc
-  if (!inherits(object, "gdpcs")){
+  if (any(!inherits(object, "gdpcs"), !inherits(object, "list"))) {
     return(FALSE)
   } else {
     return(all(sapply(object,is.gdpc)))
@@ -206,7 +207,7 @@ plot.gdpcs <- function(x, which_comp = 1, ...) {
 }
 
 print.gdpcs <- function(x, ...) {
-  #Print method for the gdpcs class
+#   Print method for the gdpcs class
   if (!is.gdpcs(x)) {
     stop("x should be of class gdpcs")
   }
@@ -217,7 +218,9 @@ print.gdpcs <- function(x, ...) {
   mat <- cbind(lags, crits, mses, vars)
   nums <- paste(1:length(x))
   nums <- sapply(nums, function(x){ paste("Component", x)})
-  colnames(mat) <- c("Number of lags", "Criterion", "MSE", "Explained Variance")
+  fn_call <- x[[1]]$call
+  crit_name <- fn_call$crit
+  colnames(mat) <- c("Number of lags", crit_name, "MSE", "Explained Variance")
   tab <- data.frame(mat, row.names = nums)
   print(tab)
 }

@@ -133,8 +133,9 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = TRUE, auto_comp = TRUE, expl_
   if (normalize) {
     Z <- scale(Z)
   }
-  
-  output <- construct.gdpcs(output, Z)
+  fn_call <- match.call()
+  fn_call$crit <- crit
+  output <- construct.gdpcs(output, Z, fn_call)
   
   return(output)
   
@@ -297,6 +298,9 @@ gdpc <- function(Z, k, f_ini = NULL, tol = 1e-04, niter_max = 500, crit = "AIC")
   out <- gdpc.priv(t(Z), k, f_ini, tol, niter_max, sel)
   out$k_opt <- k
   out$expart <- 1 - out$mse/mean(apply(Z, 2, var))
+  fn_call <- match.call()
+  fn_call$crit <- crit
+  out$call <- fn_call
   out <- construct.gdpc(out, Z)
   return(out)
 }

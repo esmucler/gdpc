@@ -46,6 +46,7 @@ where \eqn{\Sigma = (res^{T} res) / T} and \eqn{res} is the matrix of residuals 
   \item{expart}{Proportion of the variance explained by the first i components.}
   \item{res}{Matrix of residuals of the fit using the first i components.}
     \item{fitted}{Matrix of fitted values of the fit using the first i components.}
+      \item{call}{The matched call.}
 }
 \author{
   Daniel Peña, Ezequiel Smucler, Victor Yohai
