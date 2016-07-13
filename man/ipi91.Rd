@@ -32,7 +32,11 @@ plot(ipi91, plot.type = 'multiple', main = 'Industrial Production Index')
 #Compute first GDPC with twelve lags; this may take a bit.
 gdpc_ipi <- gdpc(ipi91, 12, niter_max = 1000)
 #plot the component
-plot(gdpc_ipi, which='Component', ylab = '') 
+plot(gdpc_ipi, which = 'Component', ylab = '')
+#get fitted values and plot
+fit_val <- fitted(gdpc_ipi)
+colnames(fit_val) <- colnames(ipi91)
+plot(fit_val, 'Fitted values')
 }
 }
 \keyword{datasets}

@@ -44,8 +44,6 @@ where \eqn{\Sigma = (res^{T} res) / T} and \eqn{res} is the matrix of residuals 
   \item{crit}{The AIC or BIC of the fitted model, according to what the user specified.}
   \item{k_opt}{Number of lags chosen.}
   \item{expart}{Proportion of the variance explained by the first i components.}
-  \item{res}{Matrix of residuals of the fit using the first i components.}
-    \item{fitted}{Matrix of fitted values of the fit using the first i components.}
       \item{call}{The matched call.}
 }
 \author{
@@ -73,8 +71,8 @@ for (i in 1:m) {
 #k_max=3 to keep computation time low
 autofit <- auto.gdpc(x, normalize = FALSE, k_max = 3)
 autofit
-resid <- residuals(autofit[[1]]) #Get residuals of the fit
 fit_val <- fitted(autofit[[1]]) #Get fitted values
+resid <- x - fit_val #Residuals
 plot.gdpcs(autofit, which_comp = 1)
 }
 

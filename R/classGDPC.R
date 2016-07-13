@@ -8,23 +8,17 @@ is.gdpc <- function(object, ...) {
     return(FALSE)
   } else if (any(is.null(object$f), is.null(object$initial_f), is.null(object$beta),
                  is.null(object$alpha), is.null(object$mse), is.null(object$crit),
-                 is.null(object$k_opt), is.null(object$expart), is.null(object$res),
-                 is.null(object$fitted), is.null(object$call))) {
+                 is.null(object$k_opt), is.null(object$expart), is.null(object$call))) {
     return(FALSE)
   } else if (any(!inherits(object$mse, "numeric"), !inherits(object$crit, 'numeric'), !inherits(object$alpha, "numeric"),
                  !inherits(object$beta, "matrix"), !inherits(object$call, "call"),
-                 all(!inherits(object$f,"numeric"), !inherits(object$f,"ts"), !inherits(object$f,"xts")), 
-                 all(!inherits(object$res,'matrix'),!inherits(object$res,'mts'),!inherits(object$res,'xts'),
-                     !inherits(object$res,'data.frame')),
-                 all(!inherits(object$fitted,'matrix'),!inherits(object$fitted,'mts'),!inherits(object$fitted,'xts'),
-                     !inherits(object$fitted, 'data.frame')),
+                 all(!inherits(object$f,"numeric"), !inherits(object$f,"ts"), !inherits(object$f,"xts")),
                  !inherits(object$k_opt, "numeric"), !inherits(object$expart, "numeric"),
                  all(!inherits(object$initial_f,"numeric"), !inherits(object$initial_f,"ts"), !inherits(object$initial_f,"xts"))
   )) {
     return(FALSE)
-  } else if(any(dim(object$res) != dim(object$fitted), dim(object$alpha)[1] != dim(object$beta)[1], 
-                dim(object$res)[2] != dim(object$alpha)[1], dim(object$f)[1] != dim(object$res)[1], 
-                dim(object$initial_f)[1] != object$k_opt, dim(object$beta)[2] != object$k_opt + 1
+  } else if(any(dim(object$alpha)[1] != dim(object$beta)[1], dim(object$initial_f)[1] != object$k_opt,
+                dim(object$beta)[2] != object$k_opt + 1
   )) {
     return(FALSE)
   } else {
@@ -39,15 +33,15 @@ construct.gdpc <- function(out, data) {
   # data: the data matrix passed to gdpc.priv
   #OUTPUT
   # An object of class gdpc, that is, a list with entries:
-  # f: the dynamic component 
+  # f: coordinates of the Principal Component corresponding to the periods 1,…,T
+  # initial_f: Coordinates of the Principal Component corresponding to the periods -k+1,…,0.
   # beta: beta matrix corresponding to f
   # alpha: alpha matrix corresponding to f
   # mse: mean (in N and m) squared error of the residuals of the fit
   # k_opt: number of lags used
   # crit: the AIC or BIC of the fitted model, according to what was specified in crit
-  # res: matrix of residuals of the fit
-  # fitted: matrix of fitted values of the fit
   # expart: proportion of the variance explained
+  # call: the matched call
   
   k <- ncol(out$beta) - 1  #number of leads
   out$beta <- out$beta[, (k + 1):1]
@@ -57,20 +51,14 @@ construct.gdpc <- function(out, data) {
     out$initial_f <- 0
   }
   out$beta <- as.matrix(out$beta)
+  rownames(out$beta) <- colnames(data)
   out$alpha <- as.numeric(out$alpha)
   out$f <- out$f[(k + 1):length(out$f)]
-  out$res <- t(out$res)
-  out$fitted <- data - out$res
-  colnames(out$res) <- colnames(data)
-  colnames(out$fitted) <- colnames(data)
+  out$res <- NULL
   if (inherits(data, "xts")) {
-    out$f <- xts(out$f, order.by = index(data), frequency = frequency(data))
-    out$res <- xts(out$res, order.by = index(data), frequency = frequency(data))
-    out$fitted <- xts(out$fitted, order.by = index(data), frequency = frequency(data))
+    out$f <- reclass(out$f, match.to = data)
   } else if (inherits(data, "ts")) {
     out$f <- ts(out$f, start = start(data), end = end(data), frequency = frequency(data))
-    out$res <- ts(out$res, start = start(data), end = end(data), frequency = frequency(data))
-    out$fitted <- ts(out$fitted, start = start(data), end = end(data), frequency = frequency(data))
   }
   class(out) <- append(class(out), "gdpc")
   return(out)
@@ -78,12 +66,17 @@ construct.gdpc <- function(out, data) {
 
 fitted.gdpc <- function(object, ...) {
   # Returns the fitted values of a gdpc object
-  return(object$fitted)
-}
-
-residuals.gdpc <- function(object, ...) {
-  # Returns the residuals of a gdpc object
-  return(object$res)
+  if (!is.gdpc(object)){
+    stop("object should be of class gdpc")
+  }
+  fitted <- fits(object$f, object$initial_f, object$beta, object$alpha, object$k_opt)
+  if (inherits(object$f, "xts")) {
+    fitted <- reclass(fitted, match.to = object$f)
+  } else if (inherits(object$f, "ts")) {
+    fitted <- ts(fitted)
+    attr(fitted, "tsp") <- attr(object$f, "tsp")
+  }
+  return(fitted)
 }
 
 plot.gdpc <- function(x, which = "Component", which_load = 0, ...) {
@@ -129,6 +122,7 @@ construct.gdpcs <- function(out, data, fn_call) {
   #INPUT
   # out: the output of auto.gdpc
   # data: the data matrix passed to auto.gdpc
+  # fn_call: the original call to auto.gdpc
   #OUTPUT
   # An object of class gdpcs, that is, a list where each entry is an object of class gdpc.
   out <- lapply(out, function(x, fn_call){ x$call <- fn_call; return(x)}, fn_call)
@@ -174,7 +168,7 @@ components.gdpcs <- function(object, which_comp = 1) {
   comps <- sapply(object, function(object){ object$f })
   colnames(comps) <- paste("Component number", which_comp)
   if (inherits(object[[1]]$f, "xts")) {
-    comps <- xts(comps, order.by = index(object[[1]]$f), frequency = frequency(object[[1]]$f))
+    comps <- reclass(comps, match.to = object[[1]]$f)
   } else if (inherits(object[[1]]$f, "ts")) {
     comps <- ts(comps, start = start(object[[1]]$f), end = end(object[[1]]$f), frequency = frequency(object[[1]]$f))
   } 

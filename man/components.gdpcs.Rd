@@ -2,7 +2,7 @@
 \alias{components.gdpcs}
 \title{Get Generalized Dynamic Principal Components From a gdpcs Object}
 \description{
-Get Generalized Dynamic Principal Components From a gdpcs Object.
+Get Generalized Dynamic Principal Components from a gdpcs object.
 }
 
 

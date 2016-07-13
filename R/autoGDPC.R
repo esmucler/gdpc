@@ -30,9 +30,8 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = TRUE, auto_comp = TRUE, expl_
   # mse: mean (in T and m) squared error of the residuals of the fit with the first i components 
   # k_opt: number of lags used chosen using the criterion specified in crit
   # crit: the AIC or BIC of the fitted model, according to what was specified in crit
-  # res: matrix of residuals of the fit with the first i components 
-  # fitted: matrix of fitted values of the fit with the first i components 
   # expart: proportion of the variance explained by the first i components
+  # call: the matched call
   
   if (all(!inherits(Z, "matrix"), !inherits(Z, "mts"), !inherits(Z, "xts"), !inherits(Z, "data.frame"))) {
     stop("Z should belong to one of the following classes: matrix, data.frame, mts, xts")
@@ -130,9 +129,6 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = TRUE, auto_comp = TRUE, expl_
   
   on.exit(stopCluster(cl))
   
-  if (normalize) {
-    Z <- scale(Z)
-  }
   fn_call <- match.call()
   fn_call$crit <- crit
   output <- construct.gdpcs(output, Z, fn_call)
@@ -259,6 +255,7 @@ gdpc <- function(Z, k, f_ini = NULL, tol = 1e-04, niter_max = 500, crit = "AIC")
   # res: matrix of residuals of the fit
   # fitted: matrix of fitted values of the fit
   # expart: proportion of the variance explained
+  # call: the matched call
   
   
   if (all(!inherits(Z, "matrix"), !inherits(Z, "mts"), !inherits(Z, "xts"), !inherits(Z, "data.frame"))) {

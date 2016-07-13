@@ -1,7 +1,7 @@
 Package: gdpc
 Type: Package
 Title: Generalized Dynamic Principal Components
-Version: 0.99.2
+Version: 0.99.3
 Date: 2016-07-10
 Author: Daniel Peña <daniel.pena@uc3m.es>,
     Ezequiel Smucler <ezequiels.90@gmail.com>,
@@ -12,7 +12,6 @@ Description: Functions to compute the Generalized Dynamic Principal Components
 License: GPL (>= 2)
 Imports:
     xts,
-    zoo,
     methods,
     Rcpp,
     parallel,

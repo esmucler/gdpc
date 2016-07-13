@@ -1,4 +1,10 @@
-Changes in gdpc version 0.99.2
+Changes in gdpc version 0.99.3
+
+    + residuals and fitted values no longer a part of gdpc class. residuals method no longer available.
+    + rewrote the fitted method.
+    + use reclass to coerce to xts
+
+Changes in gdpc version 0.99.3
 
     + The output of gdpcs is now and object of class 'gdpcs'. plot method available.
 

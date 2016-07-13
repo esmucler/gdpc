@@ -47,7 +47,6 @@ List betaf(arma::mat & Z, arma::rowvec & f, int & k, int & sel) {
   return(ret);
 }
 
-// [[Rcpp::export]]
 arma::mat matrix_C(arma::rowvec & betav, double & alfa, int & k) {
   //This function constructs the matrix C correspoding to betav, alpha and k 
   int N = betav.n_elem;
@@ -68,7 +67,6 @@ arma::mat matrix_C(arma::rowvec & betav, double & alfa, int & k) {
   return (C);
 }
 
-// [[Rcpp::export]]
 arma::mat matrix_D(arma::rowvec & betav, int & N, int & k) {
   //This function constructs the matrix D correspoding to betav, N and k 
   arma::mat beta_mat = zeros(N + k, N + k);
@@ -112,4 +110,20 @@ arma::vec matrix_ff(arma::mat & Z, arma::mat & beta, arma::vec & alpha, int & k)
     f = pinv(D) * f;
   }
   return(f);
+}
+
+// [[Rcpp::export]]
+arma::mat fits(arma::rowvec & f_fin, arma::rowvec & f_ini,arma::mat beta, arma::vec alpha, int & k) {
+  // This function finds the fitted values associated with f and beta and alpha
+  int N = f_fin.n_elem;
+  f_fin.insert_cols(0, f_ini);
+  arma::mat Fmat = mat(N, k+1);
+  for ( int i=0; i<N; i++){
+    Fmat.row(i) = f_fin.subvec(i,i+k);
+  }
+  Fmat.insert_cols(k+1,ones(N,1));
+  arma::mat betalpha = fliplr(beta);
+  betalpha.insert_cols(k+1, alpha);
+  arma::mat fit = Fmat * betalpha.t();
+  return(fit);
 }

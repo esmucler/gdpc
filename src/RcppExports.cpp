@@ -20,32 +20,6 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
-// matrix_C
-arma::mat matrix_C(arma::rowvec& betav, double& alfa, int& k);
-RcppExport SEXP gdpc_matrix_C(SEXP betavSEXP, SEXP alfaSEXP, SEXP kSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< arma::rowvec& >::type betav(betavSEXP);
-    Rcpp::traits::input_parameter< double& >::type alfa(alfaSEXP);
-    Rcpp::traits::input_parameter< int& >::type k(kSEXP);
-    __result = Rcpp::wrap(matrix_C(betav, alfa, k));
-    return __result;
-END_RCPP
-}
-// matrix_D
-arma::mat matrix_D(arma::rowvec& betav, int& N, int& k);
-RcppExport SEXP gdpc_matrix_D(SEXP betavSEXP, SEXP NSEXP, SEXP kSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< arma::rowvec& >::type betav(betavSEXP);
-    Rcpp::traits::input_parameter< int& >::type N(NSEXP);
-    Rcpp::traits::input_parameter< int& >::type k(kSEXP);
-    __result = Rcpp::wrap(matrix_D(betav, N, k));
-    return __result;
-END_RCPP
-}
 // matrix_ff
 arma::vec matrix_ff(arma::mat& Z, arma::mat& beta, arma::vec& alpha, int& k);
 RcppExport SEXP gdpc_matrix_ff(SEXP ZSEXP, SEXP betaSEXP, SEXP alphaSEXP, SEXP kSEXP) {
@@ -57,6 +31,21 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::vec& >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< int& >::type k(kSEXP);
     __result = Rcpp::wrap(matrix_ff(Z, beta, alpha, k));
+    return __result;
+END_RCPP
+}
+// fits
+arma::mat fits(arma::rowvec& f_fin, arma::rowvec& f_ini, arma::mat beta, arma::vec alpha, int& k);
+RcppExport SEXP gdpc_fits(SEXP f_finSEXP, SEXP f_iniSEXP, SEXP betaSEXP, SEXP alphaSEXP, SEXP kSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< arma::rowvec& >::type f_fin(f_finSEXP);
+    Rcpp::traits::input_parameter< arma::rowvec& >::type f_ini(f_iniSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< int& >::type k(kSEXP);
+    __result = Rcpp::wrap(fits(f_fin, f_ini, beta, alpha, k));
     return __result;
 END_RCPP
 }

@@ -5,15 +5,11 @@ betaf <- function(Z, f, k, sel) {
     .Call('gdpc_betaf', PACKAGE = 'gdpc', Z, f, k, sel)
 }
 
-matrix_C <- function(betav, alfa, k) {
-    .Call('gdpc_matrix_C', PACKAGE = 'gdpc', betav, alfa, k)
-}
-
-matrix_D <- function(betav, N, k) {
-    .Call('gdpc_matrix_D', PACKAGE = 'gdpc', betav, N, k)
-}
-
 matrix_ff <- function(Z, beta, alpha, k) {
     .Call('gdpc_matrix_ff', PACKAGE = 'gdpc', Z, beta, alpha, k)
+}
+
+fits <- function(f_fin, f_ini, beta, alpha, k) {
+    .Call('gdpc_fits', PACKAGE = 'gdpc', f_fin, f_ini, beta, alpha, k)
 }
 

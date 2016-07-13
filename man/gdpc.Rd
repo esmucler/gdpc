@@ -32,8 +32,6 @@ See \code{\link{auto.gdpc}} for the definition of the AIC or BIC type criterion 
  \item{crit}{The criterion specified by the user.}
  \item{k_opt}{Number of lags used.}
   \item{expart}{Proportion of the variance explained.}
- \item{res}{Matrix of residuals.}
-     \item{fitted}{Matrix of fitted values.}
        \item{call}{The matched call.}
  }
 \author{
