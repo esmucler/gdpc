@@ -51,12 +51,12 @@ arma::mat matrix_C(arma::rowvec & betav, double & alfa, int & k) {
   //This function constructs the matrix C correspoding to betav, alpha and k 
   int N = betav.n_elem;
   arma::mat C = zeros(N + k, k + 1);
+  arma::vec liml = vec(2);
+  liml[0] = 0;
+  arma::vec limu = vec(2);
+  limu[0] = k;
   for ( int t = 1; t <= N+k ; t++){
-    arma::vec liml = vec(2);
-    liml[0] = 0;
     liml[1] = t-N;
-    arma::vec limu = vec(2);
-    limu[0] = k;
     limu[1] = t-1;
     for (int q = 1; q <= k+1; q++){
       if( (q>= max(liml)+1) & (q<=min(limu)+1) ){
@@ -70,13 +70,13 @@ arma::mat matrix_C(arma::rowvec & betav, double & alfa, int & k) {
 arma::mat matrix_D(arma::rowvec & betav, int & N, int & k) {
   //This function constructs the matrix D correspoding to betav, N and k 
   arma::mat beta_mat = zeros(N + k, N + k);
+  arma::vec liml = vec(2);
+  liml[1] = 1;
+  arma::vec limu = vec(2);
+  limu[1] = N;
   for ( int t = 1; t <= N+k ; t++){
-    arma::vec liml = vec(2);
     liml[0] = t-k;
-    liml[1] = 1;
-    arma::vec limu = vec(2);
     limu[0] = t;
-    limu[1] = N;
     for (int r=max(liml); r<=min(limu); r++){
       for (int q = r; q <= r+k; q++){
         beta_mat(t-1,q-1) = beta_mat(t-1,q-1)+betav(q-r)*betav(t-r);
