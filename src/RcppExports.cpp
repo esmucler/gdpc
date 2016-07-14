@@ -7,13 +7,13 @@
 using namespace Rcpp;
 
 // betaf
-List betaf(arma::mat& Z, arma::rowvec& f, int& k, int& sel);
+List betaf(arma::mat& Z, arma::vec& f, int& k, int& sel);
 RcppExport SEXP gdpc_betaf(SEXP ZSEXP, SEXP fSEXP, SEXP kSEXP, SEXP selSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< arma::mat& >::type Z(ZSEXP);
-    Rcpp::traits::input_parameter< arma::rowvec& >::type f(fSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type f(fSEXP);
     Rcpp::traits::input_parameter< int& >::type k(kSEXP);
     Rcpp::traits::input_parameter< int& >::type sel(selSEXP);
     __result = Rcpp::wrap(betaf(Z, f, k, sel));
@@ -35,13 +35,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // fits
-arma::mat fits(arma::rowvec& f_fin, arma::rowvec& f_ini, arma::mat beta, arma::vec alpha, int& k);
+arma::mat fits(arma::vec& f_fin, arma::vec& f_ini, arma::mat beta, arma::vec alpha, int& k);
 RcppExport SEXP gdpc_fits(SEXP f_finSEXP, SEXP f_iniSEXP, SEXP betaSEXP, SEXP alphaSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< arma::rowvec& >::type f_fin(f_finSEXP);
-    Rcpp::traits::input_parameter< arma::rowvec& >::type f_ini(f_iniSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type f_fin(f_finSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type f_ini(f_iniSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< int& >::type k(kSEXP);

@@ -5,29 +5,29 @@ using namespace arma;
 
 
 // [[Rcpp::export]]
-List betaf(arma::mat & Z, arma::rowvec & f, int & k, int & sel) {
+List betaf(arma::mat & Z, arma::vec & f, int & k, int & sel) {
   // This function finds the optimal beta and alpha and the mse (only in N) corresponding to Z, f and k. 
   int m = Z.n_rows;
   int N = Z.n_cols;
   arma::mat beta = mat(m,k+1);
   arma::vec alpha = vec(m);
-  arma::mat Fmat = mat(N, k+1);
+  arma::mat Fmat = mat(k+1, N);
   arma::mat FF = mat(k+2,k+2);
   arma::mat invFF = mat(k+2,k+2);
   for ( int i=0; i<N; i++){
-    Fmat.row(i) = f.subvec(i,i+k);
+    Fmat.col(i) = f.subvec(i,i+k);
   }
-  Fmat.insert_cols(k+1,ones(N,1));
-  FF = Fmat.t()*Fmat;
+  Fmat.insert_rows(k+1,ones(1,N));
+  FF = Fmat*Fmat.t();
   double condition_FF = cond( FF );
   if(condition_FF<1e10){
     invFF = inv_sympd(FF);
   } else{
     invFF = pinv(FF);
   }
-  arma::mat Proj = Fmat*invFF*Fmat.t();
-  beta = Z * Fmat * invFF.t();
-  arma::mat res = Z - beta * Fmat.t();
+  arma::mat Proj = Fmat.t()*invFF*Fmat;
+  beta = Z * Fmat.t() * invFF.t();
+  arma::mat res = Z - beta * Fmat;
   alpha = beta.col(k + 1);
   beta.shed_col(k+1);
   double mse = (accu(pow(Z,2)) - trace(Z * Proj * Z.t() ))/ N;
@@ -91,11 +91,11 @@ arma::vec matrix_ff(arma::mat & Z, arma::mat & beta, arma::vec & alpha, int & k)
   //This functions finds the optimal f corresponding to Z, beta, alpha and k.
   int m = Z.n_rows;
   int N = Z.n_cols;
-  arma::vec f = zeros(N+k);
-  arma::mat D = zeros(N+k, N+k);
+  arma::vec f = zeros(N + k);
+  arma::mat D = zeros(N + k, N + k);
   arma::rowvec betaj = zeros<rowvec>(k+1);
   arma::rowvec zetaj = zeros<rowvec>(N);
-  for (int j=0; j<m; j++){
+  for (int j=0 ; j < m ; j++){
     //There has to be a better way to do this...
     betaj = beta.row(j);
     zetaj = Z.row(j);
@@ -103,27 +103,27 @@ arma::vec matrix_ff(arma::mat & Z, arma::mat & beta, arma::vec & alpha, int & k)
     f = f + matrix_C(zetaj, alpha(j), k) * betaj.t();
   }
   
-  double condition_D = cond( D );
-  if(condition_D<1e10){
+  double condition_D = cond(D);
+  if (condition_D<1e10) {
     f = solve(D,f);
-  } else{
+  } else {
     f = pinv(D) * f;
   }
   return(f);
 }
 
 // [[Rcpp::export]]
-arma::mat fits(arma::rowvec & f_fin, arma::rowvec & f_ini,arma::mat beta, arma::vec alpha, int & k) {
+arma::mat fits(arma::vec & f_fin, arma::vec & f_ini,arma::mat beta, arma::vec alpha, int & k) {
   // This function finds the fitted values associated with f and beta and alpha
   int N = f_fin.n_elem;
-  f_fin.insert_cols(0, f_ini);
-  arma::mat Fmat = mat(N, k+1);
+  f_fin.insert_rows(0, f_ini);
+  arma::mat Fmat = mat(k+1, N);
   for ( int i=0; i<N; i++){
-    Fmat.row(i) = f_fin.subvec(i,i+k);
+    Fmat.col(i) = f_fin.subvec(i,i+k);
   }
-  Fmat.insert_cols(k+1,ones(N,1));
+  Fmat.insert_rows(k+1,ones(1,N));
   arma::mat betalpha = fliplr(beta);
   betalpha.insert_cols(k+1, alpha);
-  arma::mat fit = Fmat * betalpha.t();
+  arma::mat fit = Fmat.t() * betalpha.t();
   return(fit);
 }
