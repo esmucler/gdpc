@@ -1,4 +1,4 @@
-auto.gdpc <- function(Z, crit = "AIC", normalize = TRUE, auto_comp = TRUE, expl_var = 0.9, num_comp = 5, tol = 1e-04, 
+auto.gdpc <- function(Z, crit = "AIC", normalize = FALSE, auto_comp = TRUE, expl_var = 0.9, num_comp = 5, tol = 1e-04, 
                       k_max = 10, niter_max = 500, ncores = 1) {
   # Computes Generalized Dynamic Principal Components. The number of components can be supplied by the user 
   # or chosen automatically so that a given proportion of variance is explained. The number of lags is chosen
@@ -8,7 +8,7 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = TRUE, auto_comp = TRUE, expl_
   #INPUT
   # Z: data matrix, series by columns 
   # crit: a string, either 'AIC' or 'BIC', indicating the criterion used to chose the number of lags. Default is 'AIC'
-  # normalize: logical, if TRUE the data is standardized to zero mean and unit variance. Default is TRUE
+  # normalize: logical, if TRUE the data is standardized to zero mean and unit variance. Default is FALSE
   # auto_comp:  logical, if TRUE compute components until the proportion of explained variance is equal to expl_var, other
   # wise use num_comp components. Default is TRUE
   # expl_var: a number between 0 and 1. Desired proportion of explained variance (only if auto_comp==TRUE).
@@ -103,7 +103,7 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = TRUE, auto_comp = TRUE, expl_
   
   comp_ready <- 1
   print(paste("Computing component number", comp_ready))
-  out <- my.autodyc(V, k_max, mean_var_V, tol, niter_max, sel)
+  out <- getLeads(V, k_max, mean_var_V, tol, niter_max, sel)
   mse <- out$mse  #Mean squared error (in N and m)
   output[[comp_ready]] <- out
   V <- out$res
@@ -112,7 +112,7 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = TRUE, auto_comp = TRUE, expl_
     while (mse > vard) {
       comp_ready <- comp_ready + 1
       print(paste("Computing component number", comp_ready))
-      out <- my.autodyc(V, k_max, mean_var_V, tol, niter_max, sel)
+      out <- getLeads(V, k_max, mean_var_V, tol, niter_max, sel)
       mse <- out$mse
       output[[comp_ready]] <- out
       V <- out$res
@@ -121,7 +121,7 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = TRUE, auto_comp = TRUE, expl_
     while (comp_ready < num_comp) {
       comp_ready <- comp_ready + 1
       print(paste("Computing component number", comp_ready))
-      out <- my.autodyc(V, k_max, mean_var_V, tol, niter_max, sel)
+      out <- getLeads(V, k_max, mean_var_V, tol, niter_max, sel)
       output[[comp_ready]] <- out
       V <- out$res
     }
@@ -137,7 +137,7 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = TRUE, auto_comp = TRUE, expl_
   
 }
 
-my.autodyc <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel = 1) {
+getLeads <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel = 1) {
   #Auxiliary function to choose the optimal number of leads
   #INPUT
   # V : matrix of original data or residuals where each ROW is a different time series
@@ -170,9 +170,11 @@ my.autodyc <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel =
     gdpc.priv(V, k = k_lag - 1, tol = tol, niter_max = niter_max, sel = sel)
   }
   
-  crits <- sapply(fits, function(x) {
-    x$crit
-  })  #Get criterion corresponding to each lead
+  crits <- sapply(fits, function(x) { x$crit })  #Get criterion corresponding to each lead
+  convs <- sapply(fits, function(x) { x$conv })  #Get criterion corresponding to each lead
+  if (!all(convs)) {
+    warning("Iterations did not converge. Consider increasing niter_max.")
+  }
   k_opt <- which.min(crits) - 1
   out <- fits[[k_opt + 1]]
   expart <- 1 - out$mse/mean_var_V
@@ -182,66 +184,62 @@ my.autodyc <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel =
 }
 
 
-gdpc.priv <- function(V, k, f_ini = NULL, tol = 1e-04, niter_max = 500, sel = 1) {
+gdpc.priv <- function(V, k, tol = 1e-04, niter_max = 500, sel = 1) {
   # This function computes a single GDPC with a given number of leads.
   #INPUT
   # V: data matrix each ROW is a different time series
   # k: number of leads used
   # tol: relative precision, stopping criterion
   # niter_max: maximum number of iterations
-  # f_ini: (optional) initial principal component. If no argument is passed, the standard
   # first principal component with k leads is used
   # sel: AIC (1) or BIC (2)
   #OUTPUT
-  # f: final principal component
-  # beta: matrix beta corresponding to f_fin
-  # alpha: matrix alpha corresponding to f_fin
+  # f: principal component
+  # beta: matrix beta corresponding to f
+  # alpha: vector alpha corresponding to f
   # mse:  mean squared error (in N and m)
   # crit: criterion used to evaluate the fit, that is, sel
   # res: matrix of residuals
+  # conv: logical. Did the iterations converge?
   
   m <- nrow(V)  #Number of time series
   N <- ncol(V)  #Length of the time series
   niter <- 0  #Number of iterations
-  
-  if (is.null(f_ini)) {
-    f_ini <- t(V) %*% svd(scale(t(V), scale = FALSE), nu = 0, nv = 1)$v[, 1]
-    f_ini <- c(f_ini, rep(f_ini[N], k))
-  }
-  
-  if (length(f_ini) != N + k) {
-    warning("Length of initial factor does not equal N+k")
-  }
-  f_ini <- scale(f_ini)
-  out <- betaf(V, f_ini, k, sel)
-  mse_ini <- out$mse/m
+  # 
+  # if (is.null(f_ini)) {
+  #   f_ini <- t(V) %*% svd(scale(t(V), scale = FALSE), nu = 0, nv = 1)$v[, 1]
+  #   f_ini <- c(f_ini, rep(f_ini[N], k))
+  # }
+  # f_ini <- scale(f_ini)
+  f_ini <- getFini(V, k)
+  out <- getMatrixBeta(V, f_ini, k, sel)
+  mse_ini <- out$mse
   criter <- 10  #Stopping criterion for the iterations
   while (criter > tol & niter < niter_max) {
     niter <- niter + 1
-    f_fin <- scale(matrix_ff(V, out$beta, out$alpha, k))
-    out <- betaf(V, f_fin, k, sel)
-    mse_fin <- out$mse/m
+    f_fin <- scale(getF(V, out$beta, out$alpha, k))
+    out <- getMatrixBeta(V, f_fin, k, sel)
+    mse_fin <- out$mse
     criter <- 1 - mse_fin/mse_ini
     mse_ini <- mse_fin
   }
   if (niter >= niter_max) {
     warning("Iterations did not converge. Consider increasing niter_max.")
   }
-  out$mse <- out$mse/m
+  out$conv <- (niter < niter_max)
   out$f <- f_fin
   return(out)
   
 }
 
 
-gdpc <- function(Z, k, f_ini = NULL, tol = 1e-04, niter_max = 500, crit = "AIC") {
+gdpc <- function(Z, k, tol = 1e-04, niter_max = 500, crit = "AIC") {
   # A wrapper function for gdpc.priv.
   #INPUT
   # Z: data matrix each COLUMN is a different time series
   # k: number of lags used to predict
   # tol: relative precision, stopping criterion
   # niter_max: maximum number of iterations
-  # f_ini: (optional) initial principal component. If no argument is passed, the standard
   # first principal component with k lags is used
   # crit: AIC or BIC
   #OUTPUT
@@ -264,9 +262,6 @@ gdpc <- function(Z, k, f_ini = NULL, tol = 1e-04, niter_max = 500, crit = "AIC")
     stop("Z should have at least ten rows and two columns")
   } else if (any(anyNA(Z), any(is.nan(Z)), any(is.infinite(Z)))) {
     stop("Z should not have missing, infinite or nan values")
-  }
-  if (all(!is.null(f_ini), !inherits(f_ini, "numeric"), !inherits(f_ini, "matrix"), !inherits(f_ini, "ts"), !inherits(f_ini, "xts"))) {
-    stop("f_ini should belong to one of the following classes: numeric, matrix, ts, xts")
   }
   if (!crit %in% c("BIC", "AIC")) {
     stop("crit should be AIC or BIC ")
@@ -292,7 +287,7 @@ gdpc <- function(Z, k, f_ini = NULL, tol = 1e-04, niter_max = 500, crit = "AIC")
   if (crit == "BIC") {
     sel <- 2
   }
-  out <- gdpc.priv(t(Z), k, f_ini, tol, niter_max, sel)
+  out <- gdpc.priv(t(Z), k, tol, niter_max, sel)
   out$k_opt <- k
   out$expart <- 1 - out$mse/mean(apply(Z, 2, var))
   fn_call <- match.call()

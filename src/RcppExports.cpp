@@ -6,46 +6,58 @@
 
 using namespace Rcpp;
 
-// betaf
-List betaf(arma::mat& Z, arma::vec& f, int& k, int& sel);
-RcppExport SEXP gdpc_betaf(SEXP ZSEXP, SEXP fSEXP, SEXP kSEXP, SEXP selSEXP) {
+// getMatrixBeta
+List getMatrixBeta(const arma::mat& Z, const arma::vec& f, const int& k, const int& sel);
+RcppExport SEXP gdpc_getMatrixBeta(SEXP ZSEXP, SEXP fSEXP, SEXP kSEXP, SEXP selSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< arma::mat& >::type Z(ZSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type f(fSEXP);
-    Rcpp::traits::input_parameter< int& >::type k(kSEXP);
-    Rcpp::traits::input_parameter< int& >::type sel(selSEXP);
-    __result = Rcpp::wrap(betaf(Z, f, k, sel));
+    Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type f(fSEXP);
+    Rcpp::traits::input_parameter< const int& >::type k(kSEXP);
+    Rcpp::traits::input_parameter< const int& >::type sel(selSEXP);
+    __result = Rcpp::wrap(getMatrixBeta(Z, f, k, sel));
     return __result;
 END_RCPP
 }
-// matrix_ff
-arma::vec matrix_ff(arma::mat& Z, arma::mat& beta, arma::vec& alpha, int& k);
-RcppExport SEXP gdpc_matrix_ff(SEXP ZSEXP, SEXP betaSEXP, SEXP alphaSEXP, SEXP kSEXP) {
+// getF
+arma::vec getF(const arma::mat& Z, const arma::mat& beta, const arma::vec& alpha, const int& k);
+RcppExport SEXP gdpc_getF(SEXP ZSEXP, SEXP betaSEXP, SEXP alphaSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< arma::mat& >::type Z(ZSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< int& >::type k(kSEXP);
-    __result = Rcpp::wrap(matrix_ff(Z, beta, alpha, k));
+    Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const int& >::type k(kSEXP);
+    __result = Rcpp::wrap(getF(Z, beta, alpha, k));
     return __result;
 END_RCPP
 }
-// fits
-arma::mat fits(arma::vec& f_fin, arma::vec& f_ini, arma::mat beta, arma::vec alpha, int& k);
-RcppExport SEXP gdpc_fits(SEXP f_finSEXP, SEXP f_iniSEXP, SEXP betaSEXP, SEXP alphaSEXP, SEXP kSEXP) {
+// getFitted
+arma::mat getFitted(arma::vec& f_fin, const arma::vec& f_ini, const arma::mat& beta, const arma::vec& alpha, const int& k);
+RcppExport SEXP gdpc_getFitted(SEXP f_finSEXP, SEXP f_iniSEXP, SEXP betaSEXP, SEXP alphaSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< arma::vec& >::type f_fin(f_finSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type f_ini(f_iniSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< int& >::type k(kSEXP);
-    __result = Rcpp::wrap(fits(f_fin, f_ini, beta, alpha, k));
+    Rcpp::traits::input_parameter< const arma::vec& >::type f_ini(f_iniSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const int& >::type k(kSEXP);
+    __result = Rcpp::wrap(getFitted(f_fin, f_ini, beta, alpha, k));
+    return __result;
+END_RCPP
+}
+// getFini
+arma::vec getFini(const arma::mat& Z, const int& k);
+RcppExport SEXP gdpc_getFini(SEXP ZSEXP, SEXP kSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< const int& >::type k(kSEXP);
+    __result = Rcpp::wrap(getFini(Z, k));
     return __result;
 END_RCPP
 }

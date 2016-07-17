@@ -5,41 +5,41 @@ using namespace arma;
 
 
 // [[Rcpp::export]]
-List betaf(arma::mat & Z, arma::vec & f, int & k, int & sel) {
-  // This function finds the optimal beta and alpha and the mse (only in N) corresponding to Z, f and k. 
+List getMatrixBeta(const arma::mat & Z, const arma::vec & f, const int & k, const int & sel) {
+  // This function finds the optimal beta and alpha and the mse corresponding to Z, f and k. 
   int m = Z.n_rows;
   int N = Z.n_cols;
-  arma::mat beta = mat(m,k+1);
+  arma::mat beta = mat(m, k + 1);
   arma::vec alpha = vec(m);
-  arma::mat Fmat = mat(k+1, N);
-  arma::mat FF = mat(k+2,k+2);
-  arma::mat invFF = mat(k+2,k+2);
-  for ( int i=0; i<N; i++){
-    Fmat.col(i) = f.subvec(i,i+k);
+  arma::mat Fmat = mat(k + 1, N);
+  arma::mat FF = mat(k + 2, k + 2);
+  arma::mat invFF = mat(k + 2, k + 2);
+  for ( int i = 0; i < N; i++){
+    Fmat.col(i) = f.subvec(i, i + k);
   }
-  Fmat.insert_rows(k+1,ones(1,N));
-  FF = Fmat*Fmat.t();
-  double condition_FF = cond( FF );
-  if(condition_FF<1e10){
+  Fmat.insert_rows(k + 1, ones(1, N));
+  FF = Fmat * Fmat.t();
+  double condition_FF = rcond(FF);
+  if(condition_FF > 1e-10){
     invFF = inv_sympd(FF);
   } else{
     invFF = pinv(FF);
   }
-  arma::mat Proj = Fmat.t()*invFF*Fmat;
+  arma::mat Proj = Fmat.t() * invFF * Fmat;
   beta = Z * Fmat.t() * invFF.t();
   arma::mat res = Z - beta * Fmat;
   alpha = beta.col(k + 1);
-  beta.shed_col(k+1);
-  double mse = (accu(pow(Z,2)) - trace(Z * Proj * Z.t() ))/ N;
+  beta.shed_col(k + 1);
+  double mse = (accu(pow(Z, 2)) - trace(Z * Proj * Z.t() ))/ N;
   double crit = 0;
   if (sel == 1){
-    crit = N * log( mse ) + m * (k+2) * 2;  
+    crit = N * log(mse) + m * (k + 2) * 2;  
   } else {
-    crit = N * log( mse ) + m * (k+2) * log(N);  
+    crit = N * log(mse) + m * (k + 2) * log(N);  
   }
   
   List ret;
-  ret["mse"] = mse;
+  ret["mse"] = mse / m;
   ret["alpha"] = alpha;
   ret["beta"] = beta;
   ret["res"] = res;
@@ -47,7 +47,7 @@ List betaf(arma::mat & Z, arma::vec & f, int & k, int & sel) {
   return(ret);
 }
 
-arma::mat matrix_C(arma::rowvec & betav, double & alfa, int & k) {
+arma::mat getMatrixC(const arma::subview_row<double> & betav, const double & alfa, const int & k) {
   //This function constructs the matrix C correspoding to betav, alpha and k 
   int N = betav.n_elem;
   arma::mat C = zeros(N + k, k + 1);
@@ -55,31 +55,31 @@ arma::mat matrix_C(arma::rowvec & betav, double & alfa, int & k) {
   liml[0] = 0;
   arma::vec limu = vec(2);
   limu[0] = k;
-  for ( int t = 1; t <= N+k ; t++){
-    liml[1] = t-N;
-    limu[1] = t-1;
-    for (int q = 1; q <= k+1; q++){
-      if( (q>= max(liml)+1) & (q<=min(limu)+1) ){
-        C(t-1,q-1)=betav(t-q)-alfa;
+  for ( int t = 1; t <= N + k ; t++){
+    liml[1] = t - N;
+    limu[1] = t - 1;
+    for (int q = 1; q <= k + 1; q++){
+      if( (q >= max(liml) + 1) & (q<= min(limu) + 1)){
+        C(t - 1, q - 1)=betav(t - q) - alfa;
       }
     }
   }
   return (C);
 }
 
-arma::mat matrix_D(arma::rowvec & betav, int & N, int & k) {
+arma::mat getMatrixD(const arma::subview_row<double> & betav, const int & N, const int & k) {
   //This function constructs the matrix D correspoding to betav, N and k 
   arma::mat beta_mat = zeros(N + k, N + k);
   arma::vec liml = vec(2);
   liml[1] = 1;
   arma::vec limu = vec(2);
   limu[1] = N;
-  for ( int t = 1; t <= N+k ; t++){
-    liml[0] = t-k;
+  for ( int t = 1; t <= N + k ; t++){
+    liml[0] = t - k;
     limu[0] = t;
-    for (int r=max(liml); r<=min(limu); r++){
-      for (int q = r; q <= r+k; q++){
-        beta_mat(t-1,q-1) = beta_mat(t-1,q-1)+betav(q-r)*betav(t-r);
+    for (int r = max(liml); r <= min(limu); r++){
+      for (int q = r; q <= r + k; q++){
+        beta_mat(t - 1, q - 1) = beta_mat(t - 1, q - 1) + betav(q - r) * betav(t - r);
       }
     }
   }
@@ -87,24 +87,19 @@ arma::mat matrix_D(arma::rowvec & betav, int & N, int & k) {
 }
 
 // [[Rcpp::export]]
-arma::vec matrix_ff(arma::mat & Z, arma::mat & beta, arma::vec & alpha, int & k) {
+arma::vec getF(const arma::mat & Z, const arma::mat & beta, const arma::vec & alpha, const int & k) {
   //This functions finds the optimal f corresponding to Z, beta, alpha and k.
   int m = Z.n_rows;
   int N = Z.n_cols;
   arma::vec f = zeros(N + k);
   arma::mat D = zeros(N + k, N + k);
-  arma::rowvec betaj = zeros<rowvec>(k+1);
-  arma::rowvec zetaj = zeros<rowvec>(N);
   for (int j=0 ; j < m ; j++){
-    //There has to be a better way to do this...
-    betaj = beta.row(j);
-    zetaj = Z.row(j);
-    D = D + matrix_D(betaj, N, k);
-    f = f + matrix_C(zetaj, alpha(j), k) * betaj.t();
+    D = D + getMatrixD(beta.row(j), N, k);
+    f = f + getMatrixC(Z.row(j), alpha(j), k) * (beta.row(j)).t();
   }
   
-  double condition_D = cond(D);
-  if (condition_D<1e10) {
+  double condition_D = rcond(D);
+  if (condition_D > 1e-10) {
     f = solve(D,f);
   } else {
     f = pinv(D) * f;
@@ -113,17 +108,39 @@ arma::vec matrix_ff(arma::mat & Z, arma::mat & beta, arma::vec & alpha, int & k)
 }
 
 // [[Rcpp::export]]
-arma::mat fits(arma::vec & f_fin, arma::vec & f_ini,arma::mat beta, arma::vec alpha, int & k) {
+arma::mat getFitted(arma::vec & f_fin, const arma::vec & f_ini, const arma::mat & beta, const arma::vec & alpha, const int & k) {
   // This function finds the fitted values associated with f and beta and alpha
   int N = f_fin.n_elem;
-  f_fin.insert_rows(0, f_ini);
-  arma::mat Fmat = mat(k+1, N);
-  for ( int i=0; i<N; i++){
-    Fmat.col(i) = f_fin.subvec(i,i+k);
+  if (k > 0){
+    f_fin.insert_rows(0, f_ini);
   }
-  Fmat.insert_rows(k+1,ones(1,N));
+  arma::mat Fmat = mat(k + 1, N);
+  for ( int i = 0; i < N; i++){
+    Fmat.col(i) = f_fin.subvec(i, i + k);
+  }
+  Fmat.insert_rows(k + 1, ones(1, N));
   arma::mat betalpha = fliplr(beta);
-  betalpha.insert_cols(k+1, alpha);
+  betalpha.insert_cols(k + 1, alpha);
   arma::mat fit = Fmat.t() * betalpha.t();
   return(fit);
+}
+
+// [[Rcpp::export]]
+arma::vec getFini(const arma::mat & Z, const int & k){
+  // Get initial estimator: ordinary principal component with k leads
+  int N = Z.n_cols;
+  arma::mat U;
+  arma::vec s;
+  arma::mat V;
+  arma::vec f_ini = vec(N + k);
+  arma::mat Z_trans = Z.t();
+  arma::rowvec mean_Zt = mean(Z_trans);
+  Z_trans.each_row() -= mean_Zt; 
+  svd_econ(U, s, V, Z_trans, "right");
+  f_ini.rows(0, N - 1) = Z_trans * V.col(0);
+  if (k != 0) {
+    f_ini.rows(N, N + k - 1) = zeros(k, 1) + f_ini(N - 1);
+  }
+  f_ini = (f_ini - mean(f_ini)) / stddev(f_ini);
+  return(f_ini);
 }

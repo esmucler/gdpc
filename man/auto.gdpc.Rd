@@ -6,12 +6,12 @@ Computes Generalized Dynamic Principal Components. The number of components can 
 }
 
 
-\usage{auto.gdpc(Z, crit = 'AIC', normalize = TRUE, auto_comp = TRUE, expl_var = 0.9,
+\usage{auto.gdpc(Z, crit = 'AIC', normalize = FALSE, auto_comp = TRUE, expl_var = 0.9,
           num_comp = 5, tol = 1e-4, k_max = 10, niter_max = 500, ncores = 1)}
 \arguments{
   \item{Z}{Data matrix. Each column is a different time series.}
   \item{crit}{A string specifying the criterion to be used. Either 'AIC' or 'BIC'. Default is 'AIC'.}
-  \item{normalize}{Logical. If TRUE the data is standardized to zero mean and unit variance. Default is TRUE.}
+  \item{normalize}{Logical. If TRUE the data is standardized to zero mean and unit variance. Default is FALSE.}
   \item{auto_comp}{Logical. If TRUE compute components until the proportion of explained variance is equal to expl_var, otherwise use num_comp components. Default is TRUE.}
   \item{expl_var}{A number between 0 and 1. Desired proportion of explained variance (only used if auto_comp==TRUE). Default is 0.9.}
   \item{num_comp}{Integer. Number of components to be computed (only used if auto_comp==FALSE). Default is 5.}
@@ -45,6 +45,7 @@ where \eqn{\Sigma = (res^{T} res) / T} and \eqn{res} is the matrix of residuals 
   \item{k_opt}{Number of lags chosen.}
   \item{expart}{Proportion of the variance explained by the first i components.}
       \item{call}{The matched call.}
+      \item{conv}{Logical. Did the iterations converge?}
 }
 \author{
   Daniel Peña, Ezequiel Smucler, Victor Yohai
@@ -69,11 +70,11 @@ for (i in 1:m) {
 #Choose number of lags using the AIC type criterion.
 #Data is not normalized.
 #k_max=3 to keep computation time low
-autofit <- auto.gdpc(x, normalize = FALSE, k_max = 3)
+autofit <- auto.gdpc(x, k_max = 3)
 autofit
 fit_val <- fitted(autofit[[1]]) #Get fitted values
 resid <- x - fit_val #Residuals
-plot.gdpcs(autofit, which_comp = 1)
+plot.gdpcs(autofit, which_comp = 1) #Plot component
 }
 
 \keyword{ts}

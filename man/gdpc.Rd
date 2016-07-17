@@ -6,11 +6,10 @@ Computes a single Generalized Dynamic Principal Component with a given number of
 }
 
 
-\usage{gdpc(Z, k, f_ini = NULL, tol = 1e-4, niter_max = 500, crit = 'AIC')}
+\usage{gdpc(Z, k, tol = 1e-4, niter_max = 500, crit = 'AIC')}
 \arguments{
   \item{Z}{Data matrix. Each column is a different time series.}
   \item{k}{Integer. Number of lags to use.}
-  \item{f_ini}{(Optional) Numeric vector. Starting point for the iterations. If no argument is passed, the standard first Principal Component with k lags is used.}
   \item{tol}{Relative precision. Default is 1e-4.}
   \item{niter_max}{Integer. Maximum number of iterations. Default is 500.}
   \item{crit}{A string specifying the criterion to be used to evaluate the fitted model. Either 'AIC' or 'BIC'. Default is 'AIC'.}
@@ -33,6 +32,7 @@ See \code{\link{auto.gdpc}} for the definition of the AIC or BIC type criterion 
  \item{k_opt}{Number of lags used.}
   \item{expart}{Proportion of the variance explained.}
        \item{call}{The matched call.}
+       \item{conv}{Logical. Did the iterations converge?}
  }
 \author{
 Daniel Peña, Ezequiel Smucler, Victor Yohai

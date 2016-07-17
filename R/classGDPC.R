@@ -8,11 +8,12 @@ is.gdpc <- function(object, ...) {
     return(FALSE)
   } else if (any(is.null(object$f), is.null(object$initial_f), is.null(object$beta),
                  is.null(object$alpha), is.null(object$mse), is.null(object$crit),
-                 is.null(object$k_opt), is.null(object$expart), is.null(object$call))) {
+                 is.null(object$k_opt), is.null(object$expart), is.null(object$call), 
+                 is.null(object$conv))) {
     return(FALSE)
-  } else if (any(!inherits(object$mse, "numeric"), !inherits(object$crit, 'numeric'), !inherits(object$alpha, "numeric"),
-                 !inherits(object$beta, "matrix"), !inherits(object$call, "call"),
-                 all(!inherits(object$f,"numeric"), !inherits(object$f,"ts"), !inherits(object$f,"xts")),
+  } else if (any(!inherits(object$mse, "numeric"), !inherits(object$crit, "numeric"), !inherits(object$alpha, "numeric"),
+                 !inherits(object$beta, "matrix"), !inherits(object$call, "call"), !inherits(object$conv, "logical"), 
+                 all(!inherits(object$f,"numeric"), !inherits(object$f, "ts"), !inherits(object$f, "xts")),
                  !inherits(object$k_opt, "numeric"), !inherits(object$expart, "numeric"),
                  all(!inherits(object$initial_f,"numeric"), !inherits(object$initial_f,"ts"), !inherits(object$initial_f,"xts"))
   )) {
@@ -69,7 +70,7 @@ fitted.gdpc <- function(object, ...) {
   if (!is.gdpc(object)){
     stop("object should be of class gdpc")
   }
-  fitted <- fits(object$f, object$initial_f, object$beta, object$alpha, object$k_opt)
+  fitted <- getFitted(object$f, object$initial_f, object$beta, object$alpha, object$k_opt)
   if (inherits(object$f, "xts")) {
     fitted <- reclass(fitted, match.to = object$f)
   } else if (inherits(object$f, "ts")) {
