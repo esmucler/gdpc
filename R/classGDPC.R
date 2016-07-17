@@ -18,9 +18,7 @@ is.gdpc <- function(object, ...) {
                  all(!inherits(object$initial_f,"numeric"), !inherits(object$initial_f,"ts"), !inherits(object$initial_f,"xts"))
   )) {
     return(FALSE)
-  } else if(any(dim(object$alpha)[1] != dim(object$beta)[1], dim(object$initial_f)[1] != object$k_opt,
-                dim(object$beta)[2] != object$k_opt + 1
-  )) {
+  } else if (any(length(object$alpha) != dim(object$beta)[1], dim(object$beta)[2] != object$k_opt + 1)) {
     return(FALSE)
   } else {
     return(TRUE)
@@ -140,7 +138,7 @@ is.gdpcs <- function(object, ...) {
   if (any(!inherits(object, "gdpcs"), !inherits(object, "list"))) {
     return(FALSE)
   } else {
-    return(all(sapply(object,is.gdpc)))
+    return(all(sapply(object, is.gdpc)))
   }
 }
 
