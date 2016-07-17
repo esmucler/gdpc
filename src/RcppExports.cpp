@@ -21,16 +21,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // getF
-arma::vec getF(const arma::mat& Z, const arma::mat& beta, const arma::vec& alpha, const int& k);
-RcppExport SEXP gdpc_getF(SEXP ZSEXP, SEXP betaSEXP, SEXP alphaSEXP, SEXP kSEXP) {
+arma::vec getF(const arma::mat& Z, const arma::mat& beta, const int& k);
+RcppExport SEXP gdpc_getF(SEXP ZSEXP, SEXP betaSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const int& >::type k(kSEXP);
-    __result = Rcpp::wrap(getF(Z, beta, alpha, k));
+    __result = Rcpp::wrap(getF(Z, beta, k));
     return __result;
 END_RCPP
 }

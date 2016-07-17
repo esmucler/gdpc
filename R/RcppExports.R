@@ -5,8 +5,8 @@ getMatrixBeta <- function(Z, f, k, sel) {
     .Call('gdpc_getMatrixBeta', PACKAGE = 'gdpc', Z, f, k, sel)
 }
 
-getF <- function(Z, beta, alpha, k) {
-    .Call('gdpc_getF', PACKAGE = 'gdpc', Z, beta, alpha, k)
+getF <- function(Z, beta, k) {
+    .Call('gdpc_getF', PACKAGE = 'gdpc', Z, beta, k)
 }
 
 getFitted <- function(f_fin, f_ini, beta, alpha, k) {

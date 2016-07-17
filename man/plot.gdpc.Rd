@@ -41,9 +41,8 @@ for (i in 1:m) {
     x[, i] <- 10 * sin(2 * pi * (i/m)) * f[1:N] + 10 * cos(2 * pi * (i/m)) * f[2:(N + 1)] + u[, i]
 }
 #Choose number of lags using the AIC type criterion.
-#Data is not normalized.
 #k_max=3 to keep computation time low
-autofit <- auto.gdpc(x, normalize = FALSE, k_max = 3) 
+autofit <- auto.gdpc(x, k_max = 3) 
 plot(autofit[[1]], xlab = '', ylab = '')
 }
 

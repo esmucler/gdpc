@@ -44,7 +44,8 @@ construct.gdpc <- function(out, data) {
   # expart: proportion of the variance explained
   # call: the matched call
   
-  k <- ncol(out$beta) - 1  #number of leads
+  k <- ncol(out$beta) - 2  #number of leads
+  out$alpha <- as.numeric(out$beta[, k + 2])
   out$beta <- out$beta[, (k + 1):1]
   if (k != 0) {
     out$initial_f <- out$f[1:k]
@@ -53,7 +54,6 @@ construct.gdpc <- function(out, data) {
   }
   out$beta <- as.matrix(out$beta)
   rownames(out$beta) <- colnames(data)
-  out$alpha <- as.numeric(out$alpha)
   out$f <- out$f[(k + 1):length(out$f)]
   out$res <- NULL
   if (inherits(data, "xts")) {

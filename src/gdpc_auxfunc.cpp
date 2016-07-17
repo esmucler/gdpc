@@ -9,8 +9,7 @@ List getMatrixBeta(const arma::mat & Z, const arma::vec & f, const int & k, cons
   // This function finds the optimal beta and alpha and the mse corresponding to Z, f and k. 
   int m = Z.n_rows;
   int N = Z.n_cols;
-  arma::mat beta = mat(m, k + 1);
-  arma::vec alpha = vec(m);
+  arma::mat beta = mat(m, k + 2);
   arma::mat Fmat = mat(k + 1, N);
   arma::mat FF = mat(k + 2, k + 2);
   arma::mat invFF = mat(k + 2, k + 2);
@@ -28,8 +27,6 @@ List getMatrixBeta(const arma::mat & Z, const arma::vec & f, const int & k, cons
   arma::mat Proj = Fmat.t() * invFF * Fmat;
   beta = Z * Fmat.t() * invFF.t();
   arma::mat res = Z - beta * Fmat;
-  alpha = beta.col(k + 1);
-  beta.shed_col(k + 1);
   double mse = (accu(pow(Z, 2)) - trace(Z * Proj * Z.t() ))/ N;
   double crit = 0;
   if (sel == 1){
@@ -40,16 +37,15 @@ List getMatrixBeta(const arma::mat & Z, const arma::vec & f, const int & k, cons
   
   List ret;
   ret["mse"] = mse / m;
-  ret["alpha"] = alpha;
   ret["beta"] = beta;
   ret["res"] = res;
   ret["crit"] = crit;
   return(ret);
 }
 
-arma::mat getMatrixC(const arma::subview_row<double> & betav, const double & alfa, const int & k) {
-  //This function constructs the matrix C correspoding to betav, alpha and k 
-  int N = betav.n_elem;
+arma::mat getMatrixC(const arma::subview_row<double> & rowZ, const double & alpha, const int & k) {
+  //This function constructs the matrix C correspoding to rowZ, alpha and k 
+  int N = rowZ.n_elem;
   arma::mat C = zeros(N + k, k + 1);
   arma::vec liml = vec(2);
   liml[0] = 0;
@@ -60,15 +56,15 @@ arma::mat getMatrixC(const arma::subview_row<double> & betav, const double & alf
     limu[1] = t - 1;
     for (int q = 1; q <= k + 1; q++){
       if( (q >= max(liml) + 1) & (q<= min(limu) + 1)){
-        C(t - 1, q - 1)=betav(t - q) - alfa;
+        C(t - 1, q - 1) = rowZ(t - q) - alpha;
       }
     }
   }
   return (C);
 }
 
-arma::mat getMatrixD(const arma::subview_row<double> & betav, const int & N, const int & k) {
-  //This function constructs the matrix D correspoding to betav, N and k 
+arma::mat getMatrixD(const arma::subview_row<double> & rowbeta, const int & N, const int & k) {
+  //This function constructs the matrix D correspoding to rowbeta, N and k 
   arma::mat beta_mat = zeros(N + k, N + k);
   arma::vec liml = vec(2);
   liml[1] = 1;
@@ -79,7 +75,7 @@ arma::mat getMatrixD(const arma::subview_row<double> & betav, const int & N, con
     limu[0] = t;
     for (int r = max(liml); r <= min(limu); r++){
       for (int q = r; q <= r + k; q++){
-        beta_mat(t - 1, q - 1) = beta_mat(t - 1, q - 1) + betav(q - r) * betav(t - r);
+        beta_mat(t - 1, q - 1) = beta_mat(t - 1, q - 1) + rowbeta(q - r) * rowbeta(t - r);
       }
     }
   }
@@ -87,15 +83,15 @@ arma::mat getMatrixD(const arma::subview_row<double> & betav, const int & N, con
 }
 
 // [[Rcpp::export]]
-arma::vec getF(const arma::mat & Z, const arma::mat & beta, const arma::vec & alpha, const int & k) {
+arma::vec getF(const arma::mat & Z, const arma::mat & beta, const int & k) {
   //This functions finds the optimal f corresponding to Z, beta, alpha and k.
   int m = Z.n_rows;
   int N = Z.n_cols;
   arma::vec f = zeros(N + k);
   arma::mat D = zeros(N + k, N + k);
   for (int j=0 ; j < m ; j++){
-    D = D + getMatrixD(beta.row(j), N, k);
-    f = f + getMatrixC(Z.row(j), alpha(j), k) * (beta.row(j)).t();
+    D = D + getMatrixD(beta(j, span(0, k)), N, k);
+    f = f + getMatrixC(Z.row(j), beta(j, k + 1), k) * (beta(j, span(0, k))).t();
   }
   
   double condition_D = rcond(D);

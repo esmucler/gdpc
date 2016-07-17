@@ -150,8 +150,8 @@ getLeads <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel = 1
   # A list with entries:
   # k_opt: optimal number of leads
   # f: dynamic component with k_opt leads
-  # beta: matrix beta corresponding to f
-  # alfa: matrix beta alfa corresponding to f
+  # beta: matrix of loadings and intercept corresponding to f. Last column are the
+  # intercepts (alpha).
   # mse: mean squared error
   # crit: criterion
   # res: matrix of residuals
@@ -195,29 +195,24 @@ gdpc.priv <- function(V, k, tol = 1e-04, niter_max = 500, sel = 1) {
   # sel: AIC (1) or BIC (2)
   #OUTPUT
   # f: principal component
-  # beta: matrix beta corresponding to f
-  # alpha: vector alpha corresponding to f
+  # beta: matrix of loadings and intercept corresponding to f. Last column are the
+  # intercepts (alpha).
   # mse:  mean squared error (in N and m)
-  # crit: criterion used to evaluate the fit, that is, sel
+  # crit: criterion used to evaluate the fit
   # res: matrix of residuals
   # conv: logical. Did the iterations converge?
   
   m <- nrow(V)  #Number of time series
   N <- ncol(V)  #Length of the time series
   niter <- 0  #Number of iterations
-  # 
-  # if (is.null(f_ini)) {
-  #   f_ini <- t(V) %*% svd(scale(t(V), scale = FALSE), nu = 0, nv = 1)$v[, 1]
-  #   f_ini <- c(f_ini, rep(f_ini[N], k))
-  # }
-  # f_ini <- scale(f_ini)
+  
   f_ini <- getFini(V, k)
   out <- getMatrixBeta(V, f_ini, k, sel)
   mse_ini <- out$mse
   criter <- 10  #Stopping criterion for the iterations
   while (criter > tol & niter < niter_max) {
     niter <- niter + 1
-    f_fin <- scale(getF(V, out$beta, out$alpha, k))
+    f_fin <- scale(getF(V, out$beta, k))
     out <- getMatrixBeta(V, f_fin, k, sel)
     mse_fin <- out$mse
     criter <- 1 - mse_fin/mse_ini
