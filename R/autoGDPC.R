@@ -1,13 +1,13 @@
-auto.gdpc <- function(Z, crit = "AIC", normalize = FALSE, auto_comp = TRUE, expl_var = 0.9, num_comp = 5, tol = 1e-04, 
+auto.gdpc <- function(Z, crit = "LOO", normalize = FALSE, auto_comp = TRUE, expl_var = 0.9, num_comp = 5, tol = 1e-04, 
                       k_max = 10, niter_max = 500, ncores = 1) {
   # Computes Generalized Dynamic Principal Components. The number of components can be supplied by the user 
   # or chosen automatically so that a given proportion of variance is explained. The number of lags is chosen
-  # automatically using an AIC or a BIC type criterion.
+  # automatically using of the following criteria: LOO, AIC, BIC or BNG.
   # All computations are done internally using leads rather than lags. However, the final result is outputted
   # using lags.
   #INPUT
   # Z: data matrix, series by columns 
-  # crit: a string, either 'AIC' or 'BIC', indicating the criterion used to chose the number of lags. Default is 'AIC'
+  # crit: a string: 'LOO', 'AIC', 'BIC' or 'BNG', indicating the criterion used to chose the number of lags. Default is 'LOO'
   # normalize: logical, if TRUE the data is standardized to zero mean and unit variance. Default is FALSE
   # auto_comp:  logical, if TRUE compute components until the proportion of explained variance is equal to expl_var, other
   # wise use num_comp components. Default is TRUE
@@ -24,12 +24,12 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = FALSE, auto_comp = TRUE, expl
   # gdpc, that is, a list with entries:
   # f: Coordinates of the i-th Principal Component corresponding to the periods 1,…,T
   # initial_f: Coordinates of the i-th Principal Component corresponding to the periods -k+1,…,0.
-  # Only for the case k>0
+  # Only for the case k>0, else 0.
   # beta: beta matrix corresponding to f
   # alpha: alpha vector corresponding to f
   # mse: mean (in T and m) squared error of the residuals of the fit with the first i components 
-  # k_opt: number of lags used chosen using the criterion specified in crit
-  # crit: the AIC or BIC of the fitted model, according to what was specified in crit
+  # k: number of lags used chosen using the criterion specified in crit
+  # crit: the LOO, AIC, BIC, or BNG of the fitted model, according to what was specified in crit
   # expart: proportion of the variance explained by the first i components
   # call: the matched call
   # conv: Logical. Did the iterations converge?
@@ -41,8 +41,8 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = FALSE, auto_comp = TRUE, expl
   } else if (any(anyNA(Z), any(is.nan(Z)), any(is.infinite(Z)))) {
     stop("Z should not have missing, infinite or nan values")
   }
-  if (!crit %in% c("BIC", "AIC")) {
-    stop("crit should be AIC or BIC ")
+  if (!crit %in% c("BNG", "LOO", "BIC", "AIC")) {
+    stop("crit should be LOO, AIC, BIC or BNG")
   }
   if (!inherits(auto_comp, "logical")) {
     stop("auto_comp should be logical")
@@ -91,10 +91,7 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = FALSE, auto_comp = TRUE, expl
   vard <- (1 - expl_var) * mean_var_V
   output <- vector("list")
   
-  sel <- 1
-  if (crit == "BIC") {
-    sel <- 2
-  }
+  sel <- switch(crit, LOO = 1, AIC = 2, BIC = 3, BNG = 4)
   
   ### Set-up cluster for parallel computations
   cores <- min(detectCores(), ncores)
@@ -133,6 +130,7 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = FALSE, auto_comp = TRUE, expl
   fn_call <- match.call()
   fn_call$crit <- crit
   output <- construct.gdpcs(output, Z, fn_call)
+  print(paste("Total number of computed components:", comp_ready))
   
   return(output)
   
@@ -146,11 +144,11 @@ getLeads <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel = 1
   # mean_var_V : mean variance of original data
   # tol : relative precision
   # niter_max: maximum number of iterations
-  # sel: criterion to be used, AIC = 1, BIC = 2
+  # sel: criterion to be used, LOO = 1, AIC = 2, BIC = 3, BNG = 4
   #OUTPUT
   # A list with entries:
-  # k_opt: optimal number of leads
-  # f: dynamic component with k_opt leads
+  # k: optimal number of leads
+  # f: dynamic component with k leads
   # beta: matrix of loadings and intercept corresponding to f. Last column are the
   # intercepts (alpha).
   # mse: mean squared error
@@ -172,19 +170,18 @@ getLeads <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel = 1
   }
   
   crits <- sapply(fits, function(x) { x$crit })  #Get criterion corresponding to each lead
-  convs <- sapply(fits, function(x) { x$conv })  #Get criterion corresponding to each lead
+  convs <- sapply(fits, function(x) { x$conv })
   if (!all(convs)) {
     warning("Iterations did not converge. Consider increasing niter_max.")
   }
   k_opt <- which.min(crits) - 1
   out <- fits[[k_opt + 1]]
   expart <- 1 - out$mse/mean_var_V
-  out$k_opt <- k_opt
   out$expart <- expart
   return(out)
 }
 
-gdpc <- function(Z, k, tol = 1e-04, niter_max = 500, crit = "AIC") {
+gdpc <- function(Z, k, tol = 1e-04, niter_max = 500, crit = "LOO") {
   # A wrapper function for gdpc_priv.
   #INPUT
   # Z: data matrix each COLUMN is a different time series
@@ -192,17 +189,16 @@ gdpc <- function(Z, k, tol = 1e-04, niter_max = 500, crit = "AIC") {
   # tol: relative precision, stopping criterion
   # niter_max: maximum number of iterations
   # first principal component with k lags is used
-  # crit: AIC or BIC
+  # crit: a string: "LOO", "AIC", "BIC" or "BNG"
   #OUTPUT
   # An object of class gdpc, that is, a list with entries:
-  # f: the dynamic component 
-  # beta: beta matrix corresponding to f
-  # alpha: alpha matrix corresponding to f
-  # mse: mean (in N and m) squared error of the residuals of the fit with the first i components 
-  # k_opt: number of lags, chosen using the criterion specified in crit, used to predict with the i-th component
-  # crit: the AIC or BIC of the fitted model, according to what was specified in crit
-  # res: matrix of residuals of the fit
-  # fitted: matrix of fitted values of the fit
+  # f: coordinates of the Principal Component corresponding to the periods 1,…,T
+  # initial_f: Coordinates of the Principal Component corresponding to the periods -k+1,…,0.
+  # beta: beta matrix of loadings corresponding to f
+  # alpha: alpha vector of intercepts corresponding to f
+  # mse: mean (in N and m) squared error of the residuals of the fit
+  # k: number of lags used
+  # crit: the criterion of the fitted model, according to what was specified in crit
   # expart: proportion of the variance explained
   # call: the matched call
   # conv: logical. Did the iterations converge?
@@ -215,8 +211,8 @@ gdpc <- function(Z, k, tol = 1e-04, niter_max = 500, crit = "AIC") {
   } else if (any(anyNA(Z), any(is.nan(Z)), any(is.infinite(Z)))) {
     stop("Z should not have missing, infinite or nan values")
   }
-  if (!crit %in% c("BIC", "AIC")) {
-    stop("crit should be AIC or BIC ")
+  if (!crit %in% c("BNG", "LOO","BIC", "AIC")) {
+    stop("crit should be LOO, AIC, BIC or BNG")
   }
   if (!inherits(tol, "numeric")) {
     stop("tol should be numeric")
@@ -235,12 +231,8 @@ gdpc <- function(Z, k, tol = 1e-04, niter_max = 500, crit = "AIC") {
   }
   
   
-  sel <- 1
-  if (crit == "BIC") {
-    sel <- 2
-  }
+  sel <- switch(crit, LOO = 1, AIC = 2, BIC = 3, BNG = 4)
   out <- gdpc_priv(t(Z), k, tol, niter_max, sel)
-  out$k_opt <- k
   out$expart <- 1 - out$mse/mean(apply(Z, 2, var))
   fn_call <- match.call()
   fn_call$crit <- crit

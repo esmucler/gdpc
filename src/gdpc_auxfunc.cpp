@@ -27,10 +27,15 @@ void getMatrixBeta(const arma::mat & Z, const arma::vec & f, const int & k, cons
   betaOut = Z * Fmat.t() * invFF.t();
   resOut = Z - betaOut * Fmat;
   mseOut = (accu(pow(Z, 2)) - trace(Z * Proj * Z.t() ))/ N;
-  if (sel == 1){
+  if (sel == 1) {
+    arma::vec weights = 1/(1 - diagvec(Proj));
+    critOut = accu( pow(resOut * diagmat(weights) , 2) ) / (N * m);
+  } else if (sel == 2) {
     critOut = N * log(mseOut) + m * (k + 2) * 2;  
-  } else {
+  } else if (sel == 3) {
     critOut = N * log(mseOut) + m * (k + 2) * log(N);  
+  } else if (sel == 4) {
+    critOut = N * log(mseOut) + (k + 2) * log(m);  
   }
   mseOut = mseOut / m;
 }
@@ -114,7 +119,7 @@ arma::mat getFitted(arma::vec & f_fin, const arma::vec & f_ini, const arma::mat 
 }
 
 // [[Rcpp::export]]
-arma::vec getFini(const arma::mat & Z, const int & k){
+arma::vec getFini(const arma::mat & Z, const int & k) {
   // Get initial estimator: ordinary principal component with k leads
   int N = Z.n_cols;
   arma::vec f_iniOut = zeros(N + k, 1);
@@ -142,7 +147,7 @@ List gdpc_priv(const arma::mat & Z, const int & k, const double & tol, const int
 // k: number of leads used
 // tol: relative precision, stopping criterion
 // niter_max: maximum number of iterations
-// sel: AIC (1) or BIC (2)
+// sel: LOO (1), AIC (2), BIC (3), BNG (4)
 // OUTPUT
 // f: principal component
 // beta: matrix of loadings and intercept corresponding to f. Last column are the
@@ -157,17 +162,17 @@ List gdpc_priv(const arma::mat & Z, const int & k, const double & tol, const int
   int niter = 0;
   arma::mat beta = zeros(m, k + 2);
   arma::mat res = zeros(m, N);
-  arma::vec f_ini = zeros(N + k, 1);
+  arma::vec f = zeros(N + k, 1);
   double mse = 0;
   double crit = 0;
   bool conv = false;
-  f_ini = getFini(Z, k);
-  getMatrixBeta(Z, f_ini, k, sel, beta, res, mse, crit);
+  f = getFini(Z, k);
+  getMatrixBeta(Z, f, k, sel, beta, res, mse, crit);
   double mse_ini = mse;
   while (niter < niter_max and criter > tol) {
     niter = niter + 1;
-    f_ini = getF(Z, beta, k);
-    getMatrixBeta(Z, f_ini, k, sel, beta, res, mse, crit);
+    f = getF(Z, beta, k);
+    getMatrixBeta(Z, f, k, sel, beta, res, mse, crit);
     criter = 1 - mse / mse_ini;
     mse_ini = mse;
   }
@@ -175,7 +180,8 @@ List gdpc_priv(const arma::mat & Z, const int & k, const double & tol, const int
     conv = true;
   }
   List ret;
-  ret["f"] = f_ini;
+  ret["f"] = f;
+  ret["k"] = k;
   ret["beta"] = beta;
   ret["mse"] = mse;
   ret["crit"] = crit;

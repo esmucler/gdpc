@@ -2,15 +2,15 @@
 \alias{auto.gdpc}
 \title{Automatic Fitting of Generalized Dynamic Principal Components}
 \description{
-Computes Generalized Dynamic Principal Components. The number of components can be supplied by the user or chosen automatically so that a given proportion of variance is explained. The number of lags is chosen automatically using an AIC or a BIC type criterion.
+Computes Generalized Dynamic Principal Components. The number of components can be supplied by the user or chosen automatically so that a given proportion of variance is explained. The number of lags is chosen automatically using one of the following criteria: Leave-one-out cross-validation, an AIC type criterion, a BIC type criterion or a criterion based on a proposal of Bai and Ng (2002).
 }
 
 
-\usage{auto.gdpc(Z, crit = 'AIC', normalize = FALSE, auto_comp = TRUE, expl_var = 0.9,
+\usage{auto.gdpc(Z, crit = 'LOO', normalize = FALSE, auto_comp = TRUE, expl_var = 0.9,
           num_comp = 5, tol = 1e-4, k_max = 10, niter_max = 500, ncores = 1)}
 \arguments{
   \item{Z}{Data matrix. Each column is a different time series.}
-  \item{crit}{A string specifying the criterion to be used. Either 'AIC' or 'BIC'. Default is 'AIC'.}
+  \item{crit}{A string specifying the criterion to be used. Options are 'LOO', 'AIC', 'BIC' and 'BNG'. Default is 'LOO'.}
   \item{normalize}{Logical. If TRUE the data is standardized to zero mean and unit variance. Default is FALSE.}
   \item{auto_comp}{Logical. If TRUE compute components until the proportion of explained variance is equal to expl_var, otherwise use num_comp components. Default is TRUE.}
   \item{expl_var}{A number between 0 and 1. Desired proportion of explained variance (only used if auto_comp==TRUE). Default is 0.9.}
@@ -23,13 +23,24 @@ Computes Generalized Dynamic Principal Components. The number of components can 
 
 \details{
 
-Suppose the data matrix consists of \eqn{m} series of length \eqn{T}. If crit = 'AIC' the number of lags is chosen among \eqn{0,\dots, k_{max}} as the value \eqn{k_{opt}} that minimizes the following AIC type criterion
-\deqn{ AIC = T \log(trace(\Sigma)) + 2 m (k+2), }
-where \eqn{\Sigma = (res^{T} res) / T} and \eqn{res} is the matrix of residuals of the fit using \eqn{k} lags. 
+Suppose the data matrix consists of \eqn{m} series of length \eqn{T}.
+Let \eqn{\bold{f}} be the Dynamic Principal Component defined using \eqn{k} lags, let \eqn{R_k} be the corresponding matrix of residuals, let \eqn{\Sigma_{k} = (R_{k}^{\prime} R_{k}) / T}.
 
-If crit = 'BIC' the number of lags is chosen among \eqn{0,\dots, k_{max}} as the value \eqn{k_{opt}} that minimizes the following BIC type criterion
-\deqn{ BIC = T \log(trace(\Sigma)) + m (k+2) \log(T), }
-where \eqn{\Sigma = (res^{T} res) / T} and \eqn{res} is the matrix of residuals of the fit using \eqn{k} lags. 
+If crit = 'LOO' the number of lags is chosen among \eqn{0,\dots, k_{max}} as the value \eqn{k} that minimizes the leave-one-out (LOO) cross-validation mean squared error, given by
+\deqn{ LOO_{k} = \frac{1}{T m}\sum\limits_{i=1}^{m}\sum\limits_{t=1}^{T}\frac{R_{k,t,i}^{2}}{(1-h_{k,tt})^{2}},}
+where \eqn{h_{k,tt}} are the diagonal elements of the hat matrix \eqn{H_{k} = F_{k} (F_{k}^{\prime} F_{k})^{-1} F_{k}^{\prime} }, with \eqn{F_{k}} being \eqn{T \times (k+2)} matrix with rows \eqn{(f_{t}, f_{t+1}, \dots, f_{t+k}, 1)}.
+
+If crit = 'AIC' the number of lags is chosen among \eqn{0,\dots, k_{max}} as the value \eqn{k} that minimizes the following AIC type criterion
+\deqn{ AIC_{k} = T \log(trace(\Sigma_{k})) + 2 m (k+2) .}
+
+If crit = 'BIC' the number of lags is chosen among \eqn{0,\dots, k_{max}} as the value \eqn{k} that minimizes the following BIC type criterion
+\deqn{ BIC_{k} = T \log(trace(\Sigma_{k})) + m (k+2) \log(T) .}
+
+If crit = 'BNG' the number of lags is chosen among \eqn{0,\dots, k_{max}} as the value \eqn{k} that minimizes the following criterion
+\deqn{ BNG_{k} = T \log(trace(\Sigma_{k})) + (k+2) \log(m).}
+This is an adaptation of a criterion proposed by Bai and Ng (2002).
+
+
 
 
 }
@@ -41,8 +52,8 @@ where \eqn{\Sigma = (res^{T} res) / T} and \eqn{res} is the matrix of residuals 
   \item{beta}{Matrix of loadings corresponding to f. Column number \eqn{k} is the vector of \eqn{k-1} lag loadings.}
   \item{alpha}{Vector of intercepts corresponding to f.}
   \item{mse}{Mean squared error of the residuals of the fit using the first i components.}
-  \item{crit}{The AIC or BIC of the fitted model, according to what the user specified.}
-  \item{k_opt}{Number of lags chosen.}
+  \item{crit}{The criterion of the fitted model, according to what the user specified.}
+  \item{k}{Number of lags chosen.}
   \item{expart}{Proportion of the variance explained by the first i components.}
       \item{call}{The matched call.}
       \item{conv}{Logical. Did the iterations converge?}
@@ -51,6 +62,10 @@ where \eqn{\Sigma = (res^{T} res) / T} and \eqn{res} is the matrix of residuals 
   Daniel Peña, Ezequiel Smucler, Victor Yohai
 }
 
+\references{
+Bai, J. and Ng, S. (2002). Determining the number of factors in approximate
+factor models. Econometrica 70 191–221.
+}
 
 \seealso{
 \code{\link{gdpc}}, \code{\link{plot.gdpc}}, \code{\link{plot.gdpcs}}
@@ -65,7 +80,7 @@ u <- matrix(rnorm(T * m), T, m)
 for (i in 1:m) {
     x[, i] <- 10 * sin(2 * pi * (i/m)) * f[1:T] + 10 * cos(2 * pi * (i/m)) * f[2:(T + 1)] + u[, i]
 }
-#Choose number of lags using the AIC type criterion.
+#Choose number of lags using the LOO criterion.
 #k_max=3 to keep computation time low
 autofit <- auto.gdpc(x, k_max = 3)
 autofit

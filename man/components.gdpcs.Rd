@@ -36,7 +36,7 @@ u <- matrix(rnorm(T * m), T, m)
 for (i in 1:m) {
     x[, i] <- 10 * sin(2 * pi * (i/m)) * f[1:T] + 10 * cos(2 * pi * (i/m)) * f[2:(T + 1)] + u[, i]
 }
-#Choose number of lags using the AIC type criterion.
+#Choose number of lags using the LOO criterion.
 #k_max=2 to keep computation time low
 autofit <- auto.gdpc(x, k_max = 2, auto_comp = FALSE, num_comp = 2) 
 comps <- components.gdpcs(autofit, which_comp = c(1,2))

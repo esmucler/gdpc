@@ -8,17 +8,17 @@ is.gdpc <- function(object, ...) {
     return(FALSE)
   } else if (any(is.null(object$f), is.null(object$initial_f), is.null(object$beta),
                  is.null(object$alpha), is.null(object$mse), is.null(object$crit),
-                 is.null(object$k_opt), is.null(object$expart), is.null(object$call), 
+                 is.null(object$k), is.null(object$expart), is.null(object$call), 
                  is.null(object$conv))) {
     return(FALSE)
   } else if (any(!inherits(object$mse, "numeric"), !inherits(object$crit, "numeric"), !inherits(object$alpha, "numeric"),
                  !inherits(object$beta, "matrix"), !inherits(object$call, "call"), !inherits(object$conv, "logical"), 
                  all(!inherits(object$f,"numeric"), !inherits(object$f, "ts"), !inherits(object$f, "xts")),
-                 !inherits(object$k_opt, "numeric"), !inherits(object$expart, "numeric"),
+                 all(!inherits(object$k, "numeric"), !inherits(object$k, "integer")), !inherits(object$expart, "numeric"),
                  all(!inherits(object$initial_f,"numeric"), !inherits(object$initial_f,"ts"), !inherits(object$initial_f,"xts"))
   )) {
     return(FALSE)
-  } else if (any(length(object$alpha) != dim(object$beta)[1], dim(object$beta)[2] != object$k_opt + 1)) {
+  } else if (any(length(object$alpha) != dim(object$beta)[1], dim(object$beta)[2] != object$k + 1)) {
     return(FALSE)
   } else {
     return(TRUE)
@@ -28,19 +28,20 @@ is.gdpc <- function(object, ...) {
 construct.gdpc <- function(out, data) {
   #This function constructs an object of class gdpc.
   #INPUT
-  # out: the output of gdpc.priv
-  # data: the data matrix passed to gdpc.priv
+  # out: the output of gdpc_priv
+  # data: the data matrix passed to gdpc_priv
   #OUTPUT
   # An object of class gdpc, that is, a list with entries:
   # f: coordinates of the Principal Component corresponding to the periods 1,…,T
   # initial_f: Coordinates of the Principal Component corresponding to the periods -k+1,…,0.
   # beta: beta matrix corresponding to f
-  # alpha: alpha matrix corresponding to f
+  # alpha: alpha vector corresponding to f
   # mse: mean (in N and m) squared error of the residuals of the fit
-  # k_opt: number of lags used
-  # crit: the AIC or BIC of the fitted model, according to what was specified in crit
+  # k: number of lags used
+  # crit: the criterion of the fitted model, according to what was specified in crit
   # expart: proportion of the variance explained
   # call: the matched call
+  # conv: logical. Did the iterations converge?
   
   k <- ncol(out$beta) - 2  #number of leads
   out$alpha <- as.numeric(out$beta[, k + 2])
@@ -68,7 +69,7 @@ fitted.gdpc <- function(object, ...) {
   if (!is.gdpc(object)){
     stop("object should be of class gdpc")
   }
-  fitted <- getFitted(object$f, object$initial_f, object$beta, object$alpha, object$k_opt)
+  fitted <- getFitted(object$f, object$initial_f, object$beta, object$alpha, object$k)
   if (inherits(object$f, "xts")) {
     fitted <- reclass(fitted, match.to = object$f)
   } else if (inherits(object$f, "ts")) {
@@ -204,7 +205,7 @@ print.gdpcs <- function(x, ...) {
   if (!is.gdpcs(x)) {
     stop("x should be of class gdpcs")
   }
-  lags <- sapply(x, function(x){ round(x$k_opt, 3) })
+  lags <- sapply(x, function(x){ round(x$k, 3) })
   vars <- sapply(x, function(x){ round(x$expart, 3) })
   mses <- sapply(x, function(x){ round(x$mse, 3) })
   crits <- sapply(x, function(x){ round(x$crit, 3) })
