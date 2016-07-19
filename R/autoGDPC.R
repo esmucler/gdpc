@@ -26,12 +26,13 @@ auto.gdpc <- function(Z, crit = "AIC", normalize = FALSE, auto_comp = TRUE, expl
   # initial_f: Coordinates of the i-th Principal Component corresponding to the periods -k+1,…,0.
   # Only for the case k>0
   # beta: beta matrix corresponding to f
-  # alpha: alpha matrix corresponding to f
+  # alpha: alpha vector corresponding to f
   # mse: mean (in T and m) squared error of the residuals of the fit with the first i components 
   # k_opt: number of lags used chosen using the criterion specified in crit
   # crit: the AIC or BIC of the fitted model, according to what was specified in crit
   # expart: proportion of the variance explained by the first i components
   # call: the matched call
+  # conv: Logical. Did the iterations converge?
   
   if (all(!inherits(Z, "matrix"), !inherits(Z, "mts"), !inherits(Z, "xts"), !inherits(Z, "data.frame"))) {
     stop("Z should belong to one of the following classes: matrix, data.frame, mts, xts")
@@ -156,18 +157,18 @@ getLeads <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel = 1
   # crit: criterion
   # res: matrix of residuals
   # expart: proportion of the variance explained
-  
+  # conv: Logical. Did the iterations converge?
   
   
   m <- nrow(V)
   N <- ncol(V)
   
-  exports <- c("gdpc.priv")
+  exports <- c("gdpc_priv")
   k_lag <- NULL
   crits <- rep(0, k_max + 1)
   fits <- vector("list", k_max + 1)
   fits <- foreach(k_lag = 1:(k_max + 1), .export = exports, .packages = "gdpc") %dopar% {
-    gdpc.priv(V, k = k_lag - 1, tol = tol, niter_max = niter_max, sel = sel)
+    gdpc_priv(V, k = k_lag - 1, tol = tol, niter_max = niter_max, sel = sel)
   }
   
   crits <- sapply(fits, function(x) { x$crit })  #Get criterion corresponding to each lead
@@ -183,53 +184,8 @@ getLeads <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel = 1
   return(out)
 }
 
-
-gdpc.priv <- function(V, k, tol = 1e-04, niter_max = 500, sel = 1) {
-  # This function computes a single GDPC with a given number of leads.
-  #INPUT
-  # V: data matrix each ROW is a different time series
-  # k: number of leads used
-  # tol: relative precision, stopping criterion
-  # niter_max: maximum number of iterations
-  # first principal component with k leads is used
-  # sel: AIC (1) or BIC (2)
-  #OUTPUT
-  # f: principal component
-  # beta: matrix of loadings and intercept corresponding to f. Last column are the
-  # intercepts (alpha).
-  # mse:  mean squared error (in N and m)
-  # crit: criterion used to evaluate the fit
-  # res: matrix of residuals
-  # conv: logical. Did the iterations converge?
-  
-  m <- nrow(V)  #Number of time series
-  N <- ncol(V)  #Length of the time series
-  niter <- 0  #Number of iterations
-  
-  f_ini <- getFini(V, k)
-  out <- getMatrixBeta(V, f_ini, k, sel)
-  mse_ini <- out$mse
-  criter <- 10  #Stopping criterion for the iterations
-  while (criter > tol & niter < niter_max) {
-    niter <- niter + 1
-    f_fin <- scale(getF(V, out$beta, k))
-    out <- getMatrixBeta(V, f_fin, k, sel)
-    mse_fin <- out$mse
-    criter <- 1 - mse_fin/mse_ini
-    mse_ini <- mse_fin
-  }
-  if (niter >= niter_max) {
-    warning("Iterations did not converge. Consider increasing niter_max.")
-  }
-  out$conv <- (niter < niter_max)
-  out$f <- f_fin
-  return(out)
-  
-}
-
-
 gdpc <- function(Z, k, tol = 1e-04, niter_max = 500, crit = "AIC") {
-  # A wrapper function for gdpc.priv.
+  # A wrapper function for gdpc_priv.
   #INPUT
   # Z: data matrix each COLUMN is a different time series
   # k: number of lags used to predict
@@ -249,6 +205,7 @@ gdpc <- function(Z, k, tol = 1e-04, niter_max = 500, crit = "AIC") {
   # fitted: matrix of fitted values of the fit
   # expart: proportion of the variance explained
   # call: the matched call
+  # conv: logical. Did the iterations converge?
   
   
   if (all(!inherits(Z, "matrix"), !inherits(Z, "mts"), !inherits(Z, "xts"), !inherits(Z, "data.frame"))) {
@@ -282,7 +239,7 @@ gdpc <- function(Z, k, tol = 1e-04, niter_max = 500, crit = "AIC") {
   if (crit == "BIC") {
     sel <- 2
   }
-  out <- gdpc.priv(t(Z), k, tol, niter_max, sel)
+  out <- gdpc_priv(t(Z), k, tol, niter_max, sel)
   out$k_opt <- k
   out$expart <- 1 - out$mse/mean(apply(Z, 2, var))
   fn_call <- match.call()

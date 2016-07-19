@@ -20,10 +20,7 @@ Six series corresponding to the Industrial Production Index (IPI) of France, Ger
   }
 }
 
-\references{
-Peña and Yohai (2016) "Generalized Dynamic Principal Components". Upcoming on Journal of the American
-Statistical Association.
-}
+
 
 \examples{
 data(ipi91)

@@ -37,10 +37,6 @@ See \code{\link{auto.gdpc}} for the definition of the AIC or BIC type criterion 
 \author{
 Daniel Peña, Ezequiel Smucler, Victor Yohai
 }
-\references{
-Peña and Yohai (2016) "Generalized Dynamic Principal Components". Upcoming on Journal of the American
-Statistical Association.
-}
 
 
 \seealso{
@@ -48,14 +44,14 @@ Statistical Association.
 }
 
 \examples{
-N <- 200 #length of series
+T <- 200 #length of series
 m <- 500 #number of series
 set.seed(1234)
-f <- rnorm(N + 1)
-x <- matrix(0, N, m)
-u <- matrix(rnorm(N * m), N, m)
+f <- rnorm(T + 1)
+x <- matrix(0, T, m)
+u <- matrix(rnorm(T * m), T, m)
 for (i in 1:m) {
-    x[, i] <- 10 * sin(2 * pi * (i/m)) * f[1:N] + 10 * cos(2 * pi * (i/m)) * f[2:(N + 1)] + u[, i]
+    x[, i] <- 10 * sin(2 * pi * (i/m)) * f[1:T] + 10 * cos(2 * pi * (i/m)) * f[2:(T + 1)] + u[, i]
 }
 fit <- gdpc(x, k = 1) #find first DPC with one lag
 fit

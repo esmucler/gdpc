@@ -4,12 +4,11 @@ using namespace arma;
 // [[Rcpp::depends(RcppArmadillo)]]
 
 
-// [[Rcpp::export]]
-List getMatrixBeta(const arma::mat & Z, const arma::vec & f, const int & k, const int & sel) {
-  // This function finds the optimal beta and alpha and the mse corresponding to Z, f and k. 
+void getMatrixBeta(const arma::mat & Z, const arma::vec & f, const int & k, const int & sel, arma::mat & betaOut, arma::mat & resOut, double & mseOut, double & critOut) {
+  // This function finds the optimal beta, the residuals, mse and criterion corresponding to Z, f and k.
+  // alpha is the last column of beta.
   int m = Z.n_rows;
   int N = Z.n_cols;
-  arma::mat beta = mat(m, k + 2);
   arma::mat Fmat = mat(k + 1, N);
   arma::mat FF = mat(k + 2, k + 2);
   arma::mat invFF = mat(k + 2, k + 2);
@@ -25,26 +24,19 @@ List getMatrixBeta(const arma::mat & Z, const arma::vec & f, const int & k, cons
     invFF = pinv(FF);
   }
   arma::mat Proj = Fmat.t() * invFF * Fmat;
-  beta = Z * Fmat.t() * invFF.t();
-  arma::mat res = Z - beta * Fmat;
-  double mse = (accu(pow(Z, 2)) - trace(Z * Proj * Z.t() ))/ N;
-  double crit = 0;
+  betaOut = Z * Fmat.t() * invFF.t();
+  resOut = Z - betaOut * Fmat;
+  mseOut = (accu(pow(Z, 2)) - trace(Z * Proj * Z.t() ))/ N;
   if (sel == 1){
-    crit = N * log(mse) + m * (k + 2) * 2;  
+    critOut = N * log(mseOut) + m * (k + 2) * 2;  
   } else {
-    crit = N * log(mse) + m * (k + 2) * log(N);  
+    critOut = N * log(mseOut) + m * (k + 2) * log(N);  
   }
-  
-  List ret;
-  ret["mse"] = mse / m;
-  ret["beta"] = beta;
-  ret["res"] = res;
-  ret["crit"] = crit;
-  return(ret);
+  mseOut = mseOut / m;
 }
 
 arma::mat getMatrixC(const arma::subview_row<double> & rowZ, const double & alpha, const int & k) {
-  //This function constructs the matrix C correspoding to rowZ, alpha and k 
+  // Constructs the matrix C correspoding to rowZ, alpha and k 
   int N = rowZ.n_elem;
   arma::mat C = zeros(N + k, k + 1);
   arma::vec liml = vec(2);
@@ -64,7 +56,7 @@ arma::mat getMatrixC(const arma::subview_row<double> & rowZ, const double & alph
 }
 
 arma::mat getMatrixD(const arma::subview_row<double> & rowbeta, const int & N, const int & k) {
-  //This function constructs the matrix D correspoding to rowbeta, N and k 
+  // Constructs the matrix D corresponding to rowbeta, N and k 
   arma::mat beta_mat = zeros(N + k, N + k);
   arma::vec liml = vec(2);
   liml[1] = 1;
@@ -82,30 +74,30 @@ arma::mat getMatrixD(const arma::subview_row<double> & rowbeta, const int & N, c
   return (beta_mat);
 }
 
-// [[Rcpp::export]]
 arma::vec getF(const arma::mat & Z, const arma::mat & beta, const int & k) {
-  //This functions finds the optimal f corresponding to Z, beta, alpha and k.
+  // Get optimal f corresponding to Z, beta, alpha and k.
   int m = Z.n_rows;
   int N = Z.n_cols;
-  arma::vec f = zeros(N + k);
   arma::mat D = zeros(N + k, N + k);
+  arma::vec fOut = zeros(N + k, 1);
   for (int j=0 ; j < m ; j++){
     D = D + getMatrixD(beta(j, span(0, k)), N, k);
-    f = f + getMatrixC(Z.row(j), beta(j, k + 1), k) * (beta(j, span(0, k))).t();
+    fOut = fOut + getMatrixC(Z.row(j), beta(j, k + 1), k) * (beta(j, span(0, k))).t();
   }
   
   double condition_D = rcond(D);
   if (condition_D > 1e-10) {
-    f = solve(D,f);
+    fOut = solve(D, fOut);
   } else {
-    f = pinv(D) * f;
+    fOut = pinv(D) * fOut;
   }
-  return(f);
+  fOut = (fOut - mean(fOut)) / stddev(fOut);
+  return(fOut);
 }
 
 // [[Rcpp::export]]
 arma::mat getFitted(arma::vec & f_fin, const arma::vec & f_ini, const arma::mat & beta, const arma::vec & alpha, const int & k) {
-  // This function finds the fitted values associated with f and beta and alpha
+  // Get fitted values associated with f and beta and alpha
   int N = f_fin.n_elem;
   if (k > 0){
     f_fin.insert_rows(0, f_ini);
@@ -125,18 +117,69 @@ arma::mat getFitted(arma::vec & f_fin, const arma::vec & f_ini, const arma::mat 
 arma::vec getFini(const arma::mat & Z, const int & k){
   // Get initial estimator: ordinary principal component with k leads
   int N = Z.n_cols;
+  arma::vec f_iniOut = zeros(N + k, 1);
   arma::mat U;
   arma::vec s;
   arma::mat V;
-  arma::vec f_ini = vec(N + k);
   arma::mat Z_trans = Z.t();
   arma::rowvec mean_Zt = mean(Z_trans);
   Z_trans.each_row() -= mean_Zt; 
   svd_econ(U, s, V, Z_trans, "right");
-  f_ini.rows(0, N - 1) = Z_trans * V.col(0);
+  f_iniOut.rows(0, N - 1) = Z_trans * V.col(0);
   if (k != 0) {
-    f_ini.rows(N, N + k - 1) = zeros(k, 1) + f_ini(N - 1);
+    f_iniOut.rows(N, N + k - 1) = zeros(k, 1) + f_iniOut(N - 1);
   }
-  f_ini = (f_ini - mean(f_ini)) / stddev(f_ini);
-  return(f_ini);
+  f_iniOut = (f_iniOut - mean(f_iniOut)) / stddev(f_iniOut);
+  return(f_iniOut);
+}
+
+
+// [[Rcpp::export]]
+List gdpc_priv(const arma::mat & Z, const int & k, const double & tol, const int & niter_max, const int & sel) {
+// This function computes a single GDPC with a given number of leads.
+// INPUT
+// Z: data matrix each ROW is a different time series
+// k: number of leads used
+// tol: relative precision, stopping criterion
+// niter_max: maximum number of iterations
+// sel: AIC (1) or BIC (2)
+// OUTPUT
+// f: principal component
+// beta: matrix of loadings and intercept corresponding to f. Last column are the
+// intercepts (alpha).
+// mse:  mean squared error (in N and m)
+// crit: criterion used to evaluate the fit
+// res: matrix of residuals
+// conv: logical. Did the iterations converge?
+  int m = Z.n_rows;
+  int N = Z.n_cols;
+  double criter = tol + 1;  //Stopping criterion for the iterations
+  int niter = 0;
+  arma::mat beta = zeros(m, k + 2);
+  arma::mat res = zeros(m, N);
+  arma::vec f_ini = zeros(N + k, 1);
+  double mse = 0;
+  double crit = 0;
+  bool conv = false;
+  f_ini = getFini(Z, k);
+  getMatrixBeta(Z, f_ini, k, sel, beta, res, mse, crit);
+  double mse_ini = mse;
+  while (niter < niter_max and criter > tol) {
+    niter = niter + 1;
+    f_ini = getF(Z, beta, k);
+    getMatrixBeta(Z, f_ini, k, sel, beta, res, mse, crit);
+    criter = 1 - mse / mse_ini;
+    mse_ini = mse;
+  }
+  if (niter < niter_max) { 
+    conv = true;
+  }
+  List ret;
+  ret["f"] = f_ini;
+  ret["beta"] = beta;
+  ret["mse"] = mse;
+  ret["crit"] = crit;
+  ret["res"] = res;
+  ret["conv"] = conv;
+  return(ret);
 }

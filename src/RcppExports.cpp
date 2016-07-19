@@ -6,33 +6,6 @@
 
 using namespace Rcpp;
 
-// getMatrixBeta
-List getMatrixBeta(const arma::mat& Z, const arma::vec& f, const int& k, const int& sel);
-RcppExport SEXP gdpc_getMatrixBeta(SEXP ZSEXP, SEXP fSEXP, SEXP kSEXP, SEXP selSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type f(fSEXP);
-    Rcpp::traits::input_parameter< const int& >::type k(kSEXP);
-    Rcpp::traits::input_parameter< const int& >::type sel(selSEXP);
-    __result = Rcpp::wrap(getMatrixBeta(Z, f, k, sel));
-    return __result;
-END_RCPP
-}
-// getF
-arma::vec getF(const arma::mat& Z, const arma::mat& beta, const int& k);
-RcppExport SEXP gdpc_getF(SEXP ZSEXP, SEXP betaSEXP, SEXP kSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< const int& >::type k(kSEXP);
-    __result = Rcpp::wrap(getF(Z, beta, k));
-    return __result;
-END_RCPP
-}
 // getFitted
 arma::mat getFitted(arma::vec& f_fin, const arma::vec& f_ini, const arma::mat& beta, const arma::vec& alpha, const int& k);
 RcppExport SEXP gdpc_getFitted(SEXP f_finSEXP, SEXP f_iniSEXP, SEXP betaSEXP, SEXP alphaSEXP, SEXP kSEXP) {
@@ -57,6 +30,21 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
     Rcpp::traits::input_parameter< const int& >::type k(kSEXP);
     __result = Rcpp::wrap(getFini(Z, k));
+    return __result;
+END_RCPP
+}
+// gdpc_priv
+List gdpc_priv(const arma::mat& Z, const int& k, const double& tol, const int& niter_max, const int& sel);
+RcppExport SEXP gdpc_gdpc_priv(SEXP ZSEXP, SEXP kSEXP, SEXP tolSEXP, SEXP niter_maxSEXP, SEXP selSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< const int& >::type k(kSEXP);
+    Rcpp::traits::input_parameter< const double& >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< const int& >::type niter_max(niter_maxSEXP);
+    Rcpp::traits::input_parameter< const int& >::type sel(selSEXP);
+    __result = Rcpp::wrap(gdpc_priv(Z, k, tol, niter_max, sel));
     return __result;
 END_RCPP
 }
