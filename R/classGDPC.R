@@ -25,18 +25,20 @@ is.gdpc <- function(object, ...) {
   }
 }
 
-construct.gdpc <- function(out, data) {
+construct.gdpc <- function(out, data, normalize = 0) {
   #This function constructs an object of class gdpc.
   #INPUT
   # out: the output of gdpc_priv
   # data: the data matrix passed to gdpc_priv
+  # normalize: indicates the normalization the user requested. This is only used for
+  # the output of auto.gdpc
   #OUTPUT
   # An object of class gdpc, that is, a list with entries:
   # f: coordinates of the Principal Component corresponding to the periods 1,…,T
   # initial_f: Coordinates of the Principal Component corresponding to the periods -k+1,…,0.
-  # beta: beta matrix corresponding to f
-  # alpha: alpha vector corresponding to f
-  # mse: mean (in N and m) squared error of the residuals of the fit
+  # beta: beta matrix of loadings corresponding to f
+  # alpha: alpha vector of intercepts corresponding to f
+  # mse: mean (in T and m) squared error of the residuals of the fit
   # k: number of lags used
   # crit: the criterion of the fitted model, according to what was specified in crit
   # expart: proportion of the variance explained
@@ -44,13 +46,24 @@ construct.gdpc <- function(out, data) {
   # conv: logical. Did the iterations converge?
   
   k <- ncol(out$beta) - 2  #number of leads
-  out$alpha <- as.numeric(out$beta[, k + 2])
+  out$alpha <- out$beta[, k + 2]
   out$beta <- out$beta[, (k + 1):1]
   if (k != 0) {
     out$initial_f <- out$f[1:k]
   } else {
     out$initial_f <- 0
   }
+  if (normalize == 2) {
+    mean_Z <- apply(data, 2, mean)
+    sd_Z <- apply(data, 2, sd)
+    out$alpha <- out$alpha * sd_Z + mean_Z
+    if (k == 0) {
+      out$beta <- out$beta * sd_Z
+    } else {
+      out$beta <- apply(out$beta, 2, function(x, sd) { x * sd }, sd_Z)
+    }
+  }
+  out$alpha <- as.numeric(out$alpha)
   out$beta <- as.matrix(out$beta)
   rownames(out$beta) <- colnames(data)
   out$f <- out$f[(k + 1):length(out$f)]
@@ -116,17 +129,18 @@ print.gdpc <- function(x, ...) {
   print(y)
 }
 
-construct.gdpcs <- function(out, data, fn_call) {
+construct.gdpcs <- function(out, data, fn_call, normalize) {
   #This function constructs an object of class gdpcs that is, a list of length equal to 
   #the number of computed components. The i-th entry of this list is an object of class gdpc.
   #INPUT
   # out: the output of auto.gdpc
   # data: the data matrix passed to auto.gdpc
   # fn_call: the original call to auto.gdpc
+  # normalize: integer, indicates what normalization the user requested
   #OUTPUT
   # An object of class gdpcs, that is, a list where each entry is an object of class gdpc.
   out <- lapply(out, function(x, fn_call){ x$call <- fn_call; return(x)}, fn_call)
-  out <- lapply(out, construct.gdpc, data)
+  out <- lapply(out, construct.gdpc, data, normalize)
   class(out) <- append(class(out), "gdpcs")
   return(out)
 }

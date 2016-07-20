@@ -34,17 +34,19 @@ BEGIN_RCPP
 END_RCPP
 }
 // gdpc_priv
-List gdpc_priv(const arma::mat& Z, const int& k, const double& tol, const int& niter_max, const int& sel);
-RcppExport SEXP gdpc_gdpc_priv(SEXP ZSEXP, SEXP kSEXP, SEXP tolSEXP, SEXP niter_maxSEXP, SEXP selSEXP) {
+List gdpc_priv(const arma::mat& Z, const int& k, const arma::vec& f_ini, const bool& passf_ini, const double& tol, const int& niter_max, const int& sel);
+RcppExport SEXP gdpc_gdpc_priv(SEXP ZSEXP, SEXP kSEXP, SEXP f_iniSEXP, SEXP passf_iniSEXP, SEXP tolSEXP, SEXP niter_maxSEXP, SEXP selSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
     Rcpp::traits::input_parameter< const int& >::type k(kSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type f_ini(f_iniSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type passf_ini(passf_iniSEXP);
     Rcpp::traits::input_parameter< const double& >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< const int& >::type niter_max(niter_maxSEXP);
     Rcpp::traits::input_parameter< const int& >::type sel(selSEXP);
-    __result = Rcpp::wrap(gdpc_priv(Z, k, tol, niter_max, sel));
+    __result = Rcpp::wrap(gdpc_priv(Z, k, f_ini, passf_ini, tol, niter_max, sel));
     return __result;
 END_RCPP
 }

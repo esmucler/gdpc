@@ -1,4 +1,4 @@
-auto.gdpc <- function(Z, crit = "LOO", normalize = FALSE, auto_comp = TRUE, expl_var = 0.9, num_comp = 5, tol = 1e-04, 
+auto.gdpc <- function(Z, crit = "LOO", normalize = 1, auto_comp = TRUE, expl_var = 0.9, num_comp = 5, tol = 1e-04, 
                       k_max = 10, niter_max = 500, ncores = 1) {
   # Computes Generalized Dynamic Principal Components. The number of components can be supplied by the user 
   # or chosen automatically so that a given proportion of variance is explained. The number of lags is chosen
@@ -8,7 +8,13 @@ auto.gdpc <- function(Z, crit = "LOO", normalize = FALSE, auto_comp = TRUE, expl
   #INPUT
   # Z: data matrix, series by columns 
   # crit: a string: 'LOO', 'AIC', 'BIC' or 'BNG', indicating the criterion used to chose the number of lags. Default is 'LOO'
-  # normalize: logical, if TRUE the data is standardized to zero mean and unit variance. Default is FALSE
+  # normalize: integer. If normalize = 1, the data is analyzed in the orig-
+  # inal units, without mean and variance standarization. If normalize = 2, the data
+  # is standardized to zero mean and unit variance before computing the principal
+  # components, but the intercepts and the loadings are those needed to reconstruct
+  # the original series. If normalize = 3 the data are standardized as in normalize = 2
+  # but the intercepts and the loadings are those needed to reconstruct the standardized
+  # series. The default is normalize = 1.
   # auto_comp:  logical, if TRUE compute components until the proportion of explained variance is equal to expl_var, other
   # wise use num_comp components. Default is TRUE
   # expl_var: a number between 0 and 1. Desired proportion of explained variance (only if auto_comp==TRUE).
@@ -47,8 +53,10 @@ auto.gdpc <- function(Z, crit = "LOO", normalize = FALSE, auto_comp = TRUE, expl
   if (!inherits(auto_comp, "logical")) {
     stop("auto_comp should be logical")
   }
-  if (!inherits(normalize, "logical")) {
-    stop("normalize should be logical")
+  if (all(!inherits(normalize, "numeric"), !inherits(normalize, "integer"))) {
+    stop("normalize should be numeric")
+  } else if (any(!normalize == floor(normalize), normalize <= 0, normalize > 3)) {
+    stop("normalize should be either 1, 2 or 3")
   }
   if (!inherits(expl_var, "numeric")) {
     stop("expl_var should be numeric")
@@ -81,7 +89,7 @@ auto.gdpc <- function(Z, crit = "LOO", normalize = FALSE, auto_comp = TRUE, expl
     stop("ncores should be a positive integer")
   }
   # Pass to matrix form. Scale and transpose data.
-  if (normalize) {
+  if (normalize==2 | normalize==3) {
     V <- t(scale(as.matrix(Z)))
     mean_var_V <- 1
   } else {
@@ -129,7 +137,7 @@ auto.gdpc <- function(Z, crit = "LOO", normalize = FALSE, auto_comp = TRUE, expl
   
   fn_call <- match.call()
   fn_call$crit <- crit
-  output <- construct.gdpcs(output, Z, fn_call)
+  output <- construct.gdpcs(output, Z, fn_call, normalize)
   print(paste("Total number of computed components:", comp_ready))
   
   return(output)
@@ -166,7 +174,7 @@ getLeads <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel = 1
   crits <- rep(0, k_max + 1)
   fits <- vector("list", k_max + 1)
   fits <- foreach(k_lag = 1:(k_max + 1), .export = exports, .packages = "gdpc") %dopar% {
-    gdpc_priv(V, k = k_lag - 1, tol = tol, niter_max = niter_max, sel = sel)
+    gdpc_priv(V, k = k_lag - 1, f_ini = 0, passf_ini = FALSE, tol = tol, niter_max = niter_max, sel = sel)
   }
   
   crits <- sapply(fits, function(x) { x$crit })  #Get criterion corresponding to each lead
@@ -181,11 +189,13 @@ getLeads <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel = 1
   return(out)
 }
 
-gdpc <- function(Z, k, tol = 1e-04, niter_max = 500, crit = "LOO") {
+gdpc <- function(Z, k, f_ini = NULL, tol = 1e-04, niter_max = 500, crit = "LOO") {
   # A wrapper function for gdpc_priv.
   #INPUT
   # Z: data matrix each COLUMN is a different time series
-  # k: number of lags used to predict
+  # k: number of lags used
+  # f_ini: starting point for the iterations. Optional. If no argument is passed
+  # the standard Principal Component completed with k leads is used.
   # tol: relative precision, stopping criterion
   # niter_max: maximum number of iterations
   # first principal component with k lags is used
@@ -229,10 +239,21 @@ gdpc <- function(Z, k, tol = 1e-04, niter_max = 500, crit = "LOO") {
   } else if (any(!niter_max == floor(niter_max), niter_max <= 0)) {
     stop("niter_max should be a positive integer")
   }
+  if (!is.null(f_ini)) {
+    if (all(!inherits(f_ini, "numeric"), !inherits(f_ini, "ts"), !inherits(f_ini, "xts"))) {
+      stop("f_ini should belong to one of the following classes: numeric, ts, xts")
+    } else if (length(f_ini) != dim(Z)[1] + k) {
+      stop("f_ini should have length equal to T + k")
+    }
+  }
   
   
   sel <- switch(crit, LOO = 1, AIC = 2, BIC = 3, BNG = 4)
-  out <- gdpc_priv(t(Z), k, tol, niter_max, sel)
+  if (is.null(f_ini)) { 
+    out <- gdpc_priv(t(Z), k, 0, FALSE, tol, niter_max, sel)
+  } else {
+    out <- gdpc_priv(t(Z), k, f_ini, TRUE, tol, niter_max, sel)
+  }
   out$expart <- 1 - out$mse/mean(apply(Z, 2, var))
   fn_call <- match.call()
   fn_call$crit <- crit

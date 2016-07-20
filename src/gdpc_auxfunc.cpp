@@ -140,11 +140,13 @@ arma::vec getFini(const arma::mat & Z, const int & k) {
 
 
 // [[Rcpp::export]]
-List gdpc_priv(const arma::mat & Z, const int & k, const double & tol, const int & niter_max, const int & sel) {
+List gdpc_priv(const arma::mat & Z, const int & k, const arma::vec & f_ini, const bool & passf_ini,const double & tol, const int & niter_max, const int & sel) {
 // This function computes a single GDPC with a given number of leads.
 // INPUT
 // Z: data matrix each ROW is a different time series
 // k: number of leads used
+// f_ini: starting point for the iterations, optional.
+// passf_ini: logical, indicates whether f_ini is being passed or not
 // tol: relative precision, stopping criterion
 // niter_max: maximum number of iterations
 // sel: LOO (1), AIC (2), BIC (3), BNG (4)
@@ -166,7 +168,11 @@ List gdpc_priv(const arma::mat & Z, const int & k, const double & tol, const int
   double mse = 0;
   double crit = 0;
   bool conv = false;
-  f = getFini(Z, k);
+  if (!passf_ini) {
+    f = getFini(Z, k);  
+  } else {
+    f = f_ini;
+  }
   getMatrixBeta(Z, f, k, sel, beta, res, mse, crit);
   double mse_ini = mse;
   while (niter < niter_max and criter > tol) {

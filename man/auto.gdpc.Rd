@@ -6,12 +6,12 @@ Computes Generalized Dynamic Principal Components. The number of components can 
 }
 
 
-\usage{auto.gdpc(Z, crit = 'LOO', normalize = FALSE, auto_comp = TRUE, expl_var = 0.9,
+\usage{auto.gdpc(Z, crit = 'LOO', normalize = 1, auto_comp = TRUE, expl_var = 0.9,
           num_comp = 5, tol = 1e-4, k_max = 10, niter_max = 500, ncores = 1)}
 \arguments{
   \item{Z}{Data matrix. Each column is a different time series.}
-  \item{crit}{A string specifying the criterion to be used. Options are 'LOO', 'AIC', 'BIC' and 'BNG'. Default is 'LOO'.}
-  \item{normalize}{Logical. If TRUE the data is standardized to zero mean and unit variance. Default is FALSE.}
+  \item{crit}{A string specifying the criterion to be used. Options are 'LOO', 'AIC', 'BIC' and 'BNG'. Default is 'LOO'. See Details below.}
+  \item{normalize}{Integer. Either 1, 2 or 3. Indicates whether the data should be standardized. Default is 1. See Details below.}
   \item{auto_comp}{Logical. If TRUE compute components until the proportion of explained variance is equal to expl_var, otherwise use num_comp components. Default is TRUE.}
   \item{expl_var}{A number between 0 and 1. Desired proportion of explained variance (only used if auto_comp==TRUE). Default is 0.9.}
   \item{num_comp}{Integer. Number of components to be computed (only used if auto_comp==FALSE). Default is 5.}
@@ -40,23 +40,23 @@ If crit = 'BNG' the number of lags is chosen among \eqn{0,\dots, k_{max}} as the
 \deqn{ BNG_{k} = T \log(trace(\Sigma_{k})) + (k+2) \log(m).}
 This is an adaptation of a criterion proposed by Bai and Ng (2002).
 
-
-
+If normalize = 1, the data is analyzed in the original units, without mean and variance standarization. If normalize = 2, the data is standardized to zero mean and unit variance before computing the principal components, but the intercepts and the loadings are those needed to reconstruct the original series. If normalize = 3 the data are standardized as in normalize = 2, but the intercepts and the loadings are those needed to reconstruct the standardized series. Default is normalize = 1.
 
 }
 
 \value{
   An object of class \code{gdpcs}, that is, a list of length equal to the number of computed components. The i-th entry of this list is an object of class \code{gdpc}, that is, a list with entries
-  \item{f}{Coordinates of the i-th Principal Component corresponding to the periods \eqn{1,\dots,T}.}
-  \item{initial_f}{Coordinates of the i-th Principal Component corresponding to the periods \eqn{-k+1,\dots,0}. Only for the case \eqn{k>0}.}
-  \item{beta}{Matrix of loadings corresponding to f. Column number \eqn{k} is the vector of \eqn{k-1} lag loadings.}
-  \item{alpha}{Vector of intercepts corresponding to f.}
+   \item{expart}{Proportion of the variance explained by the first i components.}
   \item{mse}{Mean squared error of the residuals of the fit using the first i components.}
   \item{crit}{The criterion of the fitted model, according to what the user specified.}
   \item{k}{Number of lags chosen.}
-  \item{expart}{Proportion of the variance explained by the first i components.}
+  \item{alpha}{Vector of intercepts corresponding to f.}
+  \item{beta}{Matrix of loadings corresponding to f. Column number \eqn{k} is the vector of \eqn{k-1} lag loadings.}
+  \item{f}{Coordinates of the i-th Principal Component corresponding to the periods \eqn{1,\dots,T}.}
+  \item{initial_f}{Coordinates of the i-th Principal Component corresponding to the periods \eqn{-k+1,\dots,0}. Only for the case \eqn{k>0}, otherwise 0.}
       \item{call}{The matched call.}
       \item{conv}{Logical. Did the iterations converge?}
+  \code{plot} and \code{print} methods are available for this class.
 }
 \author{
   Daniel Peña, Ezequiel Smucler, Victor Yohai

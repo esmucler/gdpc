@@ -9,7 +9,7 @@ getFini <- function(Z, k) {
     .Call('gdpc_getFini', PACKAGE = 'gdpc', Z, k)
 }
 
-gdpc_priv <- function(Z, k, tol, niter_max, sel) {
-    .Call('gdpc_gdpc_priv', PACKAGE = 'gdpc', Z, k, tol, niter_max, sel)
+gdpc_priv <- function(Z, k, f_ini, passf_ini, tol, niter_max, sel) {
+    .Call('gdpc_gdpc_priv', PACKAGE = 'gdpc', Z, k, f_ini, passf_ini, tol, niter_max, sel)
 }
 
