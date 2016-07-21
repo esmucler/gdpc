@@ -24,23 +24,23 @@ Computes Generalized Dynamic Principal Components. The number of components can 
 \details{
 
 Suppose the data matrix consists of \eqn{m} series of length \eqn{T}.
-Let \eqn{\bold{f}} be the Dynamic Principal Component defined using \eqn{k} lags, let \eqn{R_k} be the corresponding matrix of residuals, let \eqn{\Sigma_{k} = (R_{k}^{\prime} R_{k}) / T}.
+Let \eqn{\bold{f}} be the Dynamic Principal Component defined using \eqn{k} lags, let \eqn{R} be the corresponding matrix of residuals and let \eqn{\Sigma = (R^{\prime} R) / T}.
 
 If crit = 'LOO' the number of lags is chosen among \eqn{0,\dots, k_{max}} as the value \eqn{k} that minimizes the leave-one-out (LOO) cross-validation mean squared error, given by
-\deqn{ LOO_{k} = \frac{1}{T m}\sum\limits_{i=1}^{m}\sum\limits_{t=1}^{T}\frac{R_{k,t,i}^{2}}{(1-h_{k,tt})^{2}},}
-where \eqn{h_{k,tt}} are the diagonal elements of the hat matrix \eqn{H_{k} = F_{k} (F_{k}^{\prime} F_{k})^{-1} F_{k}^{\prime} }, with \eqn{F_{k}} being \eqn{T \times (k+2)} matrix with rows \eqn{(f_{t}, f_{t+1}, \dots, f_{t+k}, 1)}.
+\deqn{ LOO = \frac{1}{T m}\sum\limits_{i=1}^{m}\sum\limits_{t=1}^{T}\frac{R_{t,i}^{2}}{(1-h_{t,t})^{2}},}
+where \eqn{h_{t,t}} are the diagonal elements of the hat matrix \eqn{H = F(F^{\prime} F)^{-1} F^{\prime} }, with \eqn{F} being the \eqn{T \times (k+2)} matrix with rows \eqn{(f_{t}, f_{t+1}, \dots, f_{t+k}, 1)}.
 
 If crit = 'AIC' the number of lags is chosen among \eqn{0,\dots, k_{max}} as the value \eqn{k} that minimizes the following AIC type criterion
-\deqn{ AIC_{k} = T \log(trace(\Sigma_{k})) + 2 m (k+2) .}
+\deqn{ AIC = T \log(trace(\Sigma)) + 2 m (k+2) .}
 
 If crit = 'BIC' the number of lags is chosen among \eqn{0,\dots, k_{max}} as the value \eqn{k} that minimizes the following BIC type criterion
-\deqn{ BIC_{k} = T \log(trace(\Sigma_{k})) + m (k+2) \log(T) .}
+\deqn{ BIC = T \log(trace(\Sigma)) + m (k+2) \log(T) .}
 
 If crit = 'BNG' the number of lags is chosen among \eqn{0,\dots, k_{max}} as the value \eqn{k} that minimizes the following criterion
-\deqn{ BNG_{k} = T \log(trace(\Sigma_{k})) + (k+2) \log(m).}
+\deqn{ BNG = T \log(trace(\Sigma)) + (k+2) \log(m).}
 This is an adaptation of a criterion proposed by Bai and Ng (2002).
 
-If normalize = 1, the data is analyzed in the original units, without mean and variance standarization. If normalize = 2, the data is standardized to zero mean and unit variance before computing the principal components, but the intercepts and the loadings are those needed to reconstruct the original series. If normalize = 3 the data are standardized as in normalize = 2, but the intercepts and the loadings are those needed to reconstruct the standardized series. Default is normalize = 1.
+If normalize = 1, the data is analyzed in the original units, without mean and variance standarization. If normalize = 2, the data is standardized to zero mean and unit variance before computing the principal components, but the intercepts and loadings are those needed to reconstruct the original series. If normalize = 3 the data are standardized as in normalize = 2, but the intercepts and the loadings are those needed to reconstruct the standardized series. Default is normalize = 1.
 
 }
 

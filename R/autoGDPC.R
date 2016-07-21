@@ -89,7 +89,7 @@ auto.gdpc <- function(Z, crit = "LOO", normalize = 1, auto_comp = TRUE, expl_var
     stop("ncores should be a positive integer")
   }
   # Pass to matrix form. Scale and transpose data.
-  if (normalize==2 | normalize==3) {
+  if (normalize == 2 | normalize == 3) {
     V <- t(scale(as.matrix(Z)))
     mean_var_V <- 1
   } else {
@@ -184,7 +184,7 @@ getLeads <- function(V, k_max, mean_var_V, tol = 1e-04, niter_max = 500, sel = 1
   }
   k_opt <- which.min(crits) - 1
   out <- fits[[k_opt + 1]]
-  expart <- 1 - out$mse/mean_var_V
+  expart <- 1 - out$mse / mean_var_V
   out$expart <- expart
   return(out)
 }
@@ -206,7 +206,7 @@ gdpc <- function(Z, k, f_ini = NULL, tol = 1e-04, niter_max = 500, crit = "LOO")
   # initial_f: Coordinates of the Principal Component corresponding to the periods -k+1,…,0.
   # beta: beta matrix of loadings corresponding to f
   # alpha: alpha vector of intercepts corresponding to f
-  # mse: mean (in N and m) squared error of the residuals of the fit
+  # mse: mean (in T and m) squared error of the residuals of the fit
   # k: number of lags used
   # crit: the criterion of the fitted model, according to what was specified in crit
   # expart: proportion of the variance explained
