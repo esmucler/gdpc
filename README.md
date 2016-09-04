@@ -43,7 +43,7 @@ plot(fit, which = 'Loadings', which_load = 1, xlab = '', ylab = '')
 # Load and plot Industrial Production Index Data
 data(ipi91)
 plot(ipi91, plot.type = 'multiple', main = 'Industrial Production Index')
-# Choose number of lags among 0, \dots, 9 using the Leave One Out criterion
+# Choose number of lags among 0,..., 9 using the (default) Leave One Out criterion
 # This might take a minute.
 gdpc_ipi <- auto.gdpc(ipi91, k_max = 9, niter_max = 1500, ncores = 4)
 gdpc_ipi
