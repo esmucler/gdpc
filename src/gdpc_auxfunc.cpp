@@ -26,7 +26,6 @@ void getMatrixBeta(const arma::mat & Z, const arma::vec & f, const int & k, cons
   arma::mat Proj = Fmat.t() * invFF * Fmat;
   betaOut = Z * Fmat.t() * invFF.t();
   resOut = Z - betaOut * Fmat;
-  // mseOut = (accu(pow(Z, 2)) - trace(Z * Proj * Z.t() ))/ N;
   mseOut = accu(pow(resOut, 2)) / N;
   if (sel == 1) {
     arma::vec weights = 1/(1 - diagvec(Proj));
@@ -39,7 +38,6 @@ void getMatrixBeta(const arma::mat & Z, const arma::vec & f, const int & k, cons
     critOut = N * log(mseOut) + (k + 2) * log(m);  
   }
   mseOut = mseOut / m;
-  // cout << '\n' << mseOut << '\n';
 }
 
 arma::mat getMatrixC(const arma::subview_row<double> & rowZ, const double & alpha, const int & k) {

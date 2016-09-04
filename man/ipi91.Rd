@@ -26,7 +26,7 @@ Six series corresponding to the Industrial Production Index (IPI) of France, Ger
 data(ipi91)
 plot(ipi91, plot.type = 'multiple', main = 'Industrial Production Index')
 \dontrun{
-#Compute first GDPC with twelve lags; this may take a bit.
+#Compute first GDPC with nine lags; this may take a bit.
 gdpc_ipi <- gdpc(ipi91, 9, niter_max = 1500)
 #Plot the component
 plot(gdpc_ipi, which = 'Component', ylab = '')
