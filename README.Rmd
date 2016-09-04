@@ -23,7 +23,7 @@ devtools::install_github("esmucler/gdpc")
 
 ### Usage
 
-```{r}
+```{r, eval = FALSE}
 library(gdpc)
 #Load and plot Industrial Production Index Data
 data(ipi91)

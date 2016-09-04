@@ -19,32 +19,17 @@ library(gdpc)
 #Load and plot Industrial Production Index Data
 data(ipi91)
 plot(ipi91, plot.type = 'multiple', main = 'Industrial Production Index')
-```
-
-![](README-unnamed-chunk-2-1.png)
-
-``` r
 #Choose number of lags among 0, \dots, 9 using the Leave One Out criterion
+#This might take a minute.
 gdpc_ipi <- auto.gdpc(ipi91, k_max = 9, niter_max = 1500, ncores = 4)
-#> [1] "Computing component number 1"
-#> [1] "Total number of computed components: 1"
 gdpc_ipi
-#>             Number.of.lags   LOO   MSE Explained.Variance
-#> Component 1              9 8.471 7.778              0.948
 #Plot the component
 plot(gdpc_ipi, which_comp = 1, ylab = '')
-```
-
-![](README-unnamed-chunk-2-2.png)
-
-``` r
 #Get fitted values and plot
 fit_val <- fitted(gdpc_ipi[[1]])
 colnames(fit_val) <- colnames(ipi91)
 plot(fit_val, main = 'Fitted values')
 ```
-
-![](README-unnamed-chunk-2-3.png)
 
 ### License
 
