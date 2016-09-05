@@ -42,6 +42,7 @@ plot(fit, which = 'Loadings', which_load = 1, xlab = '', ylab = '')
 # An example using a real data set
 # Load and plot Industrial Production Index Data
 data(ipi91)
+par(mfrow = c(1, 1))
 plot(ipi91, plot.type = 'multiple', main = 'Industrial Production Index')
 # Choose number of lags among 0,..., 9 using the (default) Leave One Out criterion
 # This might take a minute.
