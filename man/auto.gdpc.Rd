@@ -28,7 +28,7 @@ Let \eqn{\bold{f}} be the Dynamic Principal Component defined using \eqn{k} lags
 
 If crit = 'LOO' the number of lags is chosen among \eqn{0,\dots, k_{max}} as the value \eqn{k} that minimizes the leave-one-out (LOO) cross-validation mean squared error, given by
 \deqn{ LOO = \frac{1}{T m}\sum\limits_{i=1}^{m}\sum\limits_{t=1}^{T}\frac{R_{t,i}^{2}}{(1-h_{t,t})^{2}},}
-where \eqn{h_{t,t}} are the diagonal elements of the hat matrix \eqn{H = F(F^{\prime} F)^{-1} F^{\prime} }, with \eqn{F} being the \eqn{T \times (k+2)} matrix with rows \eqn{(f_{t}, f_{t+1}, \dots, f_{t+k}, 1)}.
+where \eqn{h_{t,t}} are the diagonal elements of the hat matrix \eqn{H = F(F^{\prime} F)^{-1} F^{\prime} }, with \eqn{F} being the \eqn{T \times (k+2)} matrix with rows \eqn{(f_{t-k}, f_{t-k+1}, \dots, f_{t}, 1)}.
 
 If crit = 'AIC' the number of lags is chosen among \eqn{0,\dots, k_{max}} as the value \eqn{k} that minimizes the following AIC type criterion
 \deqn{ AIC = T \log(trace(\Sigma)) + 2 m (k+2) .}
