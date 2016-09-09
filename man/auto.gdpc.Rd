@@ -47,8 +47,8 @@ If normalize = 1, the data is analyzed in the original units, without mean and v
 \value{
   An object of class \code{gdpcs}, that is, a list of length equal to the number of computed components. The i-th entry of this list is an object of class \code{gdpc}, that is, a list with entries
    \item{expart}{Proportion of the variance explained by the first i components.}
-  \item{mse}{Mean squared error of the residuals of the fit using the first i components.}
-  \item{crit}{The criterion of the fitted model, according to what the user specified.}
+  \item{mse}{Mean squared error of the reconstruction using the first i components.}
+  \item{crit}{The value of the criterion of the fitted model, according to what the user specified.}
   \item{k}{Number of lags chosen.}
   \item{alpha}{Vector of intercepts corresponding to f.}
   \item{beta}{Matrix of loadings corresponding to f. Column number \eqn{k} is the vector of \eqn{k-1} lag loadings.}

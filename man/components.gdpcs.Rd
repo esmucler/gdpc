@@ -15,7 +15,7 @@ Get Generalized Dynamic Principal Components from a gdpcs object.
 }
 
 
-\value{ A matrix whose columns are the desired Principal Components.}
+\value{ A matrix whose columns are the desired dynamic principal components.}
 \author{
 Daniel Peña, Ezequiel Smucler, Victor Yohai
 }

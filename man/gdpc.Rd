@@ -10,7 +10,7 @@ Computes a single Generalized Dynamic Principal Component with a given number of
 \arguments{
   \item{Z}{Data matrix. Each column is a different time series.}
   \item{k}{Integer. Number of lags to use.}
-  \item{f_ini}{(Optional). Numeric vector. Starting point for the iterations. If no argument is passed the standard Principal Component completed with k lags is used.}
+  \item{f_ini}{(Optional). Numeric vector. Starting point for the iterations. If no argument is passed the ordinary (non-dynamic) first principal component completed with k lags is used.}
   \item{tol}{Relative precision. Default is 1e-4.}
   \item{niter_max}{Integer. Maximum number of iterations. Default is 500.}
   \item{crit}{A string specifying the criterion to be used to evaluate the fitted model. Options are 'LOO', 'AIC', 'BIC' and 'BNG'. Default is 'LOO'.}
@@ -26,12 +26,12 @@ See \code{\link{auto.gdpc}} for the definition of criterion that is part of the 
   An object of class \code{gdpc}, that is, a list with entries:
    \item{expart}{Proportion of the variance explained.}
  \item{mse}{Mean squared error.}
- \item{crit}{The criterion specified by the user.}
+ \item{crit}{The value of the criterion of the fitted model, according to what the user specified.}
  \item{k}{Number of lags used.}
  \item{alpha}{Vector of intercepts corresponding to f.}
    \item{beta}{Matrix of loadings corresponding to f. Column number \eqn{k} is the vector of \eqn{k-1} lag loadings.}
- \item{f}{Coordinates of the first Principal Component corresponding to the periods \eqn{1,\dots,T}.}
-  \item{initial_f}{Coordinates of the first Principal Component corresponding to the periods \eqn{-k+1,\dots,0}. Only for the case \eqn{k>0}, otherwise 0.}
+ \item{f}{Coordinates of the first principal component corresponding to the periods \eqn{1,\dots,T}.}
+  \item{initial_f}{Coordinates of the first principal component corresponding to the periods \eqn{-k+1,\dots,0}. Only for the case \eqn{k>0}, otherwise 0.}
        \item{call}{The matched call.}
        \item{conv}{Logical. Did the iterations converge?}
  \code{fitted}, \code{plot} and \code{print} methods are available for this class.

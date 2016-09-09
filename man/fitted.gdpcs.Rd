@@ -40,7 +40,7 @@
   #Choose number of lags using the LOO criterion.
   #k_max=2 to keep computation time low
   autofit <- auto.gdpc(x, k_max = 2, auto_comp = FALSE, num_comp = 2) 
-  reconstruction <- fitted(autofit, num_comp = 2)
+  recons <- fitted(autofit, num_comp = 2)
 }
 
 \keyword{ts}
