@@ -3,3 +3,5 @@
 .Rbuildignore
 README.Rmd
 gdpc.Rproj
+*.so
+*.o

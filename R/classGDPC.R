@@ -189,6 +189,22 @@ components.gdpcs <- function(object, which_comp = 1) {
   return(comps)
 }
 
+fitted.gdpcs <- function(object, num_comp = 1, ...) {
+  # Returns the fitted values of a gdpcs object using components 1,...,num_comp
+  if (!is.gdpcs(object)) {
+    stop("object should be of class gdpcs")
+  }
+  fitted <- Reduce('+', lapply(object[1:num_comp], fitted))
+  if (inherits(object[[1]]$f, "xts")) {
+    fitted <- reclass(fitted, match.to = object[[1]]$f)
+  } else if (inherits(object[[1]]$f, "ts")) {
+    fitted <- ts(fitted)
+    attr(fitted, "tsp") <- attr(object[[1]]$f, "tsp")
+  }
+  return(fitted)
+}
+
+
 plot.gdpcs <- function(x, which_comp = 1, ...) {
   #Plots a gdpcs object
   #INPUT

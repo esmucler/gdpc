@@ -56,7 +56,7 @@ If normalize = 1, the data is analyzed in the original units, without mean and v
   \item{initial_f}{Coordinates of the i-th Principal Component corresponding to the periods \eqn{-k+1,\dots,0}. Only for the case \eqn{k>0}, otherwise 0.}
       \item{call}{The matched call.}
       \item{conv}{Logical. Did the iterations converge?}
-  \code{plot} and \code{print} methods are available for this class.
+  \code{components}, \code{fitted}, \code{plot} and \code{print} methods are available for this class.
 }
 \author{
   Daniel Peña, Ezequiel Smucler, Victor Yohai
@@ -68,7 +68,7 @@ factor models. Econometrica 70 191–221.
 }
 
 \seealso{
-\code{\link{gdpc}}, \code{\link{plot.gdpc}}, \code{\link{plot.gdpcs}}
+\code{\link{gdpc}}, \code{\link{plot.gdpc}}, \code{\link{plot.gdpcs}}, \code{\link{fitted.gdpcs}}, \code{\link{components.gdpcs}}
 }
 \examples{
 T <- 200 #length of series
