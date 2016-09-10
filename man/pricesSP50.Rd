@@ -17,8 +17,15 @@ Fifty series corresponding to the stock prices of the first 50 components of the
 \examples{
 data(pricesSP50)
 \dontrun{
-#This may take a bit.
-gdpc_SP50 <- auto.gdpc(pricesSP50, normalize = 2)
+#Plot the first four series
+plot(pricesSP50[, 1:4], main = 'Four components of the S&P500 index')
+#Compute GDPCs; this may take a bit.
+fit_SP <- auto.gdpc(pricesSP50, normalize = 2, niter_max = 1000, ncores= 4)
+fit_SP
+#Get reconstruction and plot
+recons <- fitted(fit_SP, num_comp = 2)
+colnames(recons) <- colnames(pricesSP50)
+plot(recons[, 1:4], main = 'Reconstruction of four components of the S&P500 index')
 }
 }
 \keyword{datasets}

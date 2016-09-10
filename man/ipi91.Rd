@@ -30,10 +30,10 @@ plot(ipi91, plot.type = 'multiple', main = 'Industrial Production Index')
 gdpc_ipi <- gdpc(ipi91, 9, niter_max = 1500)
 #Plot the component
 plot(gdpc_ipi, which = 'Component', ylab = '')
-#Get fitted values and plot
-fit_val <- fitted(gdpc_ipi)
-colnames(fit_val) <- colnames(ipi91)
-plot(fit_val, main = 'Fitted values')
+# Get reconstruction of the time series and plot
+recons <- fitted(gdpc_ipi)
+colnames(recons) <- colnames(ipi91)
+plot(recons, main = 'Fitted values')
 }
 }
 \keyword{datasets}
