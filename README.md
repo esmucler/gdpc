@@ -50,10 +50,10 @@ gdpc_ipi <- auto.gdpc(ipi91, k_max = 9, niter_max = 1500, ncores = 4)
 gdpc_ipi
 # Plot the component
 plot(gdpc_ipi, which_comp = 1, ylab = '')
-# Get fitted values and plot
-fit_val <- fitted(gdpc_ipi[[1]])
-colnames(fit_val) <- colnames(ipi91)
-plot(fit_val, main = 'Fitted values')
+# Get reconstruction of the time series and plot
+recons <- fitted(gdpc_ipi, 1)
+colnames(recons) <- colnames(ipi91)
+plot(recons, main = 'Fitted values')
 ```
 
 ### License
