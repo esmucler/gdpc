@@ -181,6 +181,9 @@ List gdpc_priv(const arma::mat & Z, const int & k, const arma::vec & f_ini, cons
     getMatrixBeta(Z, f, k, sel, beta, res, mse, crit);
     criter = 1 - mse / mse_ini;
     mse_ini = mse;
+    if (niter % 10 == 0){
+      Rcpp::checkUserInterrupt();
+    }
   }
   if (niter < niter_max) { 
     conv = true;
