@@ -2,7 +2,7 @@
 \alias{fitted.gdpcs}
 \title{Get Reconstructed Time Series From a gdpcs Object}
 \description{
-  Get reconstructed time series From a gdpcs object.
+  Get reconstructed time series from a gdpcs object.
 }
 
 
