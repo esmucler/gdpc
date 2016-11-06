@@ -63,8 +63,8 @@ If normalize = 1, the data is analyzed in the original units, without mean and v
 }
 
 \references{
-Bai, J. and Ng, S. (2002). Determining the number of factors in approximate
-factor models. Econometrica 70 191–221.
+Bai J. and Ng S. (2002). “Determining the Number of Factors in Approximate Factor Models.”
+Econometrica, 70(1), 191–221.
 }
 
 \seealso{

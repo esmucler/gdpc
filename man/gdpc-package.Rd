@@ -58,8 +58,8 @@ Maintainer: Ezequiel Smucler <ezequiels.90@gmail.com>
 }
 
 \references{
-Peña and Yohai (2016) "Generalized Dynamic Principal Components". Upcoming on Journal of the American
-Statistical Association.
+Peña D. and Yohai V.J. (2016). “Generalized Dynamic Principal Components.” Journal of the
+American Statistical Association, 111(515), 1121–1131.
 }
 
 
