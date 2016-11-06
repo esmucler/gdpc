@@ -4,9 +4,27 @@ using namespace arma;
 // [[Rcpp::depends(RcppArmadillo)]]
 
 
-void getMatrixBeta(const arma::mat & Z, const arma::vec & f, const int & k, const int & sel, arma::mat & betaOut, arma::mat & resOut, double & mseOut, double & critOut) {
+void getMatrixBeta(const arma::mat & Z, 
+                   const arma::vec & f, 
+                   const int & k, 
+                   const int & sel, 
+                   arma::mat & betaOut, 
+                   arma::mat & resOut, 
+                   double & mseOut, 
+                   double & critOut) {
   // This function finds the optimal beta, the residuals, mse and criterion corresponding to Z, f and k.
   // alpha is the last column of beta.
+  // INPUT
+  // Z: data matrix each ROW is a different time series
+  // f: principal component
+  // k: number of leads used
+  // sel: LOO (1), AIC (2), BIC (3), BNG (4)
+  // OUTPUT
+  // betaOut: matrix of loadings and intercept corresponding to f. Last column are the
+  // intercepts (alpha).
+  // resOut: matrix of residuals
+  // mseOut:  mean squared error (in N and m)
+  // critOut: criterion used to evaluate the fit
   int m = Z.n_rows;
   int N = Z.n_cols;
   arma::mat Fmat = mat(k + 1, N);
@@ -28,7 +46,7 @@ void getMatrixBeta(const arma::mat & Z, const arma::vec & f, const int & k, cons
   resOut = Z - betaOut * Fmat;
   mseOut = accu(pow(resOut, 2)) / N;
   if (sel == 1) {
-    arma::vec weights = 1/(1 - diagvec(Proj));
+    arma::vec weights = 1 / (1 - diagvec(Proj));
     critOut = accu( pow(resOut * diagmat(weights) , 2) ) / (N * m);
   } else if (sel == 2) {
     critOut = N * log(mseOut) + m * (k + 2) * 2;  
@@ -40,7 +58,9 @@ void getMatrixBeta(const arma::mat & Z, const arma::vec & f, const int & k, cons
   mseOut = mseOut / m;
 }
 
-arma::mat getMatrixC(const arma::subview_row<double> & rowZ, const double & alpha, const int & k) {
+arma::mat getMatrixC(const arma::subview_row<double> & rowZ,
+                     const double & alpha,
+                     const int & k) {
   // Constructs the matrix C correspoding to rowZ, alpha and k 
   int N = rowZ.n_elem;
   arma::mat C = zeros(N + k, k + 1);
@@ -52,15 +72,17 @@ arma::mat getMatrixC(const arma::subview_row<double> & rowZ, const double & alph
     liml[1] = t - N;
     limu[1] = t - 1;
     for (int q = 1; q <= k + 1; q++){
-      if( (q >= max(liml) + 1) & (q<= min(limu) + 1)){
-        C(t - 1, q - 1) = rowZ(t - q) - alpha;
+      if( (q >= max(liml) + 1) & (q <= min(limu) + 1)){
+        C.at(t - 1, q - 1) = rowZ[t - q] - alpha;
       }
     }
   }
   return (C);
 }
 
-arma::mat getMatrixD(const arma::subview_row<double> & rowbeta, const int & N, const int & k) {
+arma::mat getMatrixD(const arma::subview_row<double> & rowbeta,
+                     const int & N,
+                     const int & k) {
   // Constructs the matrix D corresponding to rowbeta, N and k 
   arma::mat beta_mat = zeros(N + k, N + k);
   arma::vec liml = vec(2);
@@ -72,22 +94,24 @@ arma::mat getMatrixD(const arma::subview_row<double> & rowbeta, const int & N, c
     limu[0] = t;
     for (int r = max(liml); r <= min(limu); r++){
       for (int q = r; q <= r + k; q++){
-        beta_mat(t - 1, q - 1) = beta_mat(t - 1, q - 1) + rowbeta(q - r) * rowbeta(t - r);
+        beta_mat.at(t - 1, q - 1) += rowbeta[q - r] * rowbeta[t - r];
       }
     }
   }
   return (beta_mat);
 }
 
-arma::vec getF(const arma::mat & Z, const arma::mat & beta, const int & k) {
+arma::vec getF(const arma::mat & Z,
+               const arma::mat & beta,
+               const int & k) {
   // Get optimal f corresponding to Z, beta, alpha and k.
   int m = Z.n_rows;
   int N = Z.n_cols;
   arma::mat D = zeros(N + k, N + k);
   arma::vec fOut = zeros(N + k, 1);
-  for (int j=0 ; j < m ; j++){
-    D = D + getMatrixD(beta(j, span(0, k)), N, k);
-    fOut = fOut + getMatrixC(Z.row(j), beta(j, k + 1), k) * (beta(j, span(0, k))).t();
+  for (int j = 0 ; j < m ; j++){
+    D += getMatrixD(beta(j, span(0, k)), N, k);
+    fOut += getMatrixC(Z.row(j), beta(j, k + 1), k) * (beta(j, span(0, k))).t();
   }
   
   double condition_D = rcond(D);
@@ -101,7 +125,11 @@ arma::vec getF(const arma::mat & Z, const arma::mat & beta, const int & k) {
 }
 
 // [[Rcpp::export]]
-arma::mat getFitted(arma::vec & f_fin, const arma::vec & f_ini, const arma::mat & beta, const arma::vec & alpha, const int & k) {
+arma::mat getFitted(arma::vec & f_fin,
+                    const arma::vec & f_ini,
+                    const arma::mat & beta,
+                    const arma::vec & alpha,
+                    const int & k) {
   // Get fitted values associated with f and beta and alpha
   int N = f_fin.n_elem;
   if (k > 0){
@@ -119,7 +147,8 @@ arma::mat getFitted(arma::vec & f_fin, const arma::vec & f_ini, const arma::mat 
 }
 
 // [[Rcpp::export]]
-arma::vec getFini(const arma::mat & Z, const int & k) {
+arma::vec getFini(const arma::mat & Z,
+                  const int & k) {
   // Get initial estimator: ordinary principal component with k leads
   int N = Z.n_cols;
   arma::vec f_iniOut = zeros(N + k, 1);
@@ -140,7 +169,13 @@ arma::vec getFini(const arma::mat & Z, const int & k) {
 
 
 // [[Rcpp::export]]
-List gdpc_priv(const arma::mat & Z, const int & k, const arma::vec & f_ini, const bool & passf_ini,const double & tol, const int & niter_max, const int & sel) {
+List gdpc_priv(const arma::mat & Z,
+               const int & k,
+               const arma::vec & f_ini,
+               const bool & passf_ini,
+               const double & tol,
+               const int & niter_max,
+               const int & sel) {
 // This function computes a single GDPC with a given number of leads.
 // INPUT
 // Z: data matrix each ROW is a different time series

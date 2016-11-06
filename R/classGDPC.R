@@ -150,7 +150,7 @@ plot.gdpc <- function(x, which = "Component", which_load = 0, ...) {
   }
   if (!inherits(which_load, "numeric")) {
     stop("which_load should be numeric")
-  } else if (any(!which_load == floor(which_load), which_load < 0, which_load > ncol(x$beta) - 1)) {
+  } else if (any(!(which_load == floor(which_load)), which_load < 0, which_load > ncol(x$beta) - 1)) {
     stop("which_load should be a non-negative integer, at most equal to the number of lags")
   }
   if (which == "Component"){
@@ -238,7 +238,7 @@ components.gdpcs <- function(object, which_comp = 1) {
   }
   if (all(!inherits(which_comp, "numeric"), !inherits(which_comp, "integer"))) {
     stop("which_comp should be numeric")
-  } else if (any(!which_comp == floor(which_comp), which_comp <= 0, which_comp > length(object))) {
+  } else if (any(!(which_comp == floor(which_comp)), which_comp <= 0, which_comp > length(object))) {
     stop("The entries of which_comp should be positive integers, at most equal to the number of components")
   }
   object <- object[which_comp]
@@ -256,6 +256,11 @@ fitted.gdpcs <- function(object, num_comp = 1, ...) {
   # Returns the fitted values of a gdpcs object using components 1,...,num_comp
   if (!is.gdpcs(object)) {
     stop("object should be of class gdpcs")
+  }
+  if (all(!inherits(num_comp, "numeric"), !inherits(num_comp, "integer"))) {
+    stop("num_comp should be numeric")
+  } else if (any(!(num_comp == floor(num_comp)), num_comp <= 0, num_comp > length(object))) {
+    stop("num_comp should be a positive integer, at most equal to the number of components")
   }
   fitted <- Reduce('+', lapply(object[1:num_comp], fitted))
   if (inherits(object[[1]]$f, "xts")) {
@@ -278,7 +283,7 @@ plot.gdpcs <- function(x, which_comp = 1, ...) {
   }
   if (all(!inherits(which_comp, "numeric"), !inherits(which_comp, "integer"))) {
     stop("which_comp should be numeric")
-  } else if (any(!which_comp == floor(which_comp), which_comp <= 0, which_comp > length(x))) {
+  } else if (any(!(which_comp == floor(which_comp)), which_comp <= 0, which_comp > length(x))) {
     stop("The entries of which_comp should be positive integers, at most equal to the number of components")
   }
   comps <- components(x, which_comp)
