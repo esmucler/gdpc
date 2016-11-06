@@ -21,8 +21,7 @@ NeedsCompilation: \tab yes\cr
 
 Index:
 \preformatted{
-auto.gdpc   Computes Generalized Dynamic Principal Components, number of 
-            components and lags can be chosen automatically.
+auto.gdpc   Automatic Fitting of Generalized Dynamic Principal Components.
 }
 \preformatted{
 components.gdpcs    Get Generalized Dynamic Principal Components from a gdpcs object.
@@ -31,8 +30,8 @@ components.gdpcs    Get Generalized Dynamic Principal Components from a gdpcs ob
 fitted.gdpcs    Get reconstructed time series from a gdpcs object.
 }
 \preformatted{
-gdpc    Computes a single Generalized Dynamic Principal Component with
-        a given number of lags.
+gdpc    Computes a single Generalized Dynamic Principal Component
+        with a given number of lags.
 }
 \preformatted{
 ipi91   Six series corresponding to the Industrial Production
