@@ -94,7 +94,7 @@ arma::mat getMatrixD(const arma::subview_row<double> & rowbeta,
     limu[0] = t;
     for (int r = max(liml); r <= min(limu); r++){
       for (int q = r; q <= r + k; q++){
-        beta_mat.at(t - 1, q - 1) += rowbeta[q - r] * rowbeta[t - r];
+        beta_mat.at(t - 1, q - 1) = beta_mat.at(t - 1, q - 1) + rowbeta[q - r] * rowbeta[t - r];
       }
     }
   }
@@ -110,8 +110,8 @@ arma::vec getF(const arma::mat & Z,
   arma::mat D = zeros(N + k, N + k);
   arma::vec fOut = zeros(N + k, 1);
   for (int j = 0 ; j < m ; j++){
-    D += getMatrixD(beta(j, span(0, k)), N, k);
-    fOut += getMatrixC(Z.row(j), beta(j, k + 1), k) * (beta(j, span(0, k))).t();
+    D = D + getMatrixD(beta(j, span(0, k)), N, k);
+    fOut = fOut + getMatrixC(Z.row(j), beta(j, k + 1), k) * (beta(j, span(0, k))).t();
   }
   
   double condition_D = rcond(D);
