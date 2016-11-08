@@ -1,13 +1,13 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
-os:
-  - linux
-  - osx
+
 language: r
 r:
   - release
   - devel
-sudo: false
 cache: packages
+
 matrix:
-  allow_failures:
+  include:
+    - os: linux
     - os: osx
+      latex: false
