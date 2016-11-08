@@ -1,8 +1,8 @@
 Package: gdpc
 Type: Package
 Title: Generalized Dynamic Principal Components
-Version: 0.99.3
-Date: 2016-11-05
+Version: 1.0.0
+Date: 2016-11-08
 Author: Daniel Peña <daniel.pena@uc3m.es>,
     Ezequiel Smucler <ezequiels.90@gmail.com>,
     Victor Yohai <vyohai@dm.uba.ar>
