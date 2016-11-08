@@ -13,12 +13,12 @@ License: GPL (>= 2)
 Imports:
     xts,
     methods,
-    Rcpp,
+    Rcpp (>= 0.12.7),
     parallel,
     doParallel,
     foreach
-LinkingTo: Rcpp, RcppArmadillo
+LinkingTo: Rcpp, RcppArmadillo (>= 0.7.500.0.0)
 Depends:
-    R (>= 2.10)
+    R (>= 3.3.1)
 NeedsCompilation: yes
 Encoding: UTF-8
