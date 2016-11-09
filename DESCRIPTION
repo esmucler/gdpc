@@ -8,7 +8,7 @@ Author: Daniel Peña <daniel.pena@uc3m.es>,
     Victor Yohai <vyohai@dm.uba.ar>
 Maintainer: Ezequiel Smucler <ezequiels.90@gmail.com>
 Description: Functions to compute the Generalized Dynamic Principal Components
-    introduced in Peña and Yohai (2016).
+    introduced in Peña and Yohai (2016) <DOI:10.1080/01621459.2015.1072542>.
 License: GPL (>= 2)
 Imports:
     xts,
