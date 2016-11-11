@@ -51,9 +51,9 @@ void getMatrixBeta(const arma::mat & Z,
   } else if (sel == 2) {
     critOut = N * log(mseOut) + m * (k + 2) * 2;  
   } else if (sel == 3) {
-    critOut = N * log(mseOut) + m * (k + 2) * log(N);  
+    critOut = N * log(mseOut) + m * (k + 2) * log((double) N);  
   } else if (sel == 4) {
-    critOut = N * log(mseOut) + (k + 2) * log(m);  
+    critOut = N * log(mseOut) + (k + 2) * log((double) m);  
   }
   mseOut = mseOut / m;
 }

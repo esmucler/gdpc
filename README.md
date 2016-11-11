@@ -1,19 +1,26 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-[![Travis-CI Build Status](https://travis-ci.org/esmucler/gdpc.svg?branch=master)](https://travis-ci.org/esmucler/gdpc)
+[![Build Status](https://travis-ci.org/esmucler/gdpc.svg?branch=master)](https://travis-ci.org/esmucler/gdpc) [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/gdpc)](https://cran.r-project.org/package=gdpc) [![Downloads](http://cranlogs.r-pkg.org/badges/gdpc)](https://cran.r-project.org/package=gdpc)
 
 gdpc
 ====
 
-This package (currently under development!) provides functions for computing the Generalized Dynamic Principal Components proposed in Peña and Yohai (2016). The number of components can be supplied by the user or chosen automatically so that a given proportion of variance is explained. The number of lags is chosen automatically using one of the following criteria: Leave-one-out cross-validation, an AIC type criterion, a BIC type criterion or a criterion based on a proposal of Bai and Ng (2002).
+This package provides functions for computing the Generalized Dynamic Principal Components proposed in [Peña and Yohai (2016)](http://dx.doi.org/10.1080/01621459.2015.1072542). The number of components can be supplied by the user or chosen automatically so that a given proportion of variance is explained. The number of lags is chosen automatically using one of the following criteria: Leave-one-out cross-validation, an AIC type criterion, a BIC type criterion or a criterion based on a proposal of Bai and Ng (2002).
 
 ------------------------------------------------------------------------
 
 ### Installation
 
+You can install the **stable** version on
+
+``` r
+install.packages('gdpc')
+```
+
 You can install the **development** version from [GitHub](https://github.com/esmucler/gdpc)
 
 ``` r
+library(devtools)
 devtools::install_github("esmucler/gdpc")
 ```
 
