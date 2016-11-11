@@ -11,10 +11,10 @@ This package provides functions for computing the Generalized Dynamic Principal 
 
 ### Installation
 
-You can install the **stable** version on
+You can install the **stable** version on [R CRAN](https://cran.r-project.org/package=gdpc).
 
 ``` r
-install.packages('gdpc')
+install.packages('gdpc', dependencies = TRUE)
 ```
 
 You can install the **development** version from [GitHub](https://github.com/esmucler/gdpc)
