@@ -66,7 +66,7 @@ construct.gdpc <- function(out, data) {
 }
 
 
-construct.gdpc.norm <- function(out, data, res) {
+construct.gdpc.norm <- function(out, data, comp_num) {
   #This function constructs an object of class gdpc, except that it leaves the res
   #entry (that comes from gdpc_priv). It is only used when the user called auto.gdpc
   #using normalize = 2, and in this case will adjust the final loadings and intercepts
@@ -74,7 +74,7 @@ construct.gdpc.norm <- function(out, data, res) {
   #INPUT
   # out: the output of gdpc_priv
   # data: the data matrix passed to gdpc_priv
-  # res: the residuals of the fit using the previous components
+  # comp_num: number of the component
   #OUTPUT
   # An object of class gdpc, but with a res entry, that is, a list with entries:
   # f: coordinates of the Principal Component corresponding to the periods 1,…,T
@@ -97,8 +97,12 @@ construct.gdpc.norm <- function(out, data, res) {
   } else {
     out$initial_f <- 0
   }
-  mean_Z <- apply(res, 2, mean)
-  sd_Z <- apply(res, 2, sd)
+  sd_Z <- apply(data, 2, sd)
+  if (comp_num == 1){
+    mean_Z <- apply(data, 2, mean)
+  } else {
+    mean_Z <- 0
+  }
   out$alpha <- out$alpha * sd_Z + mean_Z
   if (k == 0) {
     out$beta <- out$beta * sd_Z
@@ -187,18 +191,16 @@ construct.gdpcs <- function(out, data, fn_call, normalize) {
   #this requires using each of the residuals
   if (normalize == 2) {
     num_comp <- length(out)
-    #construct.gdpc.norm(out[[j]], data ,res) (unlike construct.gdpc) will adjust the loadings
-    #and intercepts using the mean and sd of res (the residuals of the reconstruction using
-    #all the previous components) and will not delete the res entry. data will be used to
+    #construct.gdpc.norm(out[[j]], data, num_comp) (unlike construct.gdpc) will adjust the loadings
+    #and intercepts using the mean and sd of data. data will also be used to
     #obtain rownames (if any) for beta and the class for f
-    out[[1]] <- construct.gdpc.norm(out[[1]], data, data)
+    out[[1]] <- construct.gdpc.norm(out[[1]], data, 1)
     if (num_comp > 1) {
       for (k in 2:num_comp) {
-        out[[k]] <- construct.gdpc.norm(out[[k]], data, t(out[[k-1]]$res))
+        out[[k]] <- construct.gdpc.norm(out[[k]], data, k)
       }
     }
     out <- lapply(out, function(x, fn_call){ x$call <- fn_call; return(x)}, fn_call)
-    #After adjusting all the loadings and intercepts, we can delete the res entries
     out <- lapply(out, function(x){ x$res <- NULL; return(x)})
   } else {
     out <- lapply(out, function(x, fn_call){ x$call <- fn_call; return(x)}, fn_call)
