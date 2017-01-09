@@ -1,0 +1,10 @@
+gdpc 0.1.1
+==============
+
+Bug fixes:
+
+* Fixed a bug in auto.gdpc when the user chose normalize = 2. The loadings and intercepts were
+  being correctly adjusted only for the first component.
+
+* Explicitly cast N and m as double when computing crit. This should fix an installation bug in Solaris.
+
