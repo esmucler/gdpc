@@ -67,13 +67,13 @@ construct.gdpc <- function(out, data) {
 
 
 construct.gdpc.norm <- function(out, data, comp_num) {
-  #This function constructs an object of class gdpc, except that it leaves the res
-  #entry (that comes from gdpc_priv). It is only used when the user called auto.gdpc
+  #This function constructs an object of class gdpc.
+  #It is only used when the user called auto.gdpc
   #using normalize = 2, and in this case will adjust the final loadings and intercepts
   #so that the reconstruction is of the original (not normalized) data
   #INPUT
   # out: the output of gdpc_priv
-  # data: the data matrix passed to gdpc_priv
+  # data: the data matrix. Series by columns
   # comp_num: number of the component
   #OUTPUT
   # An object of class gdpc, but with a res entry, that is, a list with entries:
@@ -87,7 +87,6 @@ construct.gdpc.norm <- function(out, data, comp_num) {
   # expart: proportion of the variance explained
   # call: the matched call
   # conv: logical. Did the iterations converge?
-  # res: the residuals of the reconstruction
   
   k <- ncol(out$beta) - 2  #number of leads
   out$alpha <- out$beta[, k + 2]
@@ -181,14 +180,13 @@ construct.gdpcs <- function(out, data, fn_call, normalize) {
   #the number of computed components. The i-th entry of this list is an object of class gdpc.
   #INPUT
   # out: the output of auto.gdpc
-  # data: the data matrix passed to auto.gdpc
+  # data: the data matrix passed to auto.gdpc, series by columns
   # fn_call: the original call to auto.gdpc
   # normalize: integer, indicates what normalization the user requested
   #OUTPUT
   # An object of class gdpcs, that is, a list where each entry is an object of class gdpc.
   
-  #If normalize == 2, we have to adjust the loadings and intercepts for each component;
-  #this requires using each of the residuals
+  #If normalize == 2, we have to adjust the loadings and intercepts for each component
   if (normalize == 2) {
     num_comp <- length(out)
     #construct.gdpc.norm(out[[j]], data, num_comp) (unlike construct.gdpc) will adjust the loadings
