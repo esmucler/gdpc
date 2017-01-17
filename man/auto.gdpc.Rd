@@ -84,7 +84,7 @@ for (i in 1:m) {
 #k_max=3 to keep computation time low
 autofit <- auto.gdpc(x, k_max = 3)
 autofit
-fit_val <- fitted(autofit[[1]]) #Get fitted values
+fit_val <- fitted(autofit, 1) #Get fitted values
 resid <- x - fit_val #Residuals
 plot.gdpcs(autofit, which_comp = 1) #Plot component
 }
