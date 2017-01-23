@@ -12,6 +12,7 @@ Description: Functions to compute the Generalized Dynamic Principal Components
 License: GPL (>= 2)
 Imports:
     xts,
+    zoo,
     methods,
     Rcpp (>= 0.12.7),
     parallel,
