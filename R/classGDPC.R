@@ -13,9 +13,10 @@ is.gdpc <- function(object, ...) {
     return(FALSE)
   } else if (any(!inherits(object$mse, "numeric"), !inherits(object$crit, "numeric"), !inherits(object$alpha, "numeric"),
                  !inherits(object$beta, "matrix"), !inherits(object$call, "call"), !inherits(object$conv, "logical"), 
-                 all(!inherits(object$f,"numeric"), !inherits(object$f, "ts"), !inherits(object$f, "xts")),
+                 all(!inherits(object$f,"numeric"), !inherits(object$f, "ts"), !inherits(object$f, "xts"), !inherits(object$f, "zoo")),
                  all(!inherits(object$k, "numeric"), !inherits(object$k, "integer")), !inherits(object$expart, "numeric"),
-                 all(!inherits(object$initial_f,"numeric"), !inherits(object$initial_f,"ts"), !inherits(object$initial_f,"xts"))
+                 all(!inherits(object$initial_f,"numeric"), !inherits(object$initial_f,"ts"), !inherits(object$initial_f,"xts"),
+                     !inherits(object$initial_f, "zoo"))
   )) {
     return(FALSE)
   } else if (any(length(object$alpha) != dim(object$beta)[1], dim(object$beta)[2] != object$k + 1)) {
@@ -58,6 +59,8 @@ construct.gdpc <- function(out, data) {
   out$res <- NULL
   if (inherits(data, "xts")) {
     out$f <- reclass(out$f, match.to = data)
+  } else if (inherits(data, "zoo")) {
+    out$f <- zoo(out$f, order.by = index(data))
   } else if (inherits(data, "ts")) {
     out$f <- ts(out$f, start = start(data), end = end(data), frequency = frequency(data))
   }
