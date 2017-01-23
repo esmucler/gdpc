@@ -40,8 +40,8 @@ auto.gdpc <- function(Z, crit = "LOO", normalize = 1, auto_comp = TRUE, expl_var
   # call: the matched call
   # conv: Logical. Did the iterations converge?
   
-  if (all(!inherits(Z, "matrix"), !inherits(Z, "mts"), !inherits(Z, "xts"), !inherits(Z, "data.frame"))) {
-    stop("Z should belong to one of the following classes: matrix, data.frame, mts, xts")
+  if (all(!inherits(Z, "matrix"), !inherits(Z, "mts"), !inherits(Z, "xts"), !inherits(Z, "zoo"), !inherits(Z, "data.frame"))) {
+    stop("Z should belong to one of the following classes: matrix, data.frame, mts, xts, zoo")
   } else if (any(dim(Z)[2] < 2, dim(Z)[1] < 10)) {
     stop("Z should have at least ten rows and two columns")
   } else if (any(anyNA(Z), any(is.nan(Z)), any(is.infinite(Z)))) {
@@ -214,8 +214,8 @@ gdpc <- function(Z, k, f_ini = NULL, tol = 1e-04, niter_max = 500, crit = "LOO")
   # conv: logical. Did the iterations converge?
   
   
-  if (all(!inherits(Z, "matrix"), !inherits(Z, "mts"), !inherits(Z, "xts"), !inherits(Z, "data.frame"))) {
-    stop("Z should belong to one of the following classes: matrix, data.frame, mts, xts")
+  if (all(!inherits(Z, "matrix"), !inherits(Z, "mts"), !inherits(Z, "xts"), !inherits(Z, "zoo"), !inherits(Z, "data.frame"))) {
+    stop("Z should belong to one of the following classes: matrix, data.frame, mts, xts, zoo")
   } else if (any(dim(Z)[2] < 2, dim(Z)[1] < 10)) {
     stop("Z should have at least ten rows and two columns")
   } else if (any(anyNA(Z), any(is.nan(Z)), any(is.infinite(Z)))) {
