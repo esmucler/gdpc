@@ -134,6 +134,8 @@ fitted.gdpc <- function(object, ...) {
   fitted <- getFitted(object$f, object$initial_f, object$beta, object$alpha, object$k)
   if (inherits(object$f, "xts")) {
     fitted <- reclass(fitted, match.to = object$f)
+  } else if (inherits(object$f, "zoo")) {
+    fitted <- zoo(fitted, order.by = index(object$f))
   } else if (inherits(object$f, "ts")) {
     fitted <- ts(fitted)
     attr(fitted, "tsp") <- attr(object$f, "tsp")
