@@ -15,7 +15,7 @@ Version: \tab 1.0.1.9000\cr
 Date: \tab 2017-01-17\cr
 Depends: \tab R (>= 3.3.1)\cr
 License: \tab GPL (>= 2)\cr
-Imports: \tab xts, methods, Rcpp (>= 0.12.7), parallel, doParallel, foreach\cr
+Imports: \tab xts, zoo, methods, Rcpp (>= 0.12.7), parallel, doParallel, foreach\cr
 LinkingTo: \tab Rcpp, RcppArmadillo (>= 0.7.500.0.0)\cr
 NeedsCompilation: \tab yes\cr
 }
