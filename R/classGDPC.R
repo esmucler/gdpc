@@ -300,7 +300,7 @@ plot.gdpcs <- function(x, which_comp = 1, plot.type = 'multiple',...) {
   }
   comps <- components(x, which_comp)
   if (inherits(comps, "xts") & length(which_comp)==1) {
-    plot(comps, main = "Principal Components", plot.type = 'multiple', ...)
+    plot(comps, main = "Principal Components", ...)
   } else if (inherits(comps, "zoo")) {
     plot(comps, main = "Principal Components", plot.type = plot.type, ...)
   } else if (inherits(comps, "ts")) {
