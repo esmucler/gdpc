@@ -284,11 +284,12 @@ fitted.gdpcs <- function(object, num_comp = 1, ...) {
 }
 
 
-plot.gdpcs <- function(x, which_comp = 1, ...) {
+plot.gdpcs <- function(x, which_comp = 1, plot.type = 'multiple',...) {
   #Plots a gdpcs object
   #INPUT
   # x: An object of class gdpcs, the result of auto.gdpc
   # which_comp: Integer vector. Indicates which components to plot
+  # plot_type: used only when x is of class zoo
   if (!is.gdpcs(x)) {
     stop("x should be of class gdpcs")
   }
@@ -299,7 +300,9 @@ plot.gdpcs <- function(x, which_comp = 1, ...) {
   }
   comps <- components(x, which_comp)
   if (inherits(comps, "xts") & length(which_comp)==1) {
-    plot(comps, main = "Principal Components",...)
+    plot(comps, main = "Principal Components", plot.type = 'multiple', ...)
+  } else if (inherits(comps, "zoo")) {
+    plot(comps, main = "Principal Components", plot.type = plot.type, ...)
   } else if (inherits(comps, "ts")) {
     plot(comps, main = "Principal Components", plot.type = 'multiple', ...)
   } else {

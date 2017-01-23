@@ -7,11 +7,13 @@ Plots a \code{gdpcs} object.
 
 
 \usage{
-\method{plot}{gdpcs}(x, which_comp = 1, \dots)
+\method{plot}{gdpcs}(x, which_comp = 1, plot.type = 'multiple', \dots)
 }
 \arguments{
   \item{x}{An object of class \code{gdpcs}, usually the result of \link{auto.gdpc}.}
   \item{which_comp}{Numeric vector indicating which components to plot. Default is 1.}
+  \item{plot.type}{Argument to be passed to \code{\link[zoo]{plot.zoo}}. Used only when the original data set
+                   was of class \code{zoo}. Default is 'multiple'.}
   \item{\dots}{Additional arguments to be passed to the plotting functions.}
 }
 
