@@ -12,8 +12,7 @@ Plots a \code{gdpcs} object.
 \arguments{
   \item{x}{An object of class \code{gdpcs}, usually the result of \link{auto.gdpc}.}
   \item{which_comp}{Numeric vector indicating which components to plot. Default is 1.}
-  \item{plot.type}{Argument to be passed to \code{\link[zoo]{plot.zoo}}. Used only when the original data set
-                   was of class \code{zoo}. Default is 'multiple'.}
+  \item{plot.type}{Argument to be passed to \code{\link[zoo]{plot.zoo}}. Used only when the original data set was stored in an object of class \code{zoo}. Default is 'multiple'.}
   \item{\dots}{Additional arguments to be passed to the plotting functions.}
 }
 
