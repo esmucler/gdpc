@@ -272,6 +272,8 @@ fitted.gdpcs <- function(object, num_comp = 1, ...) {
   fitted <- Reduce('+', lapply(object[1:num_comp], fitted))
   if (inherits(object[[1]]$f, "xts")) {
     fitted <- reclass(fitted, match.to = object[[1]]$f)
+  } else if (inherits(object[[1]]$f, "zoo")) {
+    fitted <- zoo(fitted, order.by = index(object[[1]]$f))
   } else if (inherits(object[[1]]$f, "ts")) {
     fitted <- ts(fitted)
     attr(fitted, "tsp") <- attr(object[[1]]$f, "tsp")
