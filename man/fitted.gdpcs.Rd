@@ -11,7 +11,7 @@
 }
 \arguments{
   \item{object}{An object of class \code{gdpcs}, usually the result of \link{auto.gdpc}.}
-  \item{num_comp}{Integer indicating how many components to use for the reconstrucion. Default is 1.}
+  \item{num_comp}{Integer indicating how many components to use for the reconstruction. Default is 1.}
   \item{\dots}{Additional arguments for compatibility.}
 }
 
