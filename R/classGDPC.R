@@ -117,6 +117,8 @@ construct.gdpc.norm <- function(out, data, comp_num) {
   out$f <- out$f[(k + 1):length(out$f)]
   if (inherits(data, "xts")) {
     out$f <- reclass(out$f, match.to = data)
+  } else if (inherits(data, "zoo")) {
+    out$f <- zoo(out$f, order.by = index(data))
   } else if (inherits(data, "ts")) {
     out$f <- ts(out$f, start = start(data), end = end(data), frequency = frequency(data))
   }
