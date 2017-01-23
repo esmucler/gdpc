@@ -251,6 +251,8 @@ components.gdpcs <- function(object, which_comp = 1) {
   colnames(comps) <- paste("Component number", which_comp)
   if (inherits(object[[1]]$f, "xts")) {
     comps <- reclass(comps, match.to = object[[1]]$f)
+  } else if (inherits(object[[1]]$f, "zoo")) {
+    comps <- zoo(comps, order.by = index(object[[1]]$f))
   } else if (inherits(object[[1]]$f, "ts")) {
     comps <- ts(comps, start = start(object[[1]]$f), end = end(object[[1]]$f), frequency = frequency(object[[1]]$f))
   } 
