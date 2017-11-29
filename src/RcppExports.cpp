@@ -8,7 +8,7 @@ using namespace Rcpp;
 
 // getFitted
 arma::mat getFitted(arma::vec& f_fin, const arma::vec& f_ini, const arma::mat& beta, const arma::vec& alpha, const int& k);
-RcppExport SEXP gdpc_getFitted(SEXP f_finSEXP, SEXP f_iniSEXP, SEXP betaSEXP, SEXP alphaSEXP, SEXP kSEXP) {
+RcppExport SEXP _gdpc_getFitted(SEXP f_finSEXP, SEXP f_iniSEXP, SEXP betaSEXP, SEXP alphaSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -23,7 +23,7 @@ END_RCPP
 }
 // getFini
 arma::vec getFini(const arma::mat& Z, const int& k);
-RcppExport SEXP gdpc_getFini(SEXP ZSEXP, SEXP kSEXP) {
+RcppExport SEXP _gdpc_getFini(SEXP ZSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -35,7 +35,7 @@ END_RCPP
 }
 // gdpc_priv
 List gdpc_priv(const arma::mat& Z, const int& k, const arma::vec& f_ini, const bool& passf_ini, const double& tol, const int& niter_max, const int& sel);
-RcppExport SEXP gdpc_gdpc_priv(SEXP ZSEXP, SEXP kSEXP, SEXP f_iniSEXP, SEXP passf_iniSEXP, SEXP tolSEXP, SEXP niter_maxSEXP, SEXP selSEXP) {
+RcppExport SEXP _gdpc_gdpc_priv(SEXP ZSEXP, SEXP kSEXP, SEXP f_iniSEXP, SEXP passf_iniSEXP, SEXP tolSEXP, SEXP niter_maxSEXP, SEXP selSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
