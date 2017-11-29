@@ -39,7 +39,7 @@ for (i in 1:m) {
 #Choose number of lags using the LOO criterion.
 #k_max=2 to keep computation time low
 autofit <- auto.gdpc(x, k_max = 2, auto_comp = FALSE, num_comp = 2) 
-comps <- components.gdpcs(autofit, which_comp = c(1,2))
+comps <- components(autofit, which_comp = c(1,2))
 }
 
 \keyword{ts}

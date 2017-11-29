@@ -86,7 +86,7 @@ autofit <- auto.gdpc(x, k_max = 3)
 autofit
 fit_val <- fitted(autofit, 1) #Get fitted values
 resid <- x - fit_val #Residuals
-plot.gdpcs(autofit, which_comp = 1) #Plot component
+plot(autofit, which_comp = 1) #Plot component
 }
 
 \keyword{ts}
