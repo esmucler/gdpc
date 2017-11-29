@@ -228,7 +228,7 @@ is.gdpcs <- function(object, ...) {
 }
 
 
-components <- function(object, ...){
+components <- function(object, which_comp){
   # Generic function for getting components out of an object
   UseMethod("components", object)
 }
