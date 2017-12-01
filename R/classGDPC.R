@@ -64,7 +64,7 @@ construct.gdpc <- function(out, data) {
   } else if (inherits(data, "ts")) {
     out$f <- ts(out$f, start = start(data), end = end(data), frequency = frequency(data))
   }
-  class(out) <- append(class(out), "gdpc")
+  class(out) <- append("gdpc", class(out))
   return(out)
 }
 
@@ -122,7 +122,7 @@ construct.gdpc.norm <- function(out, data, comp_num) {
   } else if (inherits(data, "ts")) {
     out$f <- ts(out$f, start = start(data), end = end(data), frequency = frequency(data))
   }
-  class(out) <- append(class(out), "gdpc")
+  class(out) <- append("gdpc", class(out))
   return(out)
 }
 
@@ -176,7 +176,7 @@ print.gdpc <- function(x, ...) {
     stop("x should be of class gdpc")
   }
   y <- list(x)
-  class(y) <- append(class(y), 'gdpcs')
+  class(y) <- append("gdpcs", class(y))
   print(y)
 }
 
@@ -211,7 +211,7 @@ construct.gdpcs <- function(out, data, fn_call, normalize) {
     out <- lapply(out, function(x, fn_call){ x$call <- fn_call; return(x)}, fn_call)
     out <- lapply(out, construct.gdpc, data)
   }
-  class(out) <- append(class(out), "gdpcs")
+  class(out) <- append("gdpcs", class(out))
   return(out)
 }
 
