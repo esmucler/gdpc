@@ -10,7 +10,7 @@
   components(object, which_comp)
 }
 \arguments{
-  \item{object}{An object. Currently there is a method for objects of class \code{gdpc}.}
+  \item{object}{An object. Currently there is a method for objects of class \code{gdpcs}.}
   \item{which_comp}{Numeric vector indicating which components to get. Default is 1.}
 }
 
