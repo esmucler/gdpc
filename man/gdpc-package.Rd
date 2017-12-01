@@ -11,8 +11,8 @@ Computes the Generalized Dynamic Principal Components proposed in Peña and Yoha
 \tabular{ll}{
 Package: \tab gdpc\cr
 Type: \tab Package\cr
-Version: \tab 1.0.2.9000\cr
-Date: \tab 2017-11-29\cr
+Version: \tab 1.0.3\cr
+Date: \tab 2017-12-01\cr
 Depends: \tab R (>= 3.3.1)\cr
 License: \tab GPL (>= 2)\cr
 Imports: \tab xts, zoo, methods, Rcpp (>= 0.12.7), parallel, doParallel, foreach\cr
