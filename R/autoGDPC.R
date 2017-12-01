@@ -108,7 +108,7 @@ auto.gdpc <- function(Z, crit = "LOO", normalize = 1, auto_comp = TRUE, expl_var
   ### 
   
   comp_ready <- 1
-  print(paste("Computing component number", comp_ready))
+  cat(paste("Computing component number", comp_ready, "\n"))
   out <- getLeads(V, k_max, mean_var_V, tol, niter_max, sel)
   mse <- out$mse  #Mean squared error (in N and m)
   output[[comp_ready]] <- out
@@ -117,7 +117,7 @@ auto.gdpc <- function(Z, crit = "LOO", normalize = 1, auto_comp = TRUE, expl_var
   if (auto_comp) {
     while (mse > vard) {
       comp_ready <- comp_ready + 1
-      print(paste("Computing component number", comp_ready))
+      cat(paste("Computing component number", comp_ready, "\n"))
       out <- getLeads(V, k_max, mean_var_V, tol, niter_max, sel)
       mse <- out$mse
       output[[comp_ready]] <- out
@@ -126,7 +126,7 @@ auto.gdpc <- function(Z, crit = "LOO", normalize = 1, auto_comp = TRUE, expl_var
   } else {
     while (comp_ready < num_comp) {
       comp_ready <- comp_ready + 1
-      print(paste("Computing component number", comp_ready))
+      cat(paste("Computing component number", comp_ready, "\n"))
       out <- getLeads(V, k_max, mean_var_V, tol, niter_max, sel)
       output[[comp_ready]] <- out
       V <- out$res
@@ -138,7 +138,7 @@ auto.gdpc <- function(Z, crit = "LOO", normalize = 1, auto_comp = TRUE, expl_var
   fn_call <- match.call()
   fn_call$crit <- crit
   output <- construct.gdpcs(output, Z, fn_call, normalize)
-  print(paste("Total number of computed components:", comp_ready))
+  cat(paste("Total number of computed components:", comp_ready, "\n"))
   
   return(output)
   
