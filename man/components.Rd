@@ -10,7 +10,7 @@
   components(object, which_comp)
 }
 \arguments{
-  \item{object}{An object of class \code{gdpcs}, usually the result of \link{auto.gdpc}.}
+  \item{object}{An object. Currently there is a method for objects of class \code{gdpc}.}
   \item{which_comp}{Numeric vector indicating which components to get. Default is 1.}
 }
 
@@ -18,12 +18,6 @@
 \value{ A matrix whose columns are the desired components.}
 \author{
   Daniel Peña, Ezequiel Smucler, Victor Yohai
-}
-
-
-
-\seealso{
-  \code{\link{gdpc}}, \code{\link{auto.gdpc}}, \code{\link{plot.gdpc}}
 }
 
 
