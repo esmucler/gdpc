@@ -231,5 +231,6 @@ List gdpc_priv(const arma::mat & Z,
   ret["crit"] = crit;
   ret["res"] = res;
   ret["conv"] = conv;
+  ret["niter"] = niter;
   return(ret);
 }

@@ -9,7 +9,7 @@ is.gdpc <- function(object, ...) {
   } else if (any(is.null(object$f), is.null(object$initial_f), is.null(object$beta),
                  is.null(object$alpha), is.null(object$mse), is.null(object$crit),
                  is.null(object$k), is.null(object$expart), is.null(object$call), 
-                 is.null(object$conv))) {
+                 is.null(object$conv), is.null(object$niter))) {
     return(FALSE)
   } else if (any(!inherits(object$mse, "numeric"), !inherits(object$crit, "numeric"), !inherits(object$alpha, "numeric"),
                  !inherits(object$beta, "matrix"), !inherits(object$call, "call"), !inherits(object$conv, "logical"), 

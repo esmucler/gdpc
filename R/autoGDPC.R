@@ -1,5 +1,5 @@
 auto.gdpc <- function(Z, crit = "LOO", normalize = 1, auto_comp = TRUE, expl_var = 0.9, num_comp = 5, tol = 1e-04, 
-                      k_max = 10, niter_max = 500, ncores = 1) {
+                      k_max = 10, niter_max = 500, ncores = 1, verbose = FALSE) {
   # Computes Generalized Dynamic Principal Components. The number of components can be supplied by the user 
   # or chosen automatically so that a given proportion of variance is explained. The number of lags is chosen
   # automatically using of the following criteria: LOO, AIC, BIC or BNG.
@@ -24,6 +24,7 @@ auto.gdpc <- function(Z, crit = "LOO", normalize = 1, auto_comp = TRUE, expl_var
   # k_max: maximum number of lags. Default is 10
   # niter_max : maximum number of iterations. Default is 500
   # ncores: number of cores to be used for parallel computations. Default is 1
+  # verbose : logical, print progress?
   
   #OUTPUT
   # A list of length equal to the number of computed components. The i-th entry of this list is an object of class
@@ -108,7 +109,9 @@ auto.gdpc <- function(Z, crit = "LOO", normalize = 1, auto_comp = TRUE, expl_var
   ### 
   
   comp_ready <- 1
-  cat(paste("Computing component number", comp_ready, "\n"))
+  if (verbose) {
+    cat(paste("Computing component number", comp_ready, "\n"))
+  }
   out <- getLeads(V, k_max, mean_var_V, tol, niter_max, sel)
   mse <- out$mse  #Mean squared error (in N and m)
   output[[comp_ready]] <- out
@@ -117,7 +120,9 @@ auto.gdpc <- function(Z, crit = "LOO", normalize = 1, auto_comp = TRUE, expl_var
   if (auto_comp) {
     while (mse > vard) {
       comp_ready <- comp_ready + 1
-      cat(paste("Computing component number", comp_ready, "\n"))
+      if (verbose){
+        cat(paste("Computing component number", comp_ready, "\n"))
+      }
       out <- getLeads(V, k_max, mean_var_V, tol, niter_max, sel)
       mse <- out$mse
       output[[comp_ready]] <- out
@@ -126,7 +131,9 @@ auto.gdpc <- function(Z, crit = "LOO", normalize = 1, auto_comp = TRUE, expl_var
   } else {
     while (comp_ready < num_comp) {
       comp_ready <- comp_ready + 1
-      cat(paste("Computing component number", comp_ready, "\n"))
+      if (verbose){
+        cat(paste("Computing component number", comp_ready, "\n"))
+      }
       out <- getLeads(V, k_max, mean_var_V, tol, niter_max, sel)
       output[[comp_ready]] <- out
       V <- out$res
@@ -138,7 +145,9 @@ auto.gdpc <- function(Z, crit = "LOO", normalize = 1, auto_comp = TRUE, expl_var
   fn_call <- match.call()
   fn_call$crit <- crit
   output <- construct.gdpcs(output, Z, fn_call, normalize)
-  cat(paste("Total number of computed components:", comp_ready, "\n"))
+  if (verbose){
+    cat(paste("Total number of computed components:", comp_ready, "\n"))
+  }
   
   return(output)
   

@@ -7,7 +7,8 @@ Computes Generalized Dynamic Principal Components. The number of components can 
 
 
 \usage{auto.gdpc(Z, crit = 'LOO', normalize = 1, auto_comp = TRUE, expl_var = 0.9,
-          num_comp = 5, tol = 1e-4, k_max = 10, niter_max = 500, ncores = 1)}
+          num_comp = 5, tol = 1e-4, k_max = 10,
+          niter_max = 500, ncores = 1, verbose = FALSE)}
 \arguments{
   \item{Z}{Data matrix. Each column is a different time series.}
   \item{crit}{A string specifying the criterion to be used. Options are 'LOO', 'AIC', 'BIC' and 'BNG'. Default is 'LOO'. See Details below.}
@@ -19,6 +20,7 @@ Computes Generalized Dynamic Principal Components. The number of components can 
   \item{k_max}{Integer. Maximum possible number of lags. Default is 10.}
   \item{niter_max}{Integer. Maximum number of iterations. Default is 500.}
   \item{ncores}{Integer. Number of cores to be used for parallel computations. Default is 1.}
+  \item{verbose}{Logical. Should progress be reported? Default is FALSE.}
 }
 
 \details{
@@ -56,6 +58,7 @@ If normalize = 1, the data is analyzed in the original units, without mean and v
   \item{initial_f}{Coordinates of the i-th dynamic principal component corresponding to the periods \eqn{-k+1,\dots,0}. Only for the case \eqn{k>0}, otherwise 0.}
       \item{call}{The matched call.}
       \item{conv}{Logical. Did the iterations converge?}
+      \item{niter}{Integer. Number of iterations.}
   \code{components}, \code{fitted}, \code{plot} and \code{print} methods are available for this class.
 }
 \author{

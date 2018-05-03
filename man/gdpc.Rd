@@ -34,6 +34,7 @@ See \code{\link{auto.gdpc}} for the definition of criterion that is part of the 
   \item{initial_f}{Coordinates of the first dynamic principal component corresponding to the periods \eqn{-k+1,\dots,0}. Only for the case \eqn{k>0}, otherwise 0.}
        \item{call}{The matched call.}
        \item{conv}{Logical. Did the iterations converge?}
+       \item{niter}{Integer. Number of iterations.}
  \code{fitted}, \code{plot} and \code{print} methods are available for this class.
  }
 \author{
