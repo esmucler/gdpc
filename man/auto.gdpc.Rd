@@ -39,7 +39,7 @@ If crit = 'BIC' the number of lags is chosen among \eqn{0,\dots, k_{max}} as the
 \deqn{ BIC = T \log(trace(\Sigma)) + m (k+2) \log(T) .}
 
 If crit = 'BNG' the number of lags is chosen among \eqn{0,\dots, k_{max}} as the value \eqn{k} that minimizes the following criterion
-\deqn{ BNG = T \log(trace(\Sigma)) + (k+2) \log(m).}
+\deqn{ BNG = \min(T, m) \log(trace(\Sigma)) + (k+1) \log(\min(T, m)).}
 This is an adaptation of a criterion proposed by Bai and Ng (2002).
 
 If normalize = 1, the data is analyzed in the original units, without mean and variance standarization. If normalize = 2, the data is standardized to zero mean and unit variance before computing the principal components, but the intercepts and loadings are those needed to reconstruct the original series. If normalize = 3 the data are standardized as in normalize = 2, but the intercepts and the loadings are those needed to reconstruct the standardized series. Default is normalize = 1.
