@@ -50,3 +50,15 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_gdpc_getFitted", (DL_FUNC) &_gdpc_getFitted, 5},
+    {"_gdpc_getFini", (DL_FUNC) &_gdpc_getFini, 2},
+    {"_gdpc_gdpc_priv", (DL_FUNC) &_gdpc_gdpc_priv, 7},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_gdpc(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+}
