@@ -19,6 +19,7 @@ Imports:
     doParallel,
     foreach
 LinkingTo: Rcpp, RcppArmadillo (>= 0.7.500.0.0)
+Suggests: testthat
 Depends:
     R (>= 3.3.1)
 NeedsCompilation: yes
