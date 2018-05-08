@@ -1,3 +1,10 @@
+gdpc 1.1.0
+==============
+
+* Change in the definition of the BNG criterion to match the ICp3 criterion of Bai and Ng (2002).
+* verbose option in auto.gdpc.
+* gdpc objects now also contain a field called 'niter', the number of iterations performed.
+
 gdpc 1.0.3
 ==============
 

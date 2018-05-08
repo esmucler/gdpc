@@ -11,12 +11,13 @@ Computes the Generalized Dynamic Principal Components proposed in Peña and Yoha
 \tabular{ll}{
 Package: \tab gdpc\cr
 Type: \tab Package\cr
-Version: \tab 1.0.3\cr
-Date: \tab 2017-12-01\cr
-Depends: \tab R (>= 3.3.1)\cr
+Version: \tab 1.1.0\cr
+Date: \tab 2018-05-08\cr
+Depends: \tab R (>= 3.3.0)\cr
 License: \tab GPL (>= 2)\cr
 Imports: \tab xts, zoo, methods, Rcpp (>= 0.12.7), parallel, doParallel, foreach\cr
 LinkingTo: \tab Rcpp, RcppArmadillo (>= 0.7.500.0.0)\cr
+Suggests: \tab testthat\cr
 NeedsCompilation: \tab yes\cr
 }
 
