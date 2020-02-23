@@ -61,6 +61,8 @@ Maintainer: Ezequiel Smucler <ezequiels.90@gmail.com>
 \references{
 Peña D. and Yohai V.J. (2016). “Generalized Dynamic Principal Components.” Journal of the
 American Statistical Association, 111(515), 1121–1131.
+
+Peña D., Smucler E. and Yohai V.J. (2020). “{gdpc}: An {R} Package for Generalized Dynamic Principal Components.” Journal of Statistical Software, to appear.
 }
 
 

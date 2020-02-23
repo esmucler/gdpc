@@ -2,7 +2,7 @@
 \alias{auto.gdpc}
 \title{Automatic Fitting of Generalized Dynamic Principal Components}
 \description{
-Computes Generalized Dynamic Principal Components. The number of components can be supplied by the user or chosen automatically so that a given proportion of variance is explained. The number of lags is chosen automatically using one of the following criteria: Leave-one-out cross-validation, an AIC type criterion, a BIC type criterion or a criterion based on a proposal of Bai and Ng (2002).
+Computes Generalized Dynamic Principal Components. The number of components can be supplied by the user or chosen automatically so that a given proportion of variance is explained. The number of lags is chosen automatically using one of the following criteria: Leave-one-out cross-validation, an AIC type criterion, a BIC type criterion or a criterion based on a proposal of Bai and Ng (2002). See Peña, Smucler and Yohai (2020) for more details. 
 }
 
 
@@ -71,6 +71,8 @@ If normalize = 1, the data is analyzed in the original units, without mean and v
 \references{
 Bai J. and Ng S. (2002). “Determining the Number of Factors in Approximate Factor Models.”
 Econometrica, 70(1), 191–221.
+
+Peña D., Smucler E. and Yohai V.J. (2020). “{gdpc}: An {R} Package for Generalized Dynamic Principal Components.” Journal of Statistical Software, to appear.
 }
 
 \seealso{
