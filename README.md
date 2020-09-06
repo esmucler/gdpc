@@ -1,23 +1,39 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-[![Build Status](https://travis-ci.org/esmucler/gdpc.svg?branch=master)](https://travis-ci.org/esmucler/gdpc) [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/gdpc)](https://cran.r-project.org/package=gdpc) [![Downloads](http://cranlogs.r-pkg.org/badges/gdpc)](https://cran.r-project.org/package=gdpc)
 
-gdpc
-====
+[![Build
+Status](https://travis-ci.org/esmucler/gdpc.svg?branch=master)](https://travis-ci.org/esmucler/gdpc)
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/gdpc)](https://cran.r-project.org/package=gdpc)
+[![Downloads](http://cranlogs.r-pkg.org/badges/gdpc)](https://cran.r-project.org/package=gdpc)
 
-This package provides functions for computing the Generalized Dynamic Principal Components proposed in [Peña and Yohai (2016)](http://dx.doi.org/10.1080/01621459.2015.1072542). The number of components can be supplied by the user or chosen automatically so that a given proportion of variance is explained. The number of lags is chosen automatically using one of the following criteria: Leave-one-out cross-validation, an AIC type criterion, a BIC type criterion or a criterion based on a proposal of Bai and Ng (2002).
+# gdpc
 
-------------------------------------------------------------------------
+This package provides functions for computing the Generalized Dynamic
+Principal Components proposed in [Peña and Yohai
+(2016)](http://dx.doi.org/10.1080/01621459.2015.1072542). It also
+provides a function to automatically choose the number of lags, using
+the criteria described in [Peña, Smucler and Yohai
+(2020)](http://dx.doi.org/10.18637/jss.v092.c02).
+
+The implementation includes an automatic procedure proposed in [Peña,
+Smucler and Yohai (2020)](http://dx.doi.org/10.18637/jss.v092.c02) for
+the selection of both the number of lags to be used in the generalized
+dynamic principal components as well as the number of components
+required for a given reconstruction accuracy.
+
+-----
 
 ### Installation
 
-You can install the **stable** version on [R CRAN](https://cran.r-project.org/package=gdpc).
+You can install the **stable** version on [R
+CRAN](https://cran.r-project.org/package=gdpc).
 
 ``` r
 install.packages('gdpc', dependencies = TRUE)
 ```
 
-You can install the **development** version from [GitHub](https://github.com/esmucler/gdpc)
+You can install the **development** version from
+[GitHub](https://github.com/esmucler/gdpc)
 
 ``` r
 library(devtools)
@@ -67,4 +83,5 @@ plot(recons, main = 'Fitted values')
 
 ### License
 
-This package is free and open source software, licensed under GPL (&gt;= 2).
+This package is free and open source software, licensed under GPL (\>=
+2).
