@@ -11,7 +11,7 @@ Status](https://travis-ci.org/esmucler/gdpc.svg?branch=master)](https://travis-c
 This package provides functions for computing the Generalized Dynamic
 Principal Components proposed in [Peña and Yohai
 (2016)](http://dx.doi.org/10.1080/01621459.2015.1072542). It also
-provides a function to automatically choose the number of lags, using
+provides a function to automatically choose the number of components and lags, using
 the criteria described in [Peña, Smucler and Yohai
 (2020)](http://dx.doi.org/10.18637/jss.v092.c02).
 
