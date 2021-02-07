@@ -19,7 +19,7 @@ the criteria described in [Peña, Smucler and Yohai
 
 ### Installation
 
-You can install the **stable** version on [R
+You can install the **stable** version from [R
 CRAN](https://cran.r-project.org/package=gdpc).
 
 ``` r
