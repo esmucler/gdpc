@@ -15,12 +15,6 @@ provides a function to automatically choose the number of lags, using
 the criteria described in [Peña, Smucler and Yohai
 (2020)](http://dx.doi.org/10.18637/jss.v092.c02).
 
-The implementation includes an automatic procedure proposed in [Peña,
-Smucler and Yohai (2020)](http://dx.doi.org/10.18637/jss.v092.c02) for
-the selection of both the number of lags to be used in the generalized
-dynamic principal components as well as the number of components
-required for a given reconstruction accuracy.
-
 -----
 
 ### Installation
