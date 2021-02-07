@@ -1,0 +1,1160 @@
+%\VignetteIndexEntry{gdpc: An R Package for Generalized Dynamic Principal Components}
+%\VignetteEngine{R.rsp::tex}
+\documentclass[nojss]{jss}
+\usepackage{thumbpdf,lmodern} 
+%\graphicspath{{Figures/}}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{graphicx, epsfig}
+\usepackage{amsmath}
+\usepackage{morefloats}
+\usepackage{placeins}
+\usepackage{booktabs}
+\usepackage{graphicx}%
+\newcommand{\bbet}{\boldsymbol{\beta}}
+\newcommand{\bal}{\boldsymbol{\alpha}}
+\newcommand{\bfac}{\mathbf{f}}
+
+\author{Daniel Pe\~na\\UC3M-BS Institute of Financial Big Data and\\ Universidad Carlos III de Madrid \And
+  Ezequiel Smucler\\ Universidad Torcuato Di Tella\AND
+  Victor J. Yohai\\Universidad de Buenos Aires -- CONICET}
+
+\title{\pkg{gdpc}: An \proglang{R} Package for Generalized Dynamic Principal Components}
+
+\Plainauthor{Daniel Pe\~na, Ezequiel Smucler, Victor J. Yohai} 
+\Plaintitle{gdpc: An R Package for Generalized Dynamic Principal Components} 
+\Shorttitle{\pkg{gdpc}: Generalized Dynamic Principal Components} 
+
+\Abstract{ \pkg{gdpc} is an \proglang{R} package for the computation
+  of the generalized dynamic principal components proposed in
+  \cite{PenaYohai2016}.  In this paper, we briefly introduce the
+  problem of dynamical principal components, propose a solution based
+  on a reconstruction criteria and present an automatic procedure to
+  compute the optimal reconstruction. This solution can be applied to
+  the non-stationary case, where the components need not be a linear
+  combination of the observations, as is the case in the proposal of
+  \cite{Brillinger}. This article discusses some new features that are
+  included in the package and that were not considered in
+  \cite{PenaYohai2016}. The most important one is an automatic
+  procedure for the identification of both the number of lags to be
+  used in the generalized dynamic principal components as well as the
+  number of components required for a given reconstruction
+  accuracy. These tools make it easy to use the proposed procedure in
+  large data sets. The procedure can also be used when the number of
+  series is larger than the number of observations. We describe an
+  iterative algorithm and present an example of the use of the package
+  with real data.
+  
+This vignette is based on \cite{JSSours}.  
+  }
+  
+\Keywords{dimensionality reduction, high-dimensional time series, \proglang{R}}
+
+\Plainkeywords{dimensionality reduction, high-dimensional time series, R} 
+
+\Address{
+Daniel Pe{\~n}a \\
+UC3M-BS Institute of Financial Big Data and\\
+Department of Statistics\\
+Universidad Carlos III de Madrid\\
+E-mail: \email{daniel.pena@uc3m.es}\\
+
+Ezequiel Smucler\\
+Department of Mathematics and Statistics\\
+Universidad Torcuato Di Tella\\
+Avenida Figueroa Alcorta 7350\\
+  Buenos Aires 1428, Argentina\\
+E-mail: \email{esmucler@utdt.edu}\\
+
+Victor J. Yohai\\
+Instituto de C\'alculo\\
+ Universidad de Buenos Aires\\
+ Ciudad Universitaria, Pabell\'on 2\\
+  Buenos Aires 1428, Argentina\\
+E-mail: \email{vyohai@dm.uba.ar}
+}
+\begin{document}
+
+\section{Introduction}
+
+Dimension reduction is important for the analysis of multivariate time
+series, particularly for the high-dimensional data sets that are becoming
+increasingly common in applications, because the number of parameters in the
+usual multivariate time series models grows quadratically with the number of
+variables. The first proposal of a dynamic factor model for time series is
+due to \cite{Brillinger64, Brillinger} who proposed to apply standard
+techniques of factor analysis to the spectral matrix. He also proposed
+dynamic principal components, which are two sided linear combinations of the
+data which provide an optimal reconstruction. They are obtained by the
+inverse Fourier transform of the principal components of the spectral density
+matrices for each frequency. \cite{Geweke} proposed a one sided
+generalization of the static factor model where the factors and the
+innovations are mutually independent and follow covariance stationary linear
+processes, and applied standard estimation methods for factor analysis to
+the spectral density matrix instead of the covariance matrix. A similar
+model was used by \cite{Sargent}, who named their model the index model. In
+this model the factors account for all the cross-correlations among the
+series, whereas the factors and the innovations account for the
+autocorrelation of the observed series. \cite{Pena87} propose a dynamic
+factor model for a vector of stationary time series with white noise
+innovations and proved that we can estimate the loading matrix by the
+eigenvectors corresponding to non null eigenvalues of the lag covariance
+matrices of the data. \cite{Stock} use dynamic factors for forecasting, by
+assuming that the variable to forecast and the explanatory variables useful
+for its forecasting follow a dynamic factor model. \cite{BaiNg} develop a
+criterion to consistently estimate the number of factors, which will be used
+in our package. \cite{Hu} proposed a test for the number of factors and
+explore the generalization of the model for integrated factors that was
+carried out by \cite{Pena2006}. \cite{Pan} include general nonstationary
+processes for the factors. \cite{Lam2012} proposed a test for the number of
+factors based on the eigenvalues of the lag covariance matrices.
+
+\cite{Forni2000} generalized Geweke's dynamic factor model by allowing the
+idiosyncratic components to be autocorrelated and contain weak
+cross-correlations. The authors proposed to estimate the common components by the
+projection of the data on the dynamic principal components proposed by
+Brillinger. \cite{Forni2005} proposed a one sided method of estimation of a dynamic factor
+model and used the method for forecasting. The forecasts generated with this procedure have been compared to the ones derived by \cite{Stock} and the results are mixed (see %
+\citet{Forni2016}). A modified forecasting approach was proposed by \cite%
+{Forni2015}, although again the finite sample results are
+mixed. \cite{Hallin2013} give a general presentation of the methodological
+foundations of dynamic factor models.
+
+\cite{PenaYohai2016} proposed a new approach for defining dynamic principal
+components that is different from the one taken by Brillinger in three ways. First, their generalized dynamic
+principal components (GDPC, from now on) are built without the assumption
+that the series are stationary. If the data is not stationary, the GDPC
+minimize a meaningful reconstruction criterion, unlike Brillinger's approach, which
+minimizes the expected reconstruction mean square error. Second, the GDPC\ need not be a linear
+combination of the original series. Third, they are computed directly in the
+time domain, instead of working in the frequency domain. These GDPC are
+optimal reconstructors of the observed data but they can also be used to
+estimate the common part in high-dimensional dynamic factor models. In fact,
+it has been shown that the GDPC\ provide consistent estimates \citep{Smucler17} of the common part of dynamic factor models. Since the GDPC are based on both leads and lags of  the data, like the dynamic principal components defined by Brillinger, they are not useful for forecasting. 
+However, they are useful in general as a way to summarize the information in
+sets of dependent time series in which the factor structure may not apply.\
+Finally, the  optimal reconstructor property of the GDPC\ is useful for data
+compression to reduce resources required to store and transmit data. This
+makes them potentially useful for compression of dependent data and they
+could be applied for image analysis and other types of spatial data in which
+dependence is important.
+
+A large number of \proglang{R} packages are available for working with time
+series. Besides the `\code{mts}' class provided by the \pkg{stats} package, 
+\cite{R}, several \proglang{R} packages provide classes and methods for
+handling time-indexed data. For example, the \pkg{zoo} package, \cite{zoo},
+provides an \proglang{S}3 class and methods for handling totally ordered indexed
+observations, in particular irregular time series. The \pkg{xts} package, 
+\cite{xts}, is able to uniformly handle \proglang{R}'s different time-based
+data classes. Our \pkg{gdpc} package supports \code{mts}, \code{xts} and %
+`\code{zoo}' objects: if the original data is stored in an object of class %
+`\code{mts}', \code{xts} or \code{zoo}, then the principal components and
+reconstructed time series will also be stored in an object of class %
+`\code{mts}', `\code{xts}' or `\code{zoo}' respectively, with the same date
+attributes. Among the multivariate time series \proglang{R} packages, the %
+\pkg{MTS} package, \cite{MTS}, is a general tool-kit for multivariate time
+series that includes vector autoregressive moving average (VARMA) models, factor models, and multivariate
+volatility models. \pkg{freqdom}, \cite{freqdom}, implements Brillinger's
+dynamic principal components.
+\pkg{pcdpca}, \cite{pcdpca}, extends Brillinger's dynamic
+principal components to periodically correlated multivariate time series. An
+extensive comparison of Brillinger's approach to dynamic principal components and GDPC
+can be found in \cite{PenaYohai2016}. The \pkg{BigVAR} package, \cite{BigVAR}%
+, estimates vector autoregressive (VAR) models with structured LASSO penalties. Many more packages
+can be found at \url{https://CRAN.R-project.org/view=TimeSeries}.
+To the best of our knowledge, \pkg{gdpc} \citep{gdpc-pack} is the only
+publicly available implementation of GDPC.
+
+This article is organized as follows. In Section~\ref{sec:defin} we briefly
+review the definition of the GDPC and presents a new proposal to apply the
+procedure in an automatic way. Several possible methods for choosing the
+number of components and the number of lags used for each component are
+discussed. In Section~\ref{sec:compu} we review the iterative algorithm used
+to compute the GDPC. In Section~\ref{sec:using} we illustrate the use of the %
+\pkg{gdpc} package using artificial and real data sets. 
+We compare the performance 
+regarding computation time and the reconstruction of non-stationary time series of the implementation of Brillinger's method found in the \pkg{freqdom} package to that of GDPC
+in Section~\ref{sec:rec_non-stat}. In Section~\ref{sec:tuning} we compare the performance
+of the different criteria available in the \pkg{gdpc} package to choose the number of lags that define the GDPC.
+Section~\ref{sec:comp_times} includes a small simulation study to estimate the typical
+computation times of the main algorithm for both stationary and
+non-stationary time series. Finally, conclusions are provided in Section~\ref%
+{sec:conclu}.
+
+\section{Definition of generalized dynamic principal components}
+\label{sec:defin}
+
+Consider a time series vector $\mathbf{z}_{t}=(z_{1,t},\ldots,z_{m,t})$, where $%
+1\leq t\leq T,$ and let $\mathbf{Z}$ be the $T\times m$ matrix whose rows
+are $\mathbf{z}_{1},\ldots,\mathbf{z}_{T}$. Here $T$ stands for the number of
+periods and $m$ for the number of series. We define the first dynamic
+principal component with $k$ lags as a vector $\mathbf{f=}(f_{t})_{-k+1\leq
+t\leq T},$ so that the reconstruction of series $z_{j,t},1\leq$ $j\leq m,$
+as a linear combination of $(f_{t-k},\dots, f_{t-1}, f_{t})$ is optimal with
+respect to the mean squared error (MSE) criterion. More precisely, given a
+possible factor $\mathbf{f}$ of length $(T+k)$, an $m\times(k+1)$ matrix of
+coefficients $\boldsymbol{\beta}=(\beta_{j,h})_{1\leq j\leq m,1\leq h\leq
+k+1}$ and $\boldsymbol{\alpha}=(\alpha_{1},\ldots,\alpha_{m})$, the
+reconstruction of the original series $z_{j,t}$ is defined as 
+\begin{equation}
+{z}^{R,b}_{j,t}(\mathbf{f}, \boldsymbol{\beta}, \boldsymbol{\alpha})=\alpha_{j}+\sum_{h=0}^{k}\beta_{j,h+1}f_{t-h}.
+\label{eq:recons}
+\end{equation}
+The $R$ superscript in ${z}^{R,b}_{j,t}$ stands for reconstruction and the $b$ superscript
+stands for backward, due to the reconstruction being defined using the lags of $f_t$, in constrast with the reconstruction using leads, to be defined later.
+
+The MSE loss function when we reconstruct the $m$ series using $\mathbf{f}$, 
+$\boldsymbol{\beta}$ and $\boldsymbol{\alpha}$ is given by 
+\begin{equation}
+\text{MSE}(\mathbf{f,\boldsymbol{\beta},\boldsymbol{\alpha})}=\frac{1}{Tm}%
+\sum_{j=1}^{m}\sum_{t=1}^{T}(z_{j,t}-{z}^{R,b}_{j,t}(\mathbf{f}, \boldsymbol{\beta}, \boldsymbol{\alpha}))^{2}
+\label{eq:MSE}
+\end{equation}
+and the values that minimize this MSE are called $(\widehat{\mathbf{f}},%
+\widehat{\boldsymbol{\beta}},\widehat{\boldsymbol{\alpha}})$. The value of $%
+\widehat{\mathbf{f}}$ is not identified as we can multiply the coefficients $%
+\beta_{j,h+1}$ by a constant and divide $f_{t-h}$ by the same contant and the
+model is the same. To solve this issue we take $\widehat{\mathbf{f}}$ with
+zero mean and unit variance.  $\widehat{\mathbf{f}}$ is then the first GDPC. 
+Note that for $k=0$, $\widehat{\mathbf{f}}$ is
+the first ordinary (non-dynamic) principal component of the data. The second
+GDPC is defined as the first GDPC of the residuals%
+\begin{equation*}
+r_{j,t}=z_{j,t}-z^{R,b}_{j,t}(\widehat{\mathbf{f}}, \widehat{\boldsymbol{\beta}}, \widehat{\boldsymbol{\alpha}}),\quad 1\leq j\leq m,1\leq t\leq T.
+\end{equation*}
+Higher order GDPC are defined in a similar fashion.
+
+Note that the reconstruction given in Equation~\ref{eq:recons} can be
+written using leads instead of lags. Suppose to simplify that $\alpha_{j}=0$
+and $k=1$ so that we have%
+\begin{equation*}
+{z}^{R,b}_{j,t}(\mathbf{f}, \boldsymbol{\beta}, \boldsymbol{\alpha})=\beta_{j,1}f_{t}+\beta_{j,2}f_{t-1}.
+\end{equation*}
+Given $\mathbf{f}, \boldsymbol{\beta}$ and $\boldsymbol{\alpha}$, let $f_{t+1}^{\ast}=$ $f_{t}$, $\beta_{j,2}^{\ast}=\beta_{j,1}$, $%
+\beta_{j,1}^{\ast}=\beta_{j,2}$ and $\alpha^{\ast}_{j}=0$. Then
+\begin{equation*}
+{z}^{R,b}_{j,t}(\mathbf{f}, \boldsymbol{\beta}, \boldsymbol{\alpha})=
+{z}^{R,f}_{j,t}(\mathbf{f^{\ast}}, \boldsymbol{\beta}^{\ast}, \boldsymbol{\alpha}^{\ast})=\beta_{j,2}^{\ast}f_{t+1}^{\ast}+\beta_{j,1}^{\ast}f_{t}^{%
+\ast},
+\end{equation*}
+that is the same equation but now using leads. We just shift one position
+the series of the principal components and interchange the values of the $%
+\beta$ coefficients to obtain an equivalent representation but now using
+leads instead of lags. In general given $\mathbf{f}, \boldsymbol{\beta}$ and $\boldsymbol{\alpha}$ we can define 
+\begin{align}
+&f_{t+k}^{\ast}=f_{t}, \quad t=1-k,\dots,T,
+\label{eq:leadslags1}
+\\ &\beta_{j,k+2-g}^{\ast}=\beta_{j,g}, \quad 1\leq g\leq k+1, j=1,\dots,m,
+\label{eq:leadslags2}
+\\ & \alpha^{\ast}_{j}=\alpha_{j}, \quad j=1,\dots,m
+\label{eq:leadslags3}
+\end{align}
+and write 
+\begin{equation*}
+{z}^{R,f}_{j,t}(\mathbf{f^{\ast}}, \boldsymbol{\beta}^{\ast}, \boldsymbol{\alpha}^{\ast})=\alpha^{\ast}_{j}+\sum_{h=0}^{k}\beta_{j,h+1}^{\ast}f_{t+h}^{\ast
+}.  
+\end{equation*}
+Clearly
+\begin{equation*}
+{z}^{R,f}_{j,t}(\mathbf{f^{\ast}}, \boldsymbol{\beta}^{\ast}, \boldsymbol{\alpha}^{\ast})=
+{z}^{R,b}_{j,t}(\mathbf{f}, \boldsymbol{\beta}, \boldsymbol{\alpha})
+\end{equation*}
+and hence we see that, without loss of generality, we can use either lags or leads
+of the principal component to reconstruct the series. Moreover, minimizing
+the function in Equation~\ref{eq:MSE} is equivalent to minimizing
+\begin{equation}
+\frac{1}{Tm}%
+\sum_{j=1}^{m}\sum_{t=1}^{T}(z_{j,t}-{z}^{R,f}_{j,t}(\mathbf{f}, \boldsymbol{\beta}, \boldsymbol{\alpha}))^{2}.  \nonumber
+\end{equation}
+Since the notation is
+less cumbersome using leads, the derivation for the optimal solution in
+Section~\ref{sec:compu} is presented using leads. 
+Moreover, all internal
+computations in the \pkg{gdpc} package are performed using leads. However,
+since the reconstruction using lags is more intuitive, the final output is
+passed to the form using lags via Equations~\ref{eq:leadslags1},~\ref{eq:leadslags2}, \ref{eq:leadslags3}. It can be shown that the GDPC can also be equivalently defined using a $k/2$ leads and $k/2$ lags of $f_t$ to define the reconstruction, see \cite{PenaYohai2016} for details. This explains the noisy character of the GDPC at the ends of the sample, see Figure~\ref{Fig:SP50PC} for example, and why, like Brillinger's DPC, the GDPC are not directly useful for forecasting.
+
+Note that if we are considering $p$ dynamic principal components of order $k_{i}$
+each, $i=1,\dots,p$, the number of values required to reconstruct
+the original series is $\sum_{i=1}^{p}(T+k_{i}+m(k_{i} +1)+m)$.
+In practice, the number of components and the number of lags used for each
+component need to be chosen. The MSE of the reconstruction decreases when
+either of these two numbers is increased, but the amount of information
+needed to be stored for the reconstruction will also increase. The number of
+components can be chosen so that a pre-specified fraction of the total
+variance of the data is explained, as is usual in ordinary principal
+component analysis. Regarding the choice of the number of lags for each
+component, let $k$ be the number of lags used to fit the component under
+consideration. Let $\widehat{y}_{j,t}=\widehat{\alpha}_{j}+\sum_{h=0}^{k}%
+\widehat{\beta}_{j,h+1}\widehat{f}_{t+h}$ be the interpolator used where $y_{j,t}=z_{j,t}$ for
+the first component and will be equal to the residuals from the fit with the
+previous components otherwise. Let $r_{j,t}=y_{j,t}-\widehat{y}_{j,t},$ be
+the residuals from the fit with the component, and $\mathbf{R}$ be the
+corresponding matrix of residuals from this fit and let ${\boldsymbol{\Sigma}%
+=(\mathbf{R}^{\top}\mathbf{R})/T}$. Given $k_{max}$, $k$ can be chosen among 
+$0,\dots,k_{max}$ as the value that minimizes some criterion. This criterion
+should take into account the MSE of the reconstruction and the amount of
+information to be stored. The following four criteria are available in %
+\pkg{gdpc}:
+%
+\begin{itemize}
+\item Leave-one-out (LOO) cross-validation: 
+\begin{equation*}
+LOO_{k}=\frac{1}{Tm}\sum\limits_{i=1}^{m}\sum\limits_{t=1}^{T}\frac {%
+r_{i,t}^{2}}{(1-h_{k,tt})^{2}},
+\end{equation*}
+where $h_{k,tt}$ are the diagonal elements of the hat matrix $\mathbf{H}_{k}=%
+\mathbf{F}_{k}(\mathbf{F}_{k}^{\top}\mathbf{F}_{k})^{-1}\mathbf{F}%
+_{k}^{\top} $ , with $\mathbf{F}_{k}$ being the $T\times(k+2)$ matrix with
+rows $(f_{t-k},f_{t-k+1},\dots,f_{t},1)$.\bigskip
+
+\item An AIC type criterion (\cite{Akaike}): 
+\begin{equation*}
+AIC_{k}=T\log\left( \text{trace}(\boldsymbol{\Sigma})\right) +m(k+2)2.
+\end{equation*}
+
+\item A BIC type criterion (\cite{BIC}): 
+\begin{equation*}
+BIC_{k}=T\log\left( \text{trace}(\boldsymbol{\Sigma})\right) +m(k+2)\log T.
+\end{equation*}
+
+\item A criterion based on the $IC_{p3}$ proposal of \cite{BaiNg}: 
+\begin{equation*}
+BNG_{k}=\min(T, m)\log\left( \text{trace}(\boldsymbol{\Sigma})\right) +\log(\min(T, m))(k+1).
+\end{equation*}
+\end{itemize}
+%
+The AIC and BIC type criteria are known not to work well when the ratio $T/m$
+is small; this is to be expected since they are based on the assumption that 
+$m$ is fixed and $T\rightarrow\infty$. For the cases in which the ratio $T/m$
+is small it is interesting to use a criterion based on both $m$ and $T$
+going to infinity. For this reason, we included the criterion $BNG_{k}$,
+based on a proposal of \cite{BaiNg} for choosing the number of factors in a
+factor model. We will compare the performance of the criteria in Section~\ref{sec:tuning}.
+
+\section{Computing the GDPC}
+
+\label{sec:compu}
+
+To compute the GDPC we note that, given the component, the $\mathbf{\beta}$
+coefficients are regression coefficients that can be computed by least
+squares, and given the $\mathbf{\beta}$ coefficients we have again linear
+equations that can be easily computed. To write the equations we have to
+solve we introduce some notation. Define $a\vee b=\max(a,b)\ $and $a\wedge
+b=\min(a,b).$ Let 
+$$\mathbf{C}_{j}(\alpha_{j})=(c_{j,t,q}(\alpha_{j}))_{1\leq
+t\leq T+k,1\leq q\leq k+1}
+$$ be the $(T+k)\times(k+1)$ matrix defined by 
+$$
+c_{j,t,q}(\alpha_{j})=(z_{j,t-q+1}-\alpha_{j}),
+$$ when $1\vee(t-T+1)\leq
+q\leq(k+1)\wedge t$ and zero otherwise. Let 
+$$
+\mathbf{D}_{j}(\mathbf{\beta }%
+_{j}\mathbf{)}=(d_{j,t,q}(\mathbf{\beta}_{j}\mathbf{)})
+$$ be the $%
+(T+k)\times(T+k)$ matrix given by 
+$$d_{j,t,q}(\mathbf{\beta}_{j}\mathbf{)}%
+=\sum_{v=(t-k)\vee1}^{t\wedge T}\beta_{j,q-v+1}\beta_{j,t-v+1},
+$$ when $%
+(t-k)\vee1\leq q\leq(t+k)\wedge(T+k)$ and zero otherwise. Define 
+$$\mathbf{D}(%
+\mathbf{\beta})=\sum_{j=1}^{m}\mathbf{D}_{j}(\mathbf{\beta}_{j}\mathbf{).}
+$$
+Differentiating Equation~\ref{eq:MSE} with respect to $\mathbf{f}$, it is
+easy to show that 
+\begin{equation}
+\mathbf{f=D}(\boldsymbol{\beta})^{-1}\sum_{j=1}^{m}\mathbf{C}_{j}(%
+\boldsymbol{\alpha})\boldsymbol{\beta}_{j}  \label{eq:f}
+\end{equation}
+where $\boldsymbol{\beta}_{j}$, $j=1,\dots,m$, are the rows of $\boldsymbol{%
+\beta}$ . Differentiating Equation~\ref{eq:MSE} with respect to $\boldsymbol{%
+\beta}_{j}$ and $\alpha_{j}$ we obtain 
+\begin{equation}
+\left( 
+\begin{array}{c}
+\boldsymbol{\beta}_{j} \\ 
+\alpha_{j}%
+\end{array}
+\right) =\left( \mathbf{F(f)}^{\top}\mathbf{F(f)}\right) ^{-1}\mathbf{F(f)}%
+^{\top}\mathbf{\ z}^{(j)},  \label{eq:beta}
+\end{equation}
+where $\mathbf{z}^{(j)}=(z_{j,1},\ldots,z_{j,T})^{\top}$ and $\mathbf{F(f)}$ is
+the $T\times(k+2)$ matrix with $t$-th row ($f_{t},f_{t+1},\ldots,f_{t+k},1).$
+
+To define an iterative algorithm to compute $(\widehat{\mathbf{f}}, \widehat{%
+\boldsymbol{\beta}}, \widehat{\boldsymbol{\alpha}})$ it is enough to provide 
+$\mathbf{f}^{(0)}$ and a rule describing how to compute $\boldsymbol{\beta}%
+^{(h)},\boldsymbol{\alpha}^{(h)}$ and $\mathbf{f}^{(h+1)}$ once $\mathbf{f}%
+^{(h)}$ is known. The following two steps based on Equations~\ref{eq:f} and %
+\ref{eq:beta} describe a natural rule to perform this recursion.
+
+\begin{description}
+\item[step 1] Based on Equation~\ref{eq:beta}, define $\boldsymbol{\beta}%
+_{j}^{(h)}$ and $\alpha_{j}^{(h)},$ for $1\leq j\leq m$\ , by 
+\begin{equation*}
+\left( 
+\begin{array}{c}
+\boldsymbol{\beta}_{j}^{(h)} \\ 
+\alpha_{j}^{(h)}%
+\end{array}
+\right) =\left( \mathbf{F(f}^{(h)}\mathbf{)}^{\top}\mathbf{F(f}^{(h)}\mathbf{%
+)}\right) ^{-1}\mathbf{F(f}^{(h)}\mathbf{)}^{\top}\mathbf{z}^{(j)}.
+\end{equation*}
+
+\item[step 2] Based on Equation~\ref{eq:f}, define $\mathbf{f}^{(h+1)}$ by 
+\begin{equation*}
+\mathbf{f}^{\ast}=\mathbf{D}(\boldsymbol{\beta}^{(h)})^{-1}\mathbf{C}(%
+\boldsymbol{\alpha}^{(h)})\boldsymbol{\beta}^{(h)}
+\end{equation*}
+\ and%
+\begin{equation*}
+\mathbf{f}^{(h+1)}=(T+k-1)^{1/2}(\mathbf{f}^{\ast}-\overline{\mathbf{f}}%
+^{\ast})\mathbf{/|||\mathbf{f}^{\ast}-\overline{\mathbf{f}}^{\ast}||.}
+\end{equation*}
+\end{description}
+
+The initial value $\mathbf{f}^{(0)}$ can be chosen equal to the ordinary
+first principal component, completed with $k$ leads. We stop after %
+\code{niter_max} iterations or when 
+\begin{equation*}
+\frac{ \text{MSE}(\mathbf{f}^{(h)} ,\boldsymbol{\beta}^{(h)},\boldsymbol{%
+\alpha} ^{(h)})- \text{MSE}(\mathbf{f}^{(h+1)},\boldsymbol{\beta }^{(h+1)},%
+\boldsymbol{\alpha}^{(h+1)})}{\text{MSE}(\mathbf{f}^{(h)},\boldsymbol{\beta}%
+^{(h)},\boldsymbol{\alpha}^{(h)})}<\text{\code{tol}}
+\end{equation*}
+for some user-supplied values \code{tol} and \code{niter_max}.
+
+All numerically intensive computations are performed in \proglang{C++},
+using the \pkg{Armadillo} linear algebra library, \cite{Armadillo}. The %
+\proglang{C++} code is integrated with \proglang{R} using packages \pkg{Rcpp}%
+, \cite{Rcpp}, and \pkg{RcppArmadillo}, \cite{RcppArmadillo}.
+
+In step 1 of the algorithm we need to solve $m$ least squares problems, each with $T$ observations and $k+2$ predictor variables. The worst case complexity for solving
+each of these least squares problems is $O((k+2)^2 T)=O(k^2 T)$. Hence
+the worst case
+complexity for step 1 of the algorithm
+is $O(m k^2 T)$. The worst case complexity for solving the linear system in step 2 of the algorithm is $O((T+k)^3)$. Hence, at it each iteration the worst
+case complexity is $O((T+k)^3 + m k^2 T)$, which is linear in $m$. Thus, the algorithm
+is able to deal with very high-dimensional problems.
+Note that there are no
+restrictions on the values of $\mathbf{f}$ and, in particular, we do not
+assume, as in \cite{Brillinger}, that the GDPC\ must be linear combinations of the
+series. Note that in Equation~\ref{eq:f} the computation of the component is linear in
+the observed data given the $\boldsymbol{\beta }$ parameters. Also, the $%
+\boldsymbol{\beta }$ parameters are  estimated  as linear functions of the
+observations given the GDPC by Equation~\ref{eq:beta}. However, these two step
+estimation leads to a component which,  in general, will not be a linear
+function of the observed series. It is shown in \cite{PenaYohai2016} in
+particular stationary cases that the components are approximately linear combinations of
+the data. This is a similar result to the one found in the static case with
+standard principal components where we do not impose this restriction but
+the optimal solution verifies it. However, when the series are not
+stationary this additional flexibility leads to values of $\mathbf{f}$ better
+adapted to the possible nonstationary character of the time series. We will back up
+this claim with experimental results in Section~\ref{sec:rec_non-stat}.
+
+\section[Using the gdpc package]{Using the \pkg{gdpc} package}
+
+\label{sec:using}
+
+There are two main functions available to the user: \code{gdpc} and %
+\code{auto.gdpc}. We first describe \code{gdpc}.
+
+\subsection[The gdpc function and class]{The \code{gdpc} function and class}
+
+\label{sec:gdpcfun}
+
+The function \code{gdpc} computes a single GDPC with a number of lags that
+has to be provided by the user. It has the following arguments:
+%
+\begin{itemize}
+\item {\code{Z}:}{\ Data matrix. Each column is a different time series.}
+
+\item {\code{k}:}{\ Integer. Number of lags to use.}
+
+\item {\code{f\_ini}:}{\ (Optional). Numeric vector. Starting point for the
+iterations. If no argument is passed the ordinary first principal component
+completed with \code{k} lags is used.}
+
+\item {\code{tol}:}{\ Relative precision. Default is $10^{-4}$.}
+
+\item {\code{niter\_max}:}{\ Integer. Maximum number of iterations. Default
+is 500.}
+
+\item {\code{crit}:}{\ A string specifying the criterion to be used to
+evaluate the reconstruction. Options are \code{"LOO"}, \code{"AIC"}, \code{"BIC"} and \code{"BNG"}.
+Default is \code{"LOO"}.}
+\end{itemize}
+%
+The output of this function is an \proglang{S}3 object of class `\code{gdpc}',
+that is, a list with entries:
+%
+\begin{itemize}
+\item {\code{expart}:}{\ Proportion of the variance explained.}
+
+\item {\code{mse}:}{\ Mean squared error.}
+
+\item {\code{crit}:}{\ The value of the criterion of the reconstruction,
+according to what the user specified.}
+
+\item {\code{k}:}{\ Number of lags used.}
+
+\item {\code{alpha}:}{\ Vector of intercepts corresponding to \code{f}.}
+
+\item {\code{beta}:}{\ Matrix of loadings corresponding to \code{f}. Column
+number $j$ is the vector of $j-1$ lag loadings.}
+
+\item {\code{f}: }{Coordinates of the first dynamic principal component
+corresponding to the periods $1,\dots,T$.}
+
+\item {\code{initial\_f}:}{\ Coordinates of the first dynamic principal
+component corresponding to the periods $-\text{\code{k}}+1,\dots,0$. Only
+for the case $\text{\code{k}}>0$, otherwise 0.}
+
+\item {\code{call}:}{\ The matched call.}
+
+\item {\code{conv}:}{\ Logical. Did the iterations converge?}
+
+\item {\code{niter}:}{\ Integer. Number of iterations.}
+\end{itemize}
+%
+\code{fitted}, \code{plot} and \code{print} methods are available for this
+class.
+
+We illustrate the use of this function with the an artificial data set.
+First, we load the package and generate the artificial data.
+%
+\begin{CodeChunk}
+\begin{CodeInput}
+R> library("gdpc")
+R> set.seed(1234)
+R> T <- 200
+R> m <- 5000
+R> f <- rnorm(T + 1)
+R> x <- matrix(0, T, m)
+R> u <- matrix(rnorm(T * m), T, m)
+R> for (i in 1:m) {
++    x[, i] <- 10 * sin(2 * pi * (i / m)) * f[1:T] +
++      10 * cos(2 * pi * (i / m)) * f[2:(T + 1)] + u[, i]
++  }
+\end{CodeInput}
+\end{CodeChunk}
+%
+We use \code{gdpc} to compute a single GDPC using one lag. The rest of the
+arguments are the default ones. 
+%
+\begin{CodeChunk}
+\begin{CodeInput}
+R> fit <- gdpc(x, k = 1)
+R> fit
+\end{CodeInput}
+\begin{CodeOutput}
+	    Number.of.lags   LOO   MSE Explained.Variance
+Component 1              1 1.017 0.986              0.991
+\end{CodeOutput}
+\end{CodeChunk}
+%
+The result is stored in \code{fit} and the code \code{fit} produces the
+object to be printed. This shows the number of lags used, the value of the
+criterion specified by the user (the default \code{"LOO"} in this case), the MSE of
+the reconstruction and the fraction of explained variance. It is seen that
+the reconstruction is excellent, with more than 99\% of the variance of the
+data explained.
+
+Now we can plot the loadings and the principal component by using the %
+\code{plot} method for the `\code{gdpc}' class. The method has the following
+arguments
+%
+\begin{itemize}
+\item {\code{x}: }{\ An object of class `\code{gdpc}', usually the result of %
+\code{gdpc} or one of the entries of the result of \code{auto.gdpc}.}
+
+\item {\code{which}:}{\ String. Indicates what to plot, either \code{"Component"}
+or \code{"Loadings"}. Default is \code{"Component"}.}
+
+\item {\code{which\_load}: }{Lag number indicating which loadings should be
+plotted. Only used if \code{which = "Loadings"}. Default is 0.}
+
+\item {\code{\dots}: }{Additional arguments to be passed to the plotting
+functions.}
+\end{itemize}
+%
+Continuing with our example, we plot the loadings and the principal
+component. 
+%
+\begin{CodeChunk}
+\begin{CodeInput}
+R> par(mfrow = c(3, 1))
+R> plot(fit, which = "Loadings", which_load = 0, xlab = "", ylab = "")
+R> plot(fit, which = "Loadings", which_load = 1, xlab = "", ylab = "")
+R> plot(fit, which = "Component", xlab = "", ylab = "")
+\end{CodeInput}
+\end{CodeChunk}
+%
+The result is shown in Figure~\ref{Fig:SinCos}.
+
+\begin{figure}[t!]
+\centering
+\includegraphics[width=0.7\textwidth, trim=0 10 0 5, clip]{FigSinCos}
+\caption{Plot of the loadings and principal component for an artificial data
+set.}
+\label{Fig:SinCos}
+\end{figure}
+
+The reconstruction of the original series can be obtained using the %
+\code{fitted} method for the `\code{gdpc}' class. We store it in \code{recons}.%
+%
+\begin{CodeChunk}
+\begin{CodeInput}
+R> recons <- fitted(fit)
+\end{CodeInput}
+\end{CodeChunk}
+%
+We can compare the approximate amount of storage needed for the original
+data set and for the \code{fit} object\code{x} and the \code{gdpc} object %
+\code{fit}. 
+%
+\begin{CodeChunk}
+\begin{CodeInput}
+R> object.size(x)
+\end{CodeInput}
+\begin{CodeOutput}
+8000216 bytes
+\end{CodeOutput}
+\begin{CodeInput}
+R> object.size(fit)
+\end{CodeInput}
+\begin{CodeOutput}
+124352 bytes
+\end{CodeOutput}
+\end{CodeChunk}
+%
+Hence, the amount of memory needed to store \code{fit} is about $1.6\%$ of
+that needed to store \code{x}.
+
+\subsection[The auto.gdpc function and the gdpcs class]{The \code{auto.gdpc}
+function and the `\code{gdpcs}' class}
+
+\label{sec:autogdpcfun}
+
+The function \code{auto.gdpc} computes \textit{several} GDPC. The number of
+components can be supplied by the user or chosen automatically so that a
+given proportion of variance is explained. The number of lags is chosen
+automatically using one of the criteria listed in Section~\ref{sec:defin}.
+The function has the following arguments
+%
+\begin{itemize}
+\item {\code{Z}:}{\ Data matrix. Each column is a different time series.}
+
+\item {\code{crit}: }{\ A string specifying the criterion to be used to
+choose the number of lags. Options are \code{"LOO"}, \code{"AIC"}, \code{"BIC"} and \code{"BNG"}.
+Default is \code{"LOO"}.}
+
+\item {\code{normalize}: }{\ Integer. Either 1, 2 or 3. Indicates whether
+the data should be standardized. Default is 1. See details below.}
+
+\item {\code{auto\_comp}: }{\ Logical. If \code{TRUE} compute components
+until the proportion of explained variance is equal to \code{expl\_var},
+otherwise use \code{num\_comp} components. Default is \code{TRUE}.}
+
+\item {\code{expl\_var}:}{\ A number between 0 and 1. Desired proportion of
+explained variance (only used if \code{auto_comp}==\code{TRUE}). Default is
+0.9.}
+
+\item {\code{num\_comp}:}{\ Integer. Number of components to be computed
+(only used if \newline
+\code{auto\_comp}==\code{FALSE}). Default is 5.}
+
+\item {\code{tol}: }{\ Relative precision. Default is $10^{-4}$.}
+
+\item {\code{k\_max}:}{\ Integer. Maximum possible number of lags. Default
+is 10.}
+
+\item {\code{niter\_max}:}{\ Integer. Maximum number of iterations. Default
+is 500.}
+
+\item {\code{ncores}:}{\ Integer. Number of cores to be used for parallel
+computations. Default is 1.}
+
+\item {\code{verbose}:}{\ Logical. Should progress be reported? Default is FALSE.}
+\end{itemize}
+%
+The argument \code{normalize} indicates whether the data should be
+normalized. If \code{normalize} = 1, the data is analysed in the original
+units, without mean and variance standardization. If \code{normalize} = 2,
+the data is standardized to zero mean and unit variance before computing the
+principal components, but the intercepts and loadings are those needed to
+reconstruct the original series. If \code{normalize} = 3 the data are
+standardized as in \code{normalize} = 2, but the intercepts and the loadings
+are those needed to reconstruct the standardized series. Default is %
+\code{normalize} = 1, and hence the data is analysed in its original units.
+
+The choice of \code{"LOO"} as the default criterion for choosing the number of lags is
+justified in Section~\ref{sec:tuning}.
+The optimal number of lags for each component can be computed in parallel,
+using the \proglang{R} packages \pkg{doParallel}, \cite{doPar} and %
+\pkg{foreach}, \cite{foreachJSS}. The argument \code{ncores} indicates the
+number of cores to be used for the parallel computations. The default value
+is 1, and hence by default no parallel computations are performed. If \code{verbose=TRUE}
+a message is printed each time a component is succesfully computed.
+
+The output of \code{auto.gdpc} is an \proglang{S}3 object of class `\code{gdpcs}',
+that is, a list of length equal to the number of computed components. The $i$%
+-th entry of this list is an object of class `\code{gdpc}' that stores the
+information of the $i$-th dynamic principal component, that is, a list with
+entries
+%
+\begin{itemize}
+\item {\code{expart}:}{\ Proportion of the variance explained by the first $%
+i $ components.}
+
+\item {\code{mse}:}{\ Mean squared error of the reconstruction using the
+first $i$ components.}
+
+\item {\code{crit}:}{\ The value of the criterion of the reconstruction,
+according to what the user specified.}
+
+\item {\code{k}:}{\ Number of lags chosen.}
+
+\item {\code{alpha}:}{\ Vector of intercepts corresponding to \code{f}.}
+
+\item {\code{beta}:}{\ Matrix of loadings corresponding to \code{f}. Column
+number $j$ is the vector of $j-1$ lag loadings.}
+
+\item {\code{f}: }{Coordinates of the $i$-th dynamic principal component
+corresponding to the periods $1,\dots,T$.}
+
+\item {\code{initial\_f}:}{\ Coordinates of the $i$-th dynamic principal
+component corresponding to the periods $-\text{\code{k}}+1,\dots,0$. Only
+for the case $\text{\code{k}}>0$, otherwise 0.}
+
+\item {\code{call}:}{\ The matched call.}
+
+\item {\code{conv}:}{\ Logical. Did the iterations converge?}
+
+\item {\code{niter}:}{\ Integer. Number of iterations.}
+\end{itemize}
+%
+\code{components}, \code{fitted}, \code{plot} and \code{print} methods are
+available for this class.
+
+We illustrate the use of this function with a real data set, %
+\code{pricesSP50}, that is part of the package. The data set if formed by
+fifty series corresponding to the stock prices of the first 50 components of
+the Standard\&Poor's 500 index. Five hundred daily observations starting
+1/1/2010 are available. The class of the object storing the data set is %
+`\code{mts}'.
+
+The data set can be loaded and part of it can be plotted using the following
+commands 
+%
+\begin{CodeChunk}
+\begin{CodeInput}
+R> data("pricesSP50")
+R> plot(pricesSP50[, 1:4], main = "Four components of the S&P500 index")
+\end{CodeInput}
+\end{CodeChunk}
+%
+The plot is shown in Figure~\ref{Fig:SP504}.
+
+\begin{figure}[t!]
+\centering
+\includegraphics[width=0.55\textwidth, trim=0 20 0 5, clip]{FigSP504}
+\caption{Plot of four components of the S\&P500 index.}
+\label{Fig:SP504}
+\end{figure}
+
+Next, we apply \code{auto.gdpc} to the data set, storing the result in %
+\code{fit_SP}. Since some of the series are significantly more variable than
+others, we apply the procedure to the normalized data set using the option %
+\code{normalize}=2. Since convergence is somewhat slow for this data set, we
+increased the maximum number of iterations from the default 500 to 1000 by
+setting \code{niter\_max}=1000. We used 8 cores to perform the computation,
+by setting \code{ncores}=8. The rest of the arguments are left to their
+default values. In particular the number of lags for each component is
+chosen as the value than minimizes the LOO criterion and the number of
+components is chosen so that the reconstruction explains at least 90\% of
+the variance of the data. 
+%
+\begin{CodeChunk}
+\begin{CodeInput}
+R> fit_SP <- auto.gdpc(pricesSP50, normalize = 2, niter_max = 1000,
++    ncores = 8)
+\end{CodeInput}
+\begin{CodeInput}
+R> fit_SP
+\end{CodeInput}
+\begin{CodeOutput}
+	    Number.of.lags   LOO   MSE Explained.Variance
+Component 1             10 0.185 0.174              0.826
+Component 2              8 0.074 0.071              0.929
+\end{CodeOutput}
+\end{CodeChunk}
+%
+The whole computation took about 3 minutes on \proglang{R} version 3.4.0 on
+a computer running OS X El Capitan 10.11.4 64-bit with an Intel Xeon CPU E5-1650 v2 3.50GHz. Entering \code{fit_SP} produces the object to be printed.
+A table is printed where row $i$ shows the number of lags used in component $%
+i $, the value of the criterion specified by the user (the default \code{"LOO"} in
+this case) in component $i$, the MSE of the reconstruction using the
+components $1,\dots,i$ and the fraction of explained variance by the
+reconstruction using components $1,\dots,i$. Note that the MSEs and the
+criteria are those of the reconstruction of the normalized series in this
+case.
+
+We can obtain the reconstruction of the original time series using the %
+\code{fitted} method for the `\code{gdpcs}' class. The method has the
+following arguments
+%
+\begin{itemize}
+\item {\code{object}:}{\ An object of class `\code{gdpcs}', usually the result
+of \code{auto.gdpc}.}
+
+\item {\code{num_comp}: }{\ Integer indicating how many components to use
+for the reconstruction. Default is 1.}
+
+\item {\dots:}{\ Additional arguments for compatibility.}
+\end{itemize}
+%
+Note that the \pkg{gdpc} package supports `\code{mts}', `\code{xts}' and %
+`\code{zoo}' objects. The principal components and reconstructed time series
+will be stored in an object of class `\code{mts}', `\code{xts}' or `\code{zoo}'
+respectively, the same as the original data, with the same date attributes.
+Thus, since the \code{pricesSP50} data was stored in an object of class %
+`\code{mts}', the reconstructed time series will be of class `\code{mts}', with
+the same date attributes.
+
+We store the reconstructed time series using both computed components in an %
+\code{mts} object called \code{recons}, assign each of the series its
+corresponding name, and plot the first four series. The result is shown in
+Figure~\ref{Fig:SP50Recon}. 
+%
+\begin{CodeChunk}
+\begin{CodeInput}
+R> recons <- fitted(fit_SP, num_comp = 2)
+R> colnames(recons) <- colnames(pricesSP50)
+R> plot(recons[, 1:4],
++    main = "Reconstruction of four components of the S&P500 index")
+\end{CodeInput}
+\end{CodeChunk}
+%
+\begin{figure}[t!]
+\centering
+\includegraphics[width=0.55\textwidth, trim=0 20 0 -2, clip]{FigSP50Recon}
+\caption{Plot of the reconstruction of four components of the S\&P500 index.}
+\label{Fig:SP50Recon}
+\end{figure}
+
+We can get the dynamic principal components using the \code{components}
+method for the class `\code{gdpcs}'. The method has the following arguments
+%
+\begin{itemize}
+\item {\code{object}:}{\ An object of class `\code{gdpcs}', usually the result
+of \code{auto.gdpc}.}
+
+\item {\code{which_comp}:}{\ Numeric vector indicating which components to
+get. Default is 1.}
+\end{itemize}
+%
+Since the original data was stored in an object of class `\code{mts}', the
+components will also be of class `\code{mts}'. We store the components in an %
+`\code{mts}' object called \code{comps}. 
+%
+\begin{CodeChunk}
+\begin{CodeInput}
+R> comps <- components(fit_SP, which_comp = c(1, 2))
+\end{CodeInput}
+\end{CodeChunk}
+%
+We can either directly plot the \code{comps} time series matrix or use the %
+\code{plot} method for the class `\code{gdpcs}'. The method has the following
+arguments
+%
+\begin{itemize}
+\item {\code{x}: }{An object of class `\code{gdpcs}', usually the result of %
+\code{auto.gdpc}.}
+
+\item {\code{plot.type}:}{\ Argument to be passed to the \code{plot}
+    for `\code{zoo}' objects. Used only when the original data set was
+    stored in an object of class `\code{zoo}'.  Default is
+    \code{"multiple"}.}
+
+\item {\code{which_comp}:}{\ Numeric vector indicating which components to
+plot. Default is 1.}
+
+\item {\dots:}{\ Additional arguments to be passed to the plotting functions.%
+}
+\end{itemize}
+%
+Using the plot method for the `\code{gdpcs}' we can plot both principal
+components. The result is shown in Figure~\ref{Fig:SP50PC}. 
+%
+\begin{CodeChunk}
+\begin{CodeInput}
+R> plot(fit_SP, which_comp = c(1, 2))
+\end{CodeInput}
+\end{CodeChunk}
+%
+\begin{figure}[t!]
+\centering
+\includegraphics[width=0.55\textwidth, trim=0 25 0 5, clip]{FigSP50PC}
+\caption{Plot of the first two dynamic principal components of the 
+\code{pricesSP50} data set.}
+\label{Fig:SP50PC}
+\end{figure}
+
+We can compare the approximate amount of storage needed for the original
+data set \code{pricesSP50} and the `\code{gdpcs}' object \code{fit_SP}. 
+%
+\begin{CodeChunk}
+\begin{CodeInput}
+R> object.size(fit_SP)
+\end{CodeInput}
+\begin{CodeOutput}
+31184 bytes
+\end{CodeOutput}
+\begin{CodeInput}
+R> object.size(pricesSP50)
+\end{CodeInput}
+\begin{CodeOutput}
+204192 bytes
+\end{CodeOutput}
+\end{CodeChunk}
+%
+Hence, the amount of memory needed to store \code{fit_SP} is about $14\%$ of
+that needed to store \code{pricesSP50}.
+
+\section{Reconstructing non-stationary data}
+\label{sec:rec_non-stat} 
+
+We compare the performance of GDPC and the dynamic principal
+components proposed by \cite{Brillinger} by conducting a small simulation study.
+We consider the following
+VARI(1,1) model. The data is generated according to 
+\begin{equation*}
+\mathbf{z}_{t}=\mathbf{z}_{t-1}+\mathbf{x}_{t},
+\end{equation*}%
+where $\mathbf{x}_{t}$ satisfies a stationary VAR(1) model 
+\begin{equation*}
+\mathbf{x}_{t}=\mathbf{A}\mathbf{x}_{t-1}+\mathbf{u}_{t}.
+\end{equation*}%
+The $\mathbf{u}_{t}$ are i.i.d. with a standard multivariate normal
+distribution. In each replication the matrix $\mathbf{A}$ is generated
+randomly as $\mathbf{A}=\mathbf{V}\boldsymbol{\Lambda }\mathbf{V}^{\top }$,
+where $\mathbf{V}$ is an orthogonal matrix generated at random with uniform
+distribution and $\boldsymbol{\Lambda }$ is a diagonal matrix with diagonal
+elements are independent random variables with uniform distribution on the $%
+[0,0.9]$ interval. Note that the generated vector time series is not stationary. 
+
+We computed GDPC using one component and $k=10$ lags and the dynamic principal
+components of Brillinger (DPC) using one component with 5 leads and 5 lags. We used the \code{dpca} function from the \pkg{freqdom} package \citep{freqdom} to compute the method proposed by Brillinger. We take $(m,T)\in \{10, 50, 100\}\times \{100,200\}$  and do 500
+replications. Table~\ref{tab:exp_var_time} shows the results. We report the average computation time in seconds and the average fraction of variance explained.
+We see that the reconstructions obtained with GDPC are much better than those obtained with DPC, with the
+fraction of variance explained by GDPC being around 0.90 to 0.95, and the fraction
+of variance explained by DPC being around $0.65$ to $0.70$. Moreover, the computation
+times in seconds for GDPC are much lower. For example, for the case of $T=m=100$, GDPC
+takes on average 1.69 seconds to compute a solution whereas the same task takes 90 seconds
+using DPC.
+
+% latex table generated in R 3.4.4 by xtable 1.8-2 package
+% Mon May  7 11:11:21 2018
+\begin{table}[t!]
+\centering
+\begin{tabular}{llcccc}
+  \hline
+       &     & \multicolumn{2}{c}{GDPC}       & \multicolumn{2}{c}{DPC}  \\
+ \cmidrule(lr){3-4} \cmidrule(lr){5-6}   $T$ & $m$ & Time & Explained Variance & Time & Explained Variance\\
+ \hline
+100 & 10 & 1.34 & 0.95 & 2.87 & 0.72 \\ 
+   & 50 & 1.51 & 0.95 & 21.11 & 0.69 \\ 
+   & 100 & 1.69 & 0.94 & 90.09 & 0.68 \\ 
+  200 & 10 & 8.76 & 0.93 & 2.94 & 0.69 \\ 
+   & 50 & 7.77 & 0.92 & 21.74 & 0.65 \\ 
+   & 100 & 7.79 & 0.91 & 92.94 & 0.64 \\ 
+   \hline
+\end{tabular}
+\caption{Average computation time in seconds and fraction of explained variance for each method.} 
+\label{tab:exp_var_time}
+\end{table}
+
+
+\section{The performance of the lag selection criteria}
+\label{sec:tuning} 
+In this section we compare the performance of the four different criteria available in
+the \pkg{gdpc} package to automatically choose the number of lags used to define the GDPC.
+Since we propose to choose the number of components to explain a given fraction of the variance in the data, we focus on the case in which one component is to be computed. We consider the following two scenarios.
+%
+\begin{itemize}
+\item DFM1: The data is generated as 
+$$
+z_{j,t} = b_{0,j}f_{t} +  b_{1,j}f_{t-1}+e_{j,t},\quad 1\leq t\leq
+T,1\leq j\leq m.
+$$
+$f_{t}$ follows a stationary AR(1) model, $f_{t}=\theta f_{t-1}+u_t$, with standard normal innovations and $\theta$ generated at random on the $(-1, 1)$ interval at each replication. The loadings $b_{0,j}, b_{1,j}$, $j=1,\dots,m$ are generated at random uniformly on the $(-1,1)$ interval. The variables $e_{j,t}$ are generated as i.i.d. standard normal. This is a dynamic factor model with one factor and one lag.
+\item DFM2: The data is generated as 
+$$z_{j,t} = b_{0,j}f_{t} +  b_{1,j}f_{t-1}+b_{2,j}f_{t-2}+e_{j,t}, \quad 1\leq t\leq
+T,1\leq j\leq m.
+$$ 
+The factor $f_t$ follows a stationary MA(1) model, $f_{t}=\theta u_{t-1}+u_{t}$ with standard normal innovations and with $\theta$ generated at random at each replication, uniformly on the $(-1,1)$ interval. The loadings and the errors are generated as in model DFM1. 
+This is a dynamic factor model with one factor and two lags. 
+\end{itemize}
+%
+We take $(m, T) \in \lbrace 5, 10, 20, 200, 800\rbrace \times \lbrace 200, 400\rbrace$ and do 500 replications. We report the average number of lags chosen
+by each criterion and the resulting average reconstruction mean squared error. Tables~\ref{tab:k_choice} and~\ref{tab:mse_choice} show the results.
+
+We see that in the cases in which the dimension of the vector time series is small, say $m=5$ or $m=10$, and the sample size is large, the AIC does well, choosing a number of lags close to the true values (1 for DFM1, 2 for DFM2). In this cases BNG tends to underestimate the required number of lags, whereas LOO tends to overestimate it. 
+For moderate sized problems, with $m=20$, LOO does best all around.
+For the case of high-dimensional vector time series ($m=200, 800$), BNG and LOO perform similarly, choosing a number of lags that is on average very close to the truth. In this cases AIC underestimates the number of lags needed. BIC tends to underestimate the required number of lags in all cases and does not perform well at all in any of the cases considered here.
+
+In Table~\ref{tab:mse_choice} we see that: in the cases where the methods choose on average a number of lags close to the true values, the reconstruction errors are close to the variance of the idiosyncratic part, which is 1 in this case. In cases where the methods overestimate the number of lags needed, the reconstruction error is smaller than the idiosyncratic variance, see for example the case of $T=200$, $m=5$ for the LOO criterion. This is to be expected, since if a larger number of lags than needed is used, the components will also explain part of the variance in the idiosyncratic part. In cases where
+the number of lags needed is underestimated, the reconstruction error is larger than 1, see for example the case of $T=200$ and $m=800$ for the BIC criterion.
+
+Since we believe the main appeal of GDPC is for moderate to large sized panels of time series, the default criterion used in \code{auto.gdpc} is LOO. However, for small panels
+better results can be obtained by using the AIC criterion.
+
+% latex table generated in R 3.4.4 by xtable 1.8-2 package
+% Mon May  7 11:18:05 2018
+\begin{table}[t!]
+\centering
+\begin{tabular}{llrrrrrrrr}
+  \hline
+       &     & \multicolumn{4}{c}{DFM1}       & \multicolumn{4}{c}{DFM2}  \\
+ \cmidrule(lr){3-6} \cmidrule(lr){7-10}   $T$ & $m$ & BNG & LOO & AIC & BIC & BNG & LOO & AIC & BIC\\
+ \hline
+200 & 5 & 0.02 & 4.14 & 0.81 & 0.26 & 0.00 & 4.02 & 1.64 & 0.54 \\ 
+   & 10 & 0.08 & 2.51 & 0.43 & 0.06 & 0.02 & 2.73 & 0.92 & 0.00 \\ 
+   & 20 & 0.28 & 1.27 & 0.15 & 0.00 & 0.29 & 2.15 & 0.01 & 0.00 \\ 
+   & 200 & 1.01 & 1.01 & 0.00 & 0.00 & 2.00 & 2.00 & 0.00 & 0.00 \\ 
+   & 800 & 1.01 & 1.01 & 0.00 & 0.00 & 2.00 & 2.00 & 0.00 & 0.00 \\ 
+  400 & 5 & 0.02 & 3.76 & 0.95 & 0.51 & 0.00 & 3.83 & 1.88 & 1.16 \\ 
+   & 10 & 0.08 & 2.00 & 0.80 & 0.20 & 0.02 & 2.79 & 1.75 & 0.19 \\ 
+   & 20 & 0.19 & 1.15 & 0.38 & 0.03 & 0.18 & 2.10 & 0.83 & 0.00 \\ 
+   & 200 & 1.02 & 1.02 & 0.00 & 0.00 & 2.00 & 2.01 & 0.00 & 0.00 \\ 
+   & 800 & 1.01 & 1.01 & 0.00 & 0.00 & 2.00 & 2.00 & 0.00 & 0.00 \\ 
+   \hline
+\end{tabular}
+\caption{Average number of lags chosen by each method in scenarios DFM1 and DFM2.} 
+\label{tab:k_choice}
+\end{table}
+
+
+% latex table generated in R 3.4.4 by xtable 1.8-2 package
+% Mon May  7 11:18:05 2018
+\begin{table}[t!]
+\centering
+\begin{tabular}{llrrrrrrrr}
+  \hline
+       &     & \multicolumn{4}{c}{DFM1}       & \multicolumn{4}{c}{DFM2}  \\
+ \cmidrule(lr){3-6} \cmidrule(lr){7-10}   $T$ & $m$ & BNG & LOO & AIC & BIC & BNG & LOO & AIC & BIC\\
+ \hline
+200 & 5 & 0.88 & 0.75 & 0.80 & 0.83 & 0.96 & 0.75 & 0.79 & 0.87 \\ 
+   & 10 & 0.97 & 0.87 & 0.92 & 0.98 & 1.08 & 0.87 & 0.95 & 1.09 \\ 
+   & 20 & 1.00 & 0.93 & 1.02 & 1.06 & 1.09 & 0.93 & 1.14 & 1.15 \\ 
+   & 200 & 0.98 & 0.98 & 1.11 & 1.11 & 0.98 & 0.98 & 1.19 & 1.19 \\ 
+   & 800 & 0.98 & 0.98 & 1.11 & 1.11 & 0.98 & 0.98 & 1.20 & 1.20 \\ 
+  400 & 5 & 0.88 & 0.78 & 0.80 & 0.82 & 0.96 & 0.78 & 0.79 & 0.82 \\ 
+   & 10 & 0.98 & 0.89 & 0.91 & 0.96 & 1.08 & 0.89 & 0.90 & 1.04 \\ 
+   & 20 & 1.01 & 0.94 & 0.98 & 1.05 & 1.11 & 0.94 & 1.03 & 1.15 \\ 
+   & 200 & 0.99 & 0.99 & 1.12 & 1.12 & 0.99 & 0.98 & 1.20 & 1.20 \\ 
+   & 800 & 0.99 & 0.99 & 1.13 & 1.13 & 0.99 & 0.99 & 1.21 & 1.21 \\ 
+   \hline
+\end{tabular}
+\caption{Average reconstruction mean squared error for scenarios DFM1 and DFM2, when the 
+                          number of lags is chosen by each method.} 
+\label{tab:mse_choice}
+\end{table}
+
+\section{Computing times}
+
+\label{sec:comp_times} In this section, we estimate the run times of our
+implementation of the algorithm described in Section~\ref{sec:compu} for
+different problem sizes by conducting a small simulation study. Timings were
+carried out for the \code{gdpc} function, since it is the one that
+implements the main numerical algorithm. Timings were carried out on %
+\proglang{R} version 3.4.4 on a computer running Linux Ubuntu 18.04 64-bit with an Intel Core i7-7560U @ 2.40GHz x4. 
+
+We take $(m,T)\in \{100,1000,2000\}\times \{200,400\}$ and consider the
+following two models. 
+\begin{itemize}
+\item DFM3: The data is generated according to
+\begin{equation*}
+z_{j,t}=\sin (2\pi (j/m))f_{t}+\cos (2\pi (j/m))f_{t-1} +e_{j,t}, \quad 1\leq t\leq
+T,1\leq j \leq m,
+\end{equation*}%
+where the $e_{j,t}$ are i.i.d. standard normal variables. The vector of
+factors $\mathbf{f}_{t}=(f_{1t},f_{2t})$ is generated according to a vector
+autoregressive model $\mathbf{f}_{t}=\mathbf{A}\mathbf{f}_{t-1}+v_{t}\mathbf{%
+b}$, where the $v_{t}$ are i.i.d. standard normals, $\mathbf{A}$ is a
+diagonal matrix with diagonal equal to $(-0.8,0.7)$ and $\mathbf{b}%
+=(1,1)^{\top }$. Note that the resulting time series is stationary.
+
+\item DFM4: The data is generated according to 
+\begin{equation*}
+z_{j,t}=\sin (2\pi (j/m))f_{t}+\cos (2\pi (j/m))f_{t-1} + (j/m) f_{t-2}+e_{j,t}, \quad 1\leq t\leq
+T,1\leq j \leq m,
+\end{equation*}%
+where the $e_{j,t}$ are i.i.d. standard normal variables. The factor $f_t$ follows
+an integrated MA(1) model, $f_{t}=f_{t-1}+\theta f_{t-1}+u_t$, with standard normal
+innovations and where $\theta$ is generated at random uniformly on the $(-0.8,0.8)$ 
+interval at each replication. Note the the resulting time series is non-stationary.
+\end{itemize}
+%
+We used $k=5$ lags for the first model and $k=2$ for the second model. We report
+the average computation times in seconds over 500 replications.
+
+The results are shown in Table~\ref{tab:times}. We see 
+that in the stationary case (DFM3) the algorithm can
+compute solutions for data sets with thousands of time series in under 15
+seconds. It is seen that the convergence of the
+algorithm is slower in the non-stationary case (DFM4), since the computing
+times increase drastically for problems of the same size as before. However,
+even in the non-stationary case, the algorithm can compute solutions to
+problems with thousands of time series in under 1 minute. 
+Moreover, note that computations were performed on an ordinary desktop
+computer, on a high-performance cluster we expect the algorithm to be able
+to compute the GDPC for tens of thousands of series in a matter of minutes. 
+
+% latex table generated in R 3.4.4 by xtable 1.8-2 package
+% Sun May  6 11:14:01 2018
+\begin{table}[t!]
+\centering
+\begin{tabular}{llrr}
+  \hline
+T & m & DFM3 & DFM4 \\ 
+  \hline
+200 & 100 & 0.35 & 0.92 \\ 
+   & 1000 & 2.07 & 5.89 \\ 
+   & 2000 & 3.88 & 11.50 \\ 
+  400 & 100 & 1.38 & 4.48 \\ 
+   & 1000 & 6.86 & 22.01 \\ 
+   & 2000 & 12.68 & 40.46 \\ 
+   \hline
+\end{tabular}
+\caption{Average computing times in seconds for stationary and non-stationary factor models.} 
+\label{tab:times}
+\end{table}
+
+\section{Conclusions}
+
+\label{sec:conclu}
+
+The \pkg{gdpc} package provides functions to compute the generalized dynamic
+principal components for a set of time series. These components are useful
+to reconstruct the series and to describe their underlying dynamic
+structure. Also, they can be used as estimators of the common part
+in a dynamic factor model, as shown in Section~\ref{sec:tuning} and by the theoretical results in \cite{Smucler17}. The package is useful for the analysis of large
+data sets, even when the number of series is much larger than the length of
+the series. The \pkg{gdpc} package is available from the Comprehensive %
+\proglang{R} Archive Network at 
+\url{https://
+CRAN.R-project.org/package=gdpc}, including the \code{pricesSP50} data set. 
+\FloatBarrier
+
+\section*{Acknowledgments}
+
+The authors would like to thank two anonymous reviewers and the editors for their helpful comments. Part of this work was conducted while Ezequiel Smucler was a Ph.D student at the Deparment of Mathematics at Universidad de Buenos Aires, funded by a CONICET fellowship.
+
+\bibliography{ref}
+
+\end{document}

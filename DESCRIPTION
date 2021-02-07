@@ -1,8 +1,8 @@
 Package: gdpc
 Type: Package
 Title: Generalized Dynamic Principal Components
-Version: 1.1.1
-Date: 2020-02-22
+Version: 1.1.2
+Date: 2021-02-07
 Author: Daniel Peña <daniel.pena@uc3m.es>,
     Ezequiel Smucler <ezequiels.90@gmail.com>,
     Victor Yohai <vyohai@dm.uba.ar>
@@ -23,8 +23,9 @@ Imports:
     doParallel,
     foreach
 LinkingTo: Rcpp, RcppArmadillo (>= 0.7.500.0.0)
-Suggests: testthat
+Suggests: testthat, R.rsp
 Depends:
     R (>= 3.3.0)
 NeedsCompilation: yes
 Encoding: UTF-8
+VignetteBuilder: R.rsp

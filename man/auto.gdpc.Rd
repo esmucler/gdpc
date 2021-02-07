@@ -72,7 +72,7 @@ If normalize = 1, the data is analyzed in the original units, without mean and v
 Bai J. and Ng S. (2002). “Determining the Number of Factors in Approximate Factor Models.”
 Econometrica, 70(1), 191–221.
 
-Peña D., Smucler E. and Yohai V.J. (2020). “{gdpc}: An {R} Package for Generalized Dynamic Principal Components.” Journal of Statistical Software, to appear.
+Peña D., Smucler E. and Yohai V.J. (2020). “{gdpc}: An {R} Package for Generalized Dynamic Principal Components.” Journal of Statistical Software, 92(2), 1-23.
 }
 
 \seealso{

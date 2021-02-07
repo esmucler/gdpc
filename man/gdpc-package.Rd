@@ -11,8 +11,8 @@ Computes the Generalized Dynamic Principal Components proposed in Peña and Yoha
 \tabular{ll}{
 Package: \tab gdpc\cr
 Type: \tab Package\cr
-Version: \tab 1.1.0\cr
-Date: \tab 2018-05-08\cr
+Version: \tab 1.1.1\cr
+Date: \tab 2021-02-07\cr
 Depends: \tab R (>= 3.3.0)\cr
 License: \tab GPL (>= 2)\cr
 Imports: \tab xts, zoo, methods, Rcpp (>= 0.12.7), parallel, doParallel, foreach\cr
@@ -62,7 +62,7 @@ Maintainer: Ezequiel Smucler <ezequiels.90@gmail.com>
 Peña D. and Yohai V.J. (2016). “Generalized Dynamic Principal Components.” Journal of the
 American Statistical Association, 111(515), 1121–1131.
 
-Peña D., Smucler E. and Yohai V.J. (2020). “{gdpc}: An {R} Package for Generalized Dynamic Principal Components.” Journal of Statistical Software, to appear.
+Peña D., Smucler E. and Yohai V.J. (2020). “{gdpc}: An {R} Package for Generalized Dynamic Principal Components.” Journal of Statistical Software, 92(2), 1-23.
 }
 
 

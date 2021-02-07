@@ -1,0 +1,358 @@
+@article{Smucler17,
+title = {Consistency of generalized dynamic principal components in dynamic factor models},
+journal = {Statistics and Probability Letters},
+volume = {154},
+pages = {108536},
+year = {2019},
+doi = {https://doi.org/10.1016/j.spl.2019.06.012},
+author = {Ezequiel Smucler},
+keywords = {Dimension reduction, Dynamic principal components, High-dimensional time series},
+abstract = {This note shows that when the data follows a dynamic factor model, the reconstruction provided by the generalized dynamic principal components introduced in Peña and Yohai (2016) converges in mean square to the common part of the factor model as both the number of time series and the number of observations diverge to infinity at any rate. A simulation study shows that the method indeed provides accurate estimations of the common part, having a mean square error smaller than competitors.}
+}
+
+@article{JSSours,
+   author = {Daniel Pe{\~n}a and Ezequiel Smucler and Victor J. Yohai},
+   title = {gdpc: An R Package for Generalized Dynamic Principal Components},
+   journal = {Journal of Statistical Software, Code Snippets},
+   volume = {92},
+   number = {2},
+   year = {2020},
+   keywords = {dimensionality reduction; high-dimensional time series; R},
+   abstract = {gdpc is an R package for the computation of the generalized dynamic principal components proposed in Pe\~na and Yohai (2016). In this paper, we briefly introduce the problem of dynamical principal components, propose a solution based on a reconstruction criteria and present an automatic procedure to compute the optimal reconstruction. This solution can be applied to the non-stationary case, where the components need not be a linear combination of the observations, as is the case in the proposal of Brillinger (1981). This article discusses some new features that are included in the package and that were not considered in Pe\~na and Yohai (2016). The most important one is an automatic procedure for the identification of both the number of lags to be used in the generalized dynamic principal components as well as the number of components required for a given reconstruction accuracy. These tools make it easy to use the proposed procedure in large data sets. The procedure can also be used when the number of series is larger than the number of observations. We describe an iterative algorithm and present an example of the use of the package with real data.},
+   issn = {1548-7660},
+   pages = {1--23},
+   doi = {10.18637/jss.v092.c02},
+   url = {https://www.jstatsoft.org/v092/c02}
+}
+
+
+@Article{Forni2015,
+  title = {Dynamic Factor Models with Infinite-Dimensional Factor Spaces: One-Sided Representations},
+  journal = {Journal of Econometrics},
+  volume = {185},
+  number = {2},
+  pages = {359 - 371},
+  year = {2015},
+  author = {Mario Forni and Marc Hallin and Marco Lippi and Paolo Zaffaroni},
+  keywords = {Generalized dynamic factor models},
+  doi = {10.1016/j.jeconom.2013.10.017},
+}
+
+@Article{Forni2016,
+  title = {Dynamic Factor Models with Infinite-Dimensional Factor Space: Asymptotic Analysis},
+  author = {Mario Forni and Marc Hallin and Marco Lippi and Paolo Zaffaroni},
+  journal = {Journal of Econometrics},
+  volume = {199},
+  number = {1},
+  pages = {74--92},
+  year = {2017},
+  publisher = {Elsevier},
+  doi = {10.1016/j.jeconom.2017.04.002},
+}
+
+@Manual{R,
+  title = {\proglang{R}: A Language and Environment for Statistical Computing},
+  author = {{\proglang{R} Core Team}},
+  organization = {\proglang{R} Foundation for Statistical Computing},
+  address = {Vienna, Austria},
+  year = {2016},
+  url = {https://www.R-project.org/},
+}
+
+@Article{Akaike,
+  author = {H. Akaike},
+  journal = {IEEE Transactions on Automatic Control},
+  title = {A New Look at the Statistical Model Identification},
+  year = {1974},
+  volume = {19},
+  number = {6},
+  pages = {716-723},
+  doi = {10.1109/tac.1974.1100705},
+}
+
+@Manual{mts,
+  title = {\pkg{MTS}: All-Purpose Toolkit for Analyzing Multivariate Time Series (MTS) and Estimating Multivariate Volatility Models},
+  author = {Ruey S. Tsay and David Wood},
+  year = {2018},
+  note = {\proglang{R} package version 1.0},
+  url = {https://CRAN.R-project.org/package=MTS},
+}
+
+@Manual{freqdom,
+  title = {\pkg{freqdom}: Frequency Domain Based Analysis: Dynamic PCA},
+  author = {S. Hormann and L. Kidzinski},
+  year = {2017},
+  note = {\proglang{R} package version 2.0.1},
+  url = {https://CRAN.R-project.org/package=freqdom},
+}
+
+@Manual{pcdpca,
+  title = {\pkg{pcdpca}: Dynamic Principal Components for Periodically Correlated Functional Time Series},
+  author = {Lukasz Kidzinski and Neda Jouzdani and Piotr Kokoszka},
+  year = {2017},
+  note = {\proglang{R} package version 0.4},
+  url = {https://CRAN.R-project.org/package=pcdpca},
+}
+
+@Manual{BigVAR,
+  title = {\pkg{BigVAR}: Dimension Reduction Methods for Multivariate Time Series},
+  author = {Will Nicholson and David Matteson and Jacob Bien},
+  year = {2019},
+  note = {\proglang{R} package version 1.0.4},
+  url = {https://CRAN.R-project.org/package=BigVAR},
+}
+
+@Article{foreachJSS,
+  author = {Michael Kane and John Emerson and Stephen Weston},
+  title = {Scalable Strategies for Computing with Massive Data},
+  journal = {Journal of Statistical Software},
+  volume = {55},
+  number = {1},
+  year = {2013},
+  pages = {1--19},
+  doi = {10.18637/jss.v055.i14},
+}
+
+@Manual{doPar,
+  title = {\pkg{doParallel}: Foreach Parallel Adaptor for the \pkg{'parallel'} Package},
+  author = {Revolution Analytics and Steve Weston},
+  year = {2018},
+  note = {\proglang{R} package version 1.0.14},
+  url = {https://CRAN.R-project.org/package=doParallel},
+}
+
+@Article{Armadillo,
+  doi = {10.21105/joss.00026},
+  year = {2016},
+  publisher = {The Open Journal},
+  volume = {1},
+  number = {2},
+  author = {Conrad Sanderson and Ryan Curtin},
+  title = {\code{Armadillo}: A Template-Based \proglang{C++} Library for Linear Algebra},
+  journal = {The Journal of Open Source Software},
+}
+
+@Article{Hu,
+  author = {Yu-Pin Hu and Rouh-Jane Chou},
+  title = {On The Pe{\~{n}}a{-}Box Model},
+  journal = {Journal of Time Series Analysis},
+  volume = {25},
+  number = {6},
+  publisher = {Blackwell Publishing Ltd},
+  doi = {10.1111/j.1467-9892.2004.00381.x},
+  pages = {811--830},
+  year = {2004},
+}
+
+@Article{Pan,
+  author = {Jiazhu Pan and Qiwei Yao},
+  title = {Modelling Multiple Time Series via Common Factors},
+  journal = {Biometrika},
+  volume = {95},
+  number = {2},
+  pages = {365-379},
+  year = {2008},
+  doi = {10.1093/biomet/asn009},
+}
+
+@Article{Pena2006,
+  title = {Nonstationary Dynamic Factor Analysis},
+  journal = {Journal of Statistical Planning and Inference},
+  volume = {136},
+  number = {4},
+  pages = {1237-1257},
+  year = {2006},
+  doi = {10.1016/j.jspi.2004.08.020},
+  author = {Daniel Peña and Pilar Poncela},
+}
+
+@Article{Pena87,
+  author = {Daniel Peña and George E. P. Box},
+  title = {Identifying a Simplifying Structure in Time Series},
+  journal = {Journal of the American Statistical Association},
+  volume = {82},
+  number = {399},
+  pages = {836-843},
+  year = {1987},
+  doi = {10.1080/01621459.1987.10478506},
+}
+
+@Article{Lam2012,
+  author = {Clifford Lam and Qiwei Yao},
+  doi = {10.1214/12-aos970},
+  journal = {The Annals of Statistics},
+  number = {2},
+  pages = {694--726},
+  publisher = {The Institute of Mathematical Statistics},
+  title = {Factor Modeling for High-Dimensional Time Series: Inference for the Number of Factors},
+  volume = {40},
+  year = {2012},
+}
+
+@Article{BaiNg,
+  author = {Jushan Bai and Serena Ng},
+  title = {Determining the Number of Factors in Approximate Factor Models},
+  journal = {Econometrica},
+  volume = {70},
+  number = {1},
+  publisher = {Blackwell Publishers Ltd},
+  pages = {191-221},
+  year = {2002},
+  doi = {10.1111/1468-0262.00273},
+}
+
+@Book{Brillinger,
+  title = {Time Series: Data Analysis and Theory},
+  author = {David R. Brillinger},
+  isbn = {9780898715019},
+  series = {Classics in Applied Mathematics},
+  year = {1981},
+  publisher = {Society for Industrial and Applied Mathematics},
+}
+
+@Article{Forni2000,
+  author = {Mario Forni and Marc Hallin and Marco Lippi and Lucrezia Reichlin},
+  journal = {The Review of Economics and Statistics},
+  number = {4},
+  pages = {540-554},
+  publisher = {The MIT Press},
+  title = {The Generalized Dynamic-Factor Model: Identification and Estimation},
+  volume = {82},
+  year = {2000},
+  doi = {10.1162/003465300559037},
+}
+
+@Article{Forni2005,
+  author = {Mario Forni and Marc Hallin and Marco Lippi and Lucrezia Reichlin},
+  journal = {Journal of the American Statistical Association},
+  number = {471},
+  pages = {830-840},
+  publisher = {[American Statistical Association, Taylor & Francis, Ltd.]},
+  title = {The Generalized Dynamic Factor Model: One-Sided Estimation and Forecasting},
+  volume = {100},
+  year = {2005},
+  doi = {10.1198/016214504000002050},
+}
+
+@Article{Hallin2013,
+  title = {Factor Models in High-Dimensional Time Series-A Time-Domain Approach},
+  journal = {Stochastic Processes and their Applications},
+  volume = {123},
+  number = {7},
+  pages = {2678-2695},
+  year = {2013},
+  doi = {10.1016/j.spa.2013.04.001},
+  author = {Marc Hallin and Marco Lippi},
+}
+
+@Article{Stock,
+  author = {James H Stock and Mark W Watson},
+  title = {Forecasting Using Principal Components From a Large Number of Predictors},
+  journal = {Journal of the American Statistical Association},
+  volume = {97},
+  number = {460},
+  pages = {1167-1179},
+  year = {2002},
+  doi = {10.1198/016214502388618960},
+}
+
+@TechReport{Sargent,
+  author = {Thomas J. Sargent and Christopher A. Sims},
+  title = {Business Cycle Modeling Without Pretending to Have Too Much A Priori Economic Theory},
+  year = {1977},
+  institution = {Federal Reserve Bank of Minneapolis},
+  type = {Working Papers},
+  url = {https://ideas.repec.org/p/fip/fedmwp/55.html},
+  number = {55},
+}
+
+@Article{Brillinger64,
+  author = {David R. Brillinger},
+  title = {The Generalization of the Techniques of Factor Analysis, Canonical Correlation and Principal Components to Stationary Time Series},
+  journal = {Invited Paper at the Royal Statistical Society Conference in Cardiff, Wales.},
+  year = {1964},
+  doi = {10.2307/2343903},
+}
+
+@Article{PenaYohai2016,
+  author = {Daniel Peña and Victor J. Yohai},
+  title = {Generalized Dynamic Principal Components},
+  journal = {Journal of the American Statistical Association},
+  volume = {111},
+  number = {515},
+  pages = {1121-1131},
+  year = {2016},
+  doi = {10.1080/01621459.2015.1072542},
+}
+
+@Article{BIC,
+  author = {Gideon Schwarz},
+  fjournal = {The Annals of Statistics},
+  journal = {The Annals of Statistics},
+  number = {2},
+  pages = {461--464},
+  publisher = {The Institute of Mathematical Statistics},
+  title = {Estimating the Dimension of a Model},
+  volume = {6},
+  year = {1978},
+  doi = {10.1214/aos/1176344136},
+}
+
+@Article{Rcpp,
+  title = {\pkg{Rcpp}: Seamless \proglang{R} and \proglang{C++} Integration},
+  author = {Dirk Eddelbuettel and Romain François},
+  journal = {Journal of Statistical Software},
+  year = {2011},
+  volume = {40},
+  number = {8},
+  pages = {1--18},
+  doi = {10.18637/jss.v040.i08},
+}
+
+@Article{RcppArmadillo,
+  title = {\pkg{RcppArmadillo}: Accelerating \proglang{R} with High-Performance \proglang{C++} Linear Algebra},
+  author = {Dirk Eddelbuettel and Conrad Sanderson},
+  journal = {Computational Statistics \& Data Analysis},
+  year = {2014},
+  volume = {71},
+  pages = {1054--1063},
+  doi = {10.1016/j.csda.2013.02.005},
+}
+
+@Manual{gdpc-pack,
+  title = {\pkg{gdpc}: Generalized Dynamic Principal Components},
+  author = {Daniel Peña and Ezequiel Smucler and Victor J. Yohai},
+  year = {2018},
+  note = {\proglang{R} package version 1.1.0},
+  url = {https://CRAN.R-project.org/package=gdpc},
+}
+
+@Manual{xts,
+  title = {\pkg{xts}: eXtensible Time Series},
+  author = {Jeffrey A. Ryan and Joshua M. Ulrich},
+  year = {2018},
+  note = {\proglang{R} package version 0.11-2},
+  url = {https://CRAN.R-project.org/package=xts},
+}
+
+@Article{zoo,
+  title = {\pkg{zoo}: \code{S3} Infrastructure for Regular and Irregular Time Series},
+  author = {Achim Zeileis and Gabor Grothendieck},
+  journal = {Journal of Statistical Software},
+  year = {2005},
+  volume = {14},
+  number = {6},
+  pages = {1--27},
+  doi = {10.18637/jss.v014.i06},
+}
+
+@InCollection{Geweke,
+  title = {The Dynamic Factor Analysis of Economic Time Series   Models},
+  editor = {Dennis J. Aigner and Arthur Stanley Goldberger},
+  pages = {365-383},
+  booktitle = {Latent Variables in Socio-Economic Models},
+  author = {John Geweke},
+  address = {Amsterdam},
+  publisher = {North-Holland Publishing Company},
+  year = {1977},
+}
