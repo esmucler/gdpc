@@ -5,6 +5,7 @@
 Status](https://travis-ci.org/esmucler/gdpc.svg?branch=master)](https://travis-ci.org/esmucler/gdpc)
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/gdpc)](https://cran.r-project.org/package=gdpc)
 [![Downloads](http://cranlogs.r-pkg.org/badges/gdpc)](https://cran.r-project.org/package=gdpc)
+![Total downloads](https://cranlogs.r-pkg.org/badges/grand-total/gdpc)
 
 # gdpc
 
