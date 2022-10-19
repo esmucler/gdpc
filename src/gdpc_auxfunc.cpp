@@ -76,7 +76,7 @@ arma::mat getMatrixC(const arma::subview_row<double> & rowZ,
     liml[1] = t - N;
     limu[1] = t - 1;
     for (int q = 1; q <= k + 1; q++){
-      if( (q >= max(liml) + 1) & (q <= min(limu) + 1)){
+      if( (q >= max(liml) + 1) && (q <= min(limu) + 1)){
         C.at(t - 1, q - 1) = rowZ[t - q] - alpha;
       }
     }
